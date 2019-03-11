@@ -13,6 +13,7 @@
 		9B24404C22365EE2004A6E34 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B24404B22365EE2004A6E34 /* Assets.xcassets */; };
 		9B24404F22365EE2004A6E34 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B24404D22365EE2004A6E34 /* LaunchScreen.storyboard */; };
 		9B24405222365EE2004A6E34 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B24405122365EE2004A6E34 /* main.m */; };
+		9B24405A223666AD004A6E34 /* DWImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B244059223666AD004A6E34 /* DWImageManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,8 @@
 		9B24404E22365EE2004A6E34 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9B24405022365EE2004A6E34 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B24405122365EE2004A6E34 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		9B244058223666AD004A6E34 /* DWImageManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImageManager.h; sourceTree = "<group>"; };
+		9B244059223666AD004A6E34 /* DWImageManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImageManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +65,8 @@
 				9B24404322365EE1004A6E34 /* AppDelegate.m */,
 				9B24404522365EE1004A6E34 /* ViewController.h */,
 				9B24404622365EE1004A6E34 /* ViewController.m */,
+				9B244058223666AD004A6E34 /* DWImageManager.h */,
+				9B244059223666AD004A6E34 /* DWImageManager.m */,
 				9B24404822365EE1004A6E34 /* Main.storyboard */,
 				9B24404B22365EE2004A6E34 /* Assets.xcassets */,
 				9B24404D22365EE2004A6E34 /* LaunchScreen.storyboard */,
@@ -141,6 +146,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B24405A223666AD004A6E34 /* DWImageManager.m in Sources */,
 				9B24404722365EE1004A6E34 /* ViewController.m in Sources */,
 				9B24405222365EE2004A6E34 /* main.m in Sources */,
 				9B24404422365EE1004A6E34 /* AppDelegate.m in Sources */,
@@ -286,6 +292,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Z26Y87B8NH;
 				INFOPLIST_FILE = DWImagePickerController/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -302,6 +309,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Z26Y87B8NH;
 				INFOPLIST_FILE = DWImagePickerController/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
