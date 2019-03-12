@@ -28,6 +28,18 @@
         [self.imgMgr requestAuthorization:^(PHAuthorizationStatus status) {
             NSLog(@"%ld",status);
         }];
+    } else {
+        DWImageFetchOption * opt = [[DWImageFetchOption alloc] init];
+        opt.sortType = DWImageSortTypeCreationDateDesending;
+        [self.imgMgr fetchCameraRollWithOption:nil completion:^(PHFetchResult * obj) {
+            CGSize targetSize = CGSizeMake(300 * [UIScreen mainScreen].scale, 300 * [UIScreen mainScreen].scale);
+            [obj enumerateObjectsUsingBlock:^(PHAsset * asset, NSUInteger idx, BOOL * _Nonnull stop) {
+                [self.imgMgr fetchImageWithAsset:asset targetSize:targetSize completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
+                    self.imageView.image = image;
+                }];
+                *stop = YES;
+            }];
+        }];
     }
 }
 
