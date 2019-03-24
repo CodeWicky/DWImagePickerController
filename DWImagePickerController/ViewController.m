@@ -35,6 +35,7 @@
             CGSize targetSize = CGSizeMake(300 * [UIScreen mainScreen].scale, 300 * [UIScreen mainScreen].scale);
             [obj enumerateObjectsUsingBlock:^(PHAsset * asset, NSUInteger idx, BOOL * _Nonnull stop) {
                 [self.imgMgr fetchImageWithAsset:asset targetSize:targetSize completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
+                    NSLog(@"%@",NSStringFromCGSize(image.size));
                     self.imageView.image = image;
                 }];
                 *stop = YES;
