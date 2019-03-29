@@ -37,6 +37,7 @@
                 [self.imgMgr fetchImageWithAsset:asset targetSize:targetSize completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
                     NSLog(@"%@",NSStringFromCGSize(image.size));
                     self.imageView.image = image;
+                    
                 }];
                 *stop = YES;
             }];
