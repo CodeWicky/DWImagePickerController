@@ -85,15 +85,46 @@
     }];
 }
 
--(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize completion:(DWImageFetchImageCompletion)completion {
+-(void)fetchAllAlbumsWithOption:(DWImageFetchOption *)opt completion:(DWImageFetchAlbumCompletion)completion {
+    
+}
+
+-(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWImageFetchImageCompletion)completion {
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
+    option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (progress) {
+                progress(progress_num,error,stop,info);
+            }
+        });
+    };
     return [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option resultHandler:^(UIImage *result, NSDictionary *info) {
         BOOL downloadFinined = (![[info objectForKey:PHImageCancelledKey] boolValue] && ![info objectForKey:PHImageErrorKey]);
         if (downloadFinined && result) {
             if (completion) {
                 completion(result,info);
             }
+        }
+    }];
+}
+
+-(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWImageFetchImageCompletion)completion {
+    return [self fetchImageWithAsset:asset targetSize:PHImageManagerMaximumSize progress:progress completion:completion];
+}
+
+-(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWImageFetchVideoCompletion)completion {
+    PHVideoRequestOptions *option = [[PHVideoRequestOptions alloc] init];
+    option.progressHandler = ^(double progress_num, NSError *error, BOOL *stop, NSDictionary *info) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (progress) {
+                progress(progress_num, error, stop, info);
+            }
+        });
+    };
+    return [[PHImageManager defaultManager] requestPlayerItemForVideo:asset options:option resultHandler:^(AVPlayerItem *playerItem, NSDictionary *info) {
+        if (completion) {
+            completion(playerItem,info);
         }
     }];
 }

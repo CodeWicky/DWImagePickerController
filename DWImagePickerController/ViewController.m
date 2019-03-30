@@ -32,18 +32,15 @@
         DWImageFetchOption * opt = [[DWImageFetchOption alloc] init];
         opt.sortType = DWImageSortTypeCreationDateDesending;
         [self.imgMgr fetchCameraRollWithOption:nil completion:^(PHFetchResult * obj) {
-            CGSize targetSize = CGSizeMake(300 * [UIScreen mainScreen].scale, 300 * [UIScreen mainScreen].scale);
             [obj enumerateObjectsUsingBlock:^(PHAsset * asset, NSUInteger idx, BOOL * _Nonnull stop) {
-                [self.imgMgr fetchImageWithAsset:asset targetSize:targetSize completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
+                [self.imgMgr fetchOriginImageWithAsset:asset progress:nil completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
                     NSLog(@"%@",NSStringFromCGSize(image.size));
                     self.imageView.image = image;
-                    
                 }];
                 *stop = YES;
             }];
         }];
     }
-    
 }
 
 
