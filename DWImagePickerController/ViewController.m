@@ -36,6 +36,7 @@
                 [self.imgMgr fetchOriginImageWithAsset:asset progress:nil completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
                     NSLog(@"%@",NSStringFromCGSize(image.size));
                     self.imageView.image = image;
+                    
                 }];
                 *stop = YES;
             }];
