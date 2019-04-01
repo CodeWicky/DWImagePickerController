@@ -8,6 +8,54 @@
 
 #import "DWAlbumManager.h"
 
+@implementation DWAlbumModel
+
+-(instancetype)init {
+    if (self = [super init]) {
+        _fetchType = DWAlbumFetchTypeAll;
+        _sortType = DWAlbumSortTypeCreationDateDesending;
+        _albumType = DWAlbumFetchAlbumTypeAll;
+    }
+    return self;
+}
+
+-(void)configTypeWithFetchOption:(DWAlbumFetchOption *)opt name:(NSString *)name result:(PHFetchResult *)result isCameraRoll:(BOOL)isCameraRoll {
+    if (opt) {
+        _fetchType = opt.fetchType;
+        _sortType = opt.sortType;
+        _albumType = opt.albumType;
+    }
+    _name = name;
+    _isCameraRoll = isCameraRoll;
+    _fetchResult = result;
+    _count = result.count;
+}
+
+@end
+
+@implementation DWAssetModel
+
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
+    _asset = asset;
+    _originSize = CGSizeMake(asset.pixelWidth, asset.pixelHeight);
+    _creationDate = asset.creationDate;
+    _modificationDate = asset.modificationDate;
+    _media = media;
+    _info = info;
+}
+
+@end
+
+@implementation DWImageAssetModel
+@dynamic media;
+
+@end
+
+@implementation DWVideoAssetModel
+@dynamic media;
+
+@end
+
 @implementation DWAlbumManager
 
 #pragma mark --- interface method ---
@@ -41,7 +89,9 @@
         if ([self isCameraRollAlbum:obj]) {
             PHFetchResult *fetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:phOpt];
             if (completion) {
-                completion(fetchResult);
+                DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];
+                [albumModel configTypeWithFetchOption:opt name:obj.localizedTitle result:fetchResult isCameraRoll:YES];
+                completion(self,albumModel);
             }
             break;
         }
@@ -89,7 +139,11 @@
             [allAlbums addObject:sharedAlbums];
         }
     }
-    NSMutableArray * albumArr = [NSMutableArray arrayWithCapacity:allAlbums.count];
+    BOOL needTransform = (completion != nil);
+    NSMutableArray * albumArr = nil;
+    if (needTransform) {
+        albumArr = [NSMutableArray arrayWithCapacity:0];
+    }
     
     for (PHFetchResult * album in allAlbums) {
         BOOL hasCamera = NO;
@@ -114,18 +168,34 @@
                 continue; //『最近删除』相册
             }
             
-            if (isCamera) {
-                [albumArr insertObject:fetchResult atIndex:0];
-                hasCamera = YES;
-            } else {
-                [albumArr addObject:fetchResult];
+            if (needTransform) {
+                DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];
+                [albumModel configTypeWithFetchOption:opt name:obj.localizedTitle result:fetchResult isCameraRoll:isCamera];
+                if (isCamera) {
+                    [albumArr insertObject:albumModel atIndex:0];
+                    hasCamera = YES;
+                } else {
+                    [albumArr addObject:albumModel];
+                }
             }
         }
     }
     
-    if (completion) {
-        completion(albumArr);
+    if (needTransform) {
+        completion(self,albumArr);
     }
+}
+
+-(PHImageRequestID)fetchPostForAlbum:(DWAlbumModel *)album targetSize:(CGSize)targetSize completion:(DWAlbumFetchImageCompletion)completion {
+    if (!album || CGSizeEqualToSize(targetSize, CGSizeZero)) {
+        NSAssert(NO, @"DWAlbumManager can't fetch post for album is nil or targetSize is zero.");
+        completion(self,nil);
+        return PHInvalidImageRequestID;
+    }
+    
+    PHAsset * asset = (album.sortType == DWAlbumSortTypeCreationDateAscending || album.sortType == DWAlbumSortTypeModificationDateAscending) ? album.fetchResult.lastObject : album.fetchResult.firstObject;
+    
+    return [self fetchImageWithAsset:asset targetSize:targetSize progress:nil completion:completion];
 }
 
 -(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
@@ -139,11 +209,10 @@
         });
     };
     return [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option resultHandler:^(UIImage *result, NSDictionary *info) {
-        BOOL downloadFinined = (![[info objectForKey:PHImageCancelledKey] boolValue] && ![info objectForKey:PHImageErrorKey]);
-        if (downloadFinined && result) {
-            if (completion) {
-                completion(result,info);
-            }
+        if (completion) {
+            DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
+            [model configWithAsset:asset media:result info:info];
+            completion(self,model);
         }
     }];
 }
@@ -163,7 +232,9 @@
     };
     return [[PHImageManager defaultManager] requestPlayerItemForVideo:asset options:option resultHandler:^(AVPlayerItem *playerItem, NSDictionary *info) {
         if (completion) {
-            completion(playerItem,info);
+            DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
+            [model configWithAsset:asset media:playerItem info:info];
+            completion(self,model);
         }
     }];
 }
@@ -221,7 +292,7 @@
         versionStr = [versionStr stringByAppendingString:@"0"];
     }
     CGFloat version = versionStr.floatValue;
-    // 目前已知8.0.0 ~ 8.0.2系统，拍照后的图片会保存在最近添加中
+    
     if (version >= 800 && version <= 802) {
         return ((PHAssetCollection *)metadata).assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumRecentlyAdded;
     } else {
@@ -321,11 +392,5 @@
     }
     return self;
 }
-
-@end
-
-@implementation DWAlbumModel
-
-
 
 @end

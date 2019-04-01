@@ -9,13 +9,14 @@
 #import <Foundation/Foundation.h>
 #import <Photos/Photos.h>
 
+@class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel;
+typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * mgr ,DWAlbumModel * obj);
+typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * mgr ,NSArray <DWAlbumModel *>* obj);
+typedef void(^DWAlbumFetchImageCompletion)(DWAlbumManager * mgr ,DWImageAssetModel * obj);
+typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * mgr ,DWVideoAssetModel * obj);
+
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^DWAlbumFetchCameraRollCompletion)(PHFetchResult * obj);
-typedef void(^DWAlbumFetchAlbumCompletion)(NSArray <PHFetchResult *>* obj);
-typedef void(^DWAlbumFetchImageCompletion)(UIImage * image,NSDictionary * info);
-typedef void(^DWAlbumFetchVideoCompletion)(AVPlayerItem * video,NSDictionary * info);
-@class DWAlbumFetchOption;
 @interface DWAlbumManager : NSObject
 
 
@@ -43,6 +44,16 @@ typedef void(^DWAlbumFetchVideoCompletion)(AVPlayerItem * video,NSDictionary * i
  */
 -(void)fetchCameraRollWithOption:(nullable DWAlbumFetchOption *)opt completion:(DWAlbumFetchCameraRollCompletion)completion;
 -(void)fetchAlbumsWithOption:(nullable DWAlbumFetchOption *)opt completion:(DWAlbumFetchAlbumCompletion)completion;
+
+
+/**
+ 获取相册封面图
+
+ @param album 相册模型
+ @param targetSize 指定尺寸
+ @param completion 获取完成回调
+ */
+-(PHImageRequestID)fetchPostForAlbum:(DWAlbumModel *)album targetSize:(CGSize)targetSize completion:(DWAlbumFetchImageCompletion)completion;
 
 
 /**
@@ -120,11 +131,47 @@ typedef NS_OPTIONS(NSUInteger, DWAlbumFetchAlbumType) {
 
 @interface DWAlbumModel : NSObject
 
+@property (nonatomic ,strong ,readonly) PHFetchResult * fetchResult;
+
 @property (nonatomic ,assign ,readonly) DWAlbumFetchAlbumType albumType;
 
 @property (nonatomic ,assign ,readonly) DWAlbumFetchType fetchType;
 
 @property (nonatomic ,assign ,readonly) DWAlbumSortType sortType;
+
+@property (nonatomic ,copy ,readonly) NSString * name;
+
+@property (nonatomic ,assign ,readonly) BOOL isCameraRoll;
+
+@property (nonatomic ,assign ,readonly) NSInteger count;
+
+@end
+
+@interface DWAssetModel : NSObject
+
+@property (nonatomic ,strong ,readonly) PHAsset * asset;
+
+@property (nonatomic ,strong ,readonly) id media;
+
+@property (nonatomic ,assign ,readonly) CGSize originSize;
+
+@property (nonatomic ,strong ,readonly) NSDictionary * info;
+
+@property (nonatomic, strong, readonly) NSDate * creationDate;
+
+@property (nonatomic, strong, readonly) NSDate * modificationDate;
+
+@end
+
+@interface DWImageAssetModel : DWAssetModel
+
+@property (nonatomic ,strong ,readonly) UIImage * media;
+
+@end
+
+@interface DWVideoAssetModel : DWAssetModel
+
+@property (nonatomic ,strong ,readonly) AVPlayerItem * media;
 
 @end
 

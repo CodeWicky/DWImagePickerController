@@ -31,27 +31,13 @@
     } else {
         DWAlbumFetchOption * opt = [[DWAlbumFetchOption alloc] init];
         opt.sortType = DWAlbumSortTypeCreationDateDesending;
-        [self.imgMgr fetchAlbumsWithOption:nil completion:^(NSArray<PHFetchResult *> * _Nonnull obj) {
-            
-//            [obj enumerateObjectsUsingBlock:^(PHAsset * asset, NSUInteger idx, BOOL * _Nonnull stop) {
-//                [self.imgMgr fetchOriginImageWithAsset:asset progress:nil completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
-//                    NSLog(@"%@",NSStringFromCGSize(image.size));
-//                    self.imageView.image = image;
-//
-//                }];
-//                *stop = YES;
-//            }];
+        NSLog(@"start");
+        [self.imgMgr fetchCameraRollWithOption:nil completion:^(DWAlbumManager * mgr,DWAlbumModel *obj) {
+            [mgr fetchPostForAlbum:obj targetSize:CGSizeMake(600, 600) completion:^(DWAlbumManager * mgr,DWImageAssetModel *obj) {
+                self.imageView.image = obj.media;
+                NSLog(@"end");
+            }];
         }];
-//        [self.imgMgr fetchCameraRollWithOption:nil completion:^(PHFetchResult * obj) {
-//            [obj enumerateObjectsUsingBlock:^(PHAsset * asset, NSUInteger idx, BOOL * _Nonnull stop) {
-//                [self.imgMgr fetchOriginImageWithAsset:asset progress:nil completion:^(UIImage * _Nonnull image, NSDictionary * _Nonnull info) {
-//                    NSLog(@"%@",NSStringFromCGSize(image.size));
-//                    self.imageView.image = image;
-//
-//                }];
-//                *stop = YES;
-//            }];
-//        }];
     }
 }
 
