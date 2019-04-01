@@ -1,14 +1,14 @@
 //
-//  DWImageManager.m
-//  DWImagePickerController
+//  DWAlbumManager.m
+//  DWAlbumPickerController
 //
 //  Created by Wicky on 2019/3/11.
 //  Copyright © 2019 Wicky. All rights reserved.
 //
 
-#import "DWImageManager.h"
+#import "DWAlbumManager.h"
 
-@implementation DWImageManager
+@implementation DWAlbumManager
 
 #pragma mark --- interface method ---
 -(PHAuthorizationStatus)authorizationStatus {
@@ -25,71 +25,110 @@
     }];
 }
 
--(void)fetchCameraRollWithOption:(DWImageFetchOption *)opt completion:(DWImageFetchAlbumCompletion)completion {
-    if (!opt) {
-        opt = [[DWImageFetchOption alloc] init];
-    }
-    PHFetchOptions * phOpt = [[PHFetchOptions alloc] init];
-    switch (opt.fetchType) {
-        case DWImageFetchTypeImage:
-        {
-            phOpt.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
-        }
-            break;
-        case DWImageFetchTypeVideo:
-        {
-            phOpt.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld",
-             PHAssetMediaTypeVideo];
-        }
-            break;
-        default:
-            break;
-    }
-    
-    switch (opt.sortType) {
-        case DWImageSortTypeCreationDateAscending:
-        {
-            phOpt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:YES]];
-        }
-            break;
-        case DWImageSortTypeCreationDateDesending:
-        {
-            phOpt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-        }
-            break;
-        case DWImageSortTypeModificationDateDesending:
-        {
-            phOpt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"modificationDate" ascending:NO]];
-        }
-            break;
-        default:
-            break;
-    }
+-(void)fetchCameraRollWithOption:(DWAlbumFetchOption *)opt completion:(DWAlbumFetchCameraRollCompletion)completion {
+    PHFetchOptions * phOpt = [self phOptFromDWOpt:opt];
     PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
     
-    [smartAlbums enumerateObjectsUsingBlock:^(PHAssetCollection * obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    for (PHAssetCollection * obj in smartAlbums) {
         if (![obj isKindOfClass:[PHAssetCollection class]]) {
-            return;
+            continue;
         }
         // 过滤空相册
         if (obj.estimatedAssetCount <= 0) {
-            return;
+            continue;
         }
+        
         if ([self isCameraRollAlbum:obj]) {
             PHFetchResult *fetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:phOpt];
             if (completion) {
                 completion(fetchResult);
             }
-            *stop = YES;
+            break;
         }
-    }];
+    }
 }
 
--(void)fetchAllAlbumsWithOption:(DWImageFetchOption *)opt completion:(DWImageFetchAlbumCompletion)completion {
+-(void)fetchAlbumsWithOption:(DWAlbumFetchOption *)opt completion:(DWAlbumFetchAlbumCompletion)completion {
+    PHFetchOptions * phOpt = [self phOptFromDWOpt:opt];
+    NSMutableArray * allAlbums = [NSMutableArray arrayWithCapacity:5];
     
+    if (!opt || opt.albumType == DWAlbumFetchAlbumTypeAll) {
+        PHFetchResult *myPhotoStreamAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream options:nil];
+        [allAlbums addObject:myPhotoStreamAlbum];
+        PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
+        [allAlbums addObject:smartAlbums];
+        PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
+        [allAlbums addObject:topLevelUserCollections];
+        PHFetchResult *syncedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumSyncedAlbum options:nil];
+        [allAlbums addObject:syncedAlbums];
+        PHFetchResult *sharedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumCloudShared options:nil];
+        [allAlbums addObject:sharedAlbums];
+    } else {
+        if (opt.albumType & DWAlbumFetchAlbumTypeMyPhotoSteam) {
+            PHFetchResult *myPhotoStreamAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream options:nil];
+            [allAlbums addObject:myPhotoStreamAlbum];
+        }
+        
+        if (opt.albumType & DWAlbumFetchAlbumTypeCameraRoll) {
+            PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
+            [allAlbums addObject:smartAlbums];
+        }
+        
+        if (opt.albumType & DWAlbumFetchAlbumTypeTopLevelUser) {
+            PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
+            [allAlbums addObject:topLevelUserCollections];
+        }
+        
+        if (opt.albumType & DWAlbumFetchAlbumTypeSyncedAlbum) {
+            PHFetchResult *syncedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumSyncedAlbum options:nil];
+            [allAlbums addObject:syncedAlbums];
+        }
+        
+        if (opt.albumType & DWAlbumFetchAlbumTypeAlbumCloudShared) {
+            PHFetchResult *sharedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumCloudShared options:nil];
+            [allAlbums addObject:sharedAlbums];
+        }
+    }
+    NSMutableArray * albumArr = [NSMutableArray arrayWithCapacity:allAlbums.count];
+    
+    for (PHFetchResult * album in allAlbums) {
+        BOOL hasCamera = NO;
+        for (PHAssetCollection * obj in album) {
+            if (![obj isKindOfClass:[PHAssetCollection class]]) {
+                continue;
+            }
+            BOOL isCamera = !hasCamera && [self isCameraRollAlbum:obj];
+            if (obj.estimatedAssetCount <= 0 && !isCamera) {
+                continue;
+            }
+            
+            PHFetchResult *fetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:phOpt];
+            if (fetchResult.count < 1 && !isCamera) {
+                continue;
+            }
+            
+            if (obj.assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumAllHidden) {
+                continue;
+            }
+            if (obj.assetCollectionSubtype == 1000000201) {
+                continue; //『最近删除』相册
+            }
+            
+            if (isCamera) {
+                [albumArr insertObject:fetchResult atIndex:0];
+                hasCamera = YES;
+            } else {
+                [albumArr addObject:fetchResult];
+            }
+        }
+    }
+    
+    if (completion) {
+        completion(albumArr);
+    }
 }
 
--(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWImageFetchImageCompletion)completion {
+-(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
     option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
@@ -109,11 +148,11 @@
     }];
 }
 
--(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWImageFetchImageCompletion)completion {
+-(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
     return [self fetchImageWithAsset:asset targetSize:PHImageManagerMaximumSize progress:progress completion:completion];
 }
 
--(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWImageFetchVideoCompletion)completion {
+-(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
     PHVideoRequestOptions *option = [[PHVideoRequestOptions alloc] init];
     option.progressHandler = ^(double progress_num, NSError *error, BOOL *stop, NSDictionary *info) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -130,6 +169,50 @@
 }
 
 #pragma mark --- tool method ---
+-(PHFetchOptions *)phOptFromDWOpt:(DWAlbumFetchOption *)fetchOpt {
+    PHFetchOptions * opt = [[PHFetchOptions alloc] init];
+    if (!fetchOpt) {
+        opt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+    } else {
+        switch (fetchOpt.fetchType) {
+            case DWAlbumFetchTypeImage:
+            {
+                opt.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
+            }
+                break;
+            case DWAlbumFetchTypeVideo:
+            {
+                opt.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld",
+                                   PHAssetMediaTypeVideo];
+            }
+                break;
+            default:
+                break;
+        }
+        
+        switch (fetchOpt.sortType) {
+            case DWAlbumSortTypeCreationDateAscending:
+            {
+                opt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:YES]];
+            }
+                break;
+            case DWAlbumSortTypeCreationDateDesending:
+            {
+                opt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            }
+                break;
+            case DWAlbumSortTypeModificationDateDesending:
+            {
+                opt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"modificationDate" ascending:NO]];
+            }
+                break;
+            default:
+                break;
+        }
+    }
+    return opt;
+}
+
 - (BOOL)isCameraRollAlbum:(PHAssetCollection *)metadata {
     NSString *versionStr = [[UIDevice currentDevice].systemVersion stringByReplacingOccurrencesOfString:@"." withString:@""];
     if (versionStr.length < 2) {
@@ -227,15 +310,22 @@
 
 @end
 
-@implementation DWImageFetchOption
+@implementation DWAlbumFetchOption
 
 #pragma mark --- override ---
 -(instancetype)init {
     if (self = [super init]) {
-        _fetchType = DWImageFetchTypeAll;
-        _sortType = DWImageSortTypeCreationDateDesending;
+        _fetchType = DWAlbumFetchTypeAll;
+        _sortType = DWAlbumSortTypeCreationDateDesending;
+        _albumType = DWAlbumFetchAlbumTypeAll;
     }
     return self;
 }
+
+@end
+
+@implementation DWAlbumModel
+
+
 
 @end

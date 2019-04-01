@@ -1,6 +1,6 @@
 //
 //  ViewController.h
-//  DWImagePickerController
+//  DWAlbumPickerController
 //
 //  Created by Wicky on 2019/3/11.
 //  Copyright © 2019 Wicky. All rights reserved.
