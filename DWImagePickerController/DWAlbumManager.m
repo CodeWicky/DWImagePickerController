@@ -201,13 +201,15 @@
 -(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
-    option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (progress) {
+    
+    if (progress) {
+        option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+            dispatch_async(dispatch_get_main_queue(), ^{
                 progress(progress_num,error,stop,info);
-            }
-        });
-    };
+            });
+        };
+    }
+    
     return [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option resultHandler:^(UIImage *result, NSDictionary *info) {
         if (completion) {
             DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
