@@ -379,8 +379,6 @@
     return img;
 }
 
-
-
 @end
 
 @implementation DWAlbumFetchOption
