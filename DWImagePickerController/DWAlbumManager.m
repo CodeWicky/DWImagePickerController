@@ -210,6 +210,7 @@
         };
     }
     
+    
     return [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option resultHandler:^(UIImage *result, NSDictionary *info) {
         if (completion) {
             DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
