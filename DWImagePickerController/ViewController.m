@@ -14,6 +14,8 @@
 
 @property (nonatomic ,strong) DWAlbumManager * imgMgr;
 
+@property (nonatomic ,strong) DWAlbumModel * album;
+
 @end
 
 @implementation ViewController
@@ -28,15 +30,28 @@
         [self.imgMgr requestAuthorization:^(PHAuthorizationStatus status) {
             NSLog(@"%ld",status);
         }];
+    } else if (self.album) {
+        printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+        [self.imgMgr fetchOriginImageWithAlbum:self.album index:2 progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+            printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+            self.imageView.image = obj.media;
+        }];
     } else {
         DWAlbumFetchOption * opt = [[DWAlbumFetchOption alloc] init];
-        opt.sortType = DWAlbumSortTypeCreationDateDesending;
-        NSLog(@"start");
-        [self.imgMgr fetchCameraRollWithOption:nil completion:^(DWAlbumManager * mgr,DWAlbumModel *obj) {
-            [mgr fetchPostForAlbum:obj targetSize:CGSizeMake(600, 600) completion:^(DWAlbumManager * mgr,DWImageAssetModel *obj) {
-                self.imageView.image = obj.media;
-                NSLog(@"end");
-            }];
+        opt.sortType = DWAlbumSortTypeCreationDateAscending;
+        opt.mediaType = DWAlbumMediaTypeAll;
+        [self.imgMgr fetchAlbumsWithOption:opt completion:^(DWAlbumManager *mgr, NSArray<DWAlbumModel *> *obj) {
+            for (DWAlbumModel * model in obj) {
+                if (model.mediaType == DWAlbumMediaTypeAll || model.mediaType == DWAlbumFetchAlbumTypeCameraRoll) {
+                    self.album = model;
+                    printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+                    [mgr fetchImageWithAlbum:model index:2 targetSize:(CGSize)CGSizeMake(160, 160) progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+                        printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+                        self.imageView.image = obj.media;
+                    }];
+                    break;
+                }
+            }
         }];
     }
 }
