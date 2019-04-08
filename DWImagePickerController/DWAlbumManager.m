@@ -106,26 +106,12 @@
 
 -(void)fetchCameraRollWithOption:(DWAlbumFetchOption *)opt completion:(DWAlbumFetchCameraRollCompletion)completion {
     PHFetchOptions * phOpt = [self phOptFromDWOpt:opt];
-    PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
-    
-    for (PHAssetCollection * obj in smartAlbums) {
-        if (![obj isKindOfClass:[PHAssetCollection class]]) {
-            continue;
-        }
-        // 过滤空相册
-        if (obj.estimatedAssetCount <= 0) {
-            continue;
-        }
-        
-        if ([self isCameraRollAlbum:obj]) {
-            PHFetchResult *fetchResult = [PHAsset fetchAssetsInAssetCollection:obj options:phOpt];
-            if (completion) {
-                DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];
-                [albumModel configTypeWithFetchOption:opt name:obj.localizedTitle result:fetchResult isCameraRoll:YES];
-                completion(self,albumModel);
-            }
-            break;
-        }
+    PHAssetCollection * smartAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil].firstObject;
+    PHFetchResult *fetchResult = [PHAsset fetchAssetsInAssetCollection:smartAlbum options:phOpt];
+    if (completion) {
+        DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];
+        [albumModel configTypeWithFetchOption:opt name:smartAlbum.localizedTitle result:fetchResult isCameraRoll:YES];
+        completion(self,albumModel);
     }
 }
 
@@ -391,6 +377,59 @@
         return;
     }
     [album.albumCache removeAllObjects];
+}
+
+-(void)saveImage:(UIImage *)image toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
+    PHAssetCollection * album = nil;
+    if (!albumName.length) {
+        album = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil].firstObject;
+    } else {
+        ///遍历所有相册
+        PHFetchResult * results = [PHAssetCollection fetchAssetCollectionsWithType:(PHAssetCollectionTypeAlbum) subtype:(PHAssetCollectionSubtypeAny) options:nil];
+        for (PHAssetCollection * obj in results) {
+            if ([obj.localizedTitle isEqualToString:albumName]) {
+                album = obj;
+                break;
+            }
+        }
+        ///如果不存在则按需创建
+        if (!album) {
+            if (createIfNotExist) {
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
+                } completionHandler:^(BOOL success, NSError * _Nullable error) {
+                    [self saveImage:image toAlbum:albumName location:loc createIfNotExist:NO completion:completion];
+                }];
+            }
+            return;
+        }
+    }
+    __block NSString *localIdentifier = nil;
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        NSDate * creationDate = [NSDate date];
+        PHAssetChangeRequest *requestToCameraRoll = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
+        localIdentifier = requestToCameraRoll.placeholderForCreatedAsset.localIdentifier;
+        requestToCameraRoll.location = loc;
+        requestToCameraRoll.creationDate = creationDate;
+        
+        if (!albumName) {
+            PHObjectPlaceholder * placeHolder = requestToCameraRoll.placeholderForCreatedAsset;
+            PHAssetCollectionChangeRequest * requestToAlbum = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:album];
+            [requestToAlbum addAssets:@[placeHolder]];
+        }
+        
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (success && completion) {
+                PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil] firstObject];
+                completion(self,asset, nil);
+            } else if (error) {
+                if (completion) {
+                    completion(self,nil, error);
+                }
+            }
+        });
+    }];
 }
 
 #pragma mark --- tool method ---

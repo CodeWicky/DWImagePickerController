@@ -18,6 +18,7 @@ typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * _Nullable mgr ,
 typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * _Nullable mgr ,NSArray <DWAlbumModel *>* _Nullable obj);
 typedef void(^DWAlbumFetchImageCompletion)(DWAlbumManager * _Nullable mgr ,DWImageAssetModel * _Nullable obj);
 typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVideoAssetModel * _Nullable obj);
+typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,PHAsset * _Nullable asset ,NSError * _Nullable error);
 
 @interface DWAlbumManager : NSObject
 
@@ -114,6 +115,21 @@ typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVid
  @param album album模型
  */
 -(void)clearCacheForAlbum:(DWAlbumModel *)album;
+
+
+/**
+ 保存图片至相册
+
+ @param image 图片数据
+ @param albumName 相册名称
+ @param loc 地理位置信息
+ @param createIfNotExist 如果相册不存在，是否创建
+ @param completion 完成回调
+ 
+ 注：
+ 若albumName为空，则保存至系统相册cameraRoll
+ */
+-(void)saveImage:(UIImage *)image toAlbum:(nullable NSString *)albumName location:(CLLocation *)loc  createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion;
 
 
 @end
