@@ -45,10 +45,17 @@
                 if (model.mediaType == DWAlbumMediaTypeAll || model.mediaType == DWAlbumFetchAlbumTypeCameraRoll) {
                     self.album = model;
                     printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
-                    [mgr fetchImageWithAlbum:model index:2 targetSize:(CGSize)CGSizeMake(160, 160) progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+                    
+                    [mgr fetchOriginImageWithAlbum:model index:2 progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
                         printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+                        NSLog(@"%@",obj);
                         self.imageView.image = obj.media;
                     }];
+                    
+//                    [mgr fetchImageWithAlbum:model index:2 targetSize:(CGSize)CGSizeMake(160, 160) progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+//                        printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+//                        self.imageView.image = obj.media;
+//                    }];
                     break;
                 }
             }

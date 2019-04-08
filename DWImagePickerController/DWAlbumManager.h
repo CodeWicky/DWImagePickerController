@@ -107,6 +107,14 @@ typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVid
 -(void)cachedImageWithAsset:(DWAssetModel *)asset album:(DWAlbumModel *)album;
 
 
+/**
+ 移除album模型中缓存的所有asset
+
+ @param album album模型
+ */
+-(void)clearCacheForAlbum:(DWAlbumModel *)album;
+
+
 @end
 
 
@@ -180,6 +188,8 @@ typedef NS_OPTIONS(NSUInteger, DWAlbumFetchAlbumType) {
 @interface DWImageAssetModel : DWAssetModel
 
 @property (nonatomic ,strong ,readonly) UIImage * media;
+
+@property (nonatomic ,assign ,readonly) BOOL isDegraded;
 
 @end
 

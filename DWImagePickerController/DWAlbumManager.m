@@ -57,10 +57,20 @@
     _info = info;
 }
 
+#pragma mark --- override ---
+-(NSString *)description {
+    return [NSString stringWithFormat:@"<%@: %p> (Media: %@ - Info: %@)",NSStringFromClass([self class]),self,self.media,self.info];
+}
+
 @end
 
 @implementation DWImageAssetModel
 @dynamic media;
+
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
+    [super configWithAsset:asset media:media info:info];
+    _isDegraded = [[info valueForKey:@"PHImageResultIsDegradedKey"] boolValue];
+}
 
 @end
 
@@ -224,12 +234,14 @@
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
 
+    PHAssetImageProgressHandler progressHandler = nil;
     if (progress) {
-        option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+        progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 progress(progress_num,error,stop,info);
             });
         };
+        option.progressHandler = progressHandler;
     }
     
     return [self.phManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:nil resultHandler:^(UIImage *result, NSDictionary *info) {
@@ -276,7 +288,7 @@
     }
     
     return [self fetchImageWithAsset:asset targetSize:targetSize progress:progress completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
-        if (obj) {
+        if (obj && !obj.isDegraded) {
             [album.albumCache setObject:obj forKey:@(index)];
         }
         if (completion) {
@@ -347,6 +359,13 @@
         return;
     }
     [album.albumCache setObject:asset forKey:@(index)];
+}
+
+-(void)clearCacheForAlbum:(DWAlbumModel *)album {
+    if (!album) {
+        return;
+    }
+    [album.albumCache removeAllObjects];
 }
 
 #pragma mark --- tool method ---
