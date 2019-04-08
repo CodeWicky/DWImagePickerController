@@ -12,6 +12,8 @@
 
 @property (nonatomic ,strong) NSCache * albumCache;
 
+@property (nonatomic ,assign) BOOL networkAccessAllowed;
+
 @end
 
 @implementation DWAlbumModel
@@ -21,6 +23,7 @@
         _mediaType = DWAlbumMediaTypeAll;
         _sortType = DWAlbumSortTypeCreationDateDesending;
         _albumType = DWAlbumFetchAlbumTypeAll;
+        _networkAccessAllowed = YES;
     }
     return self;
 }
@@ -30,6 +33,7 @@
         _mediaType = opt.mediaType;
         _sortType = opt.sortType;
         _albumType = opt.albumType;
+        _networkAccessAllowed = opt.networkAccessAllowed;
     }
     _name = name;
     _isCameraRoll = isCameraRoll;
@@ -227,13 +231,13 @@
     
     PHAsset * asset = (album.sortType == DWAlbumSortTypeCreationDateAscending || album.sortType == DWAlbumSortTypeModificationDateAscending) ? album.fetchResult.lastObject : album.fetchResult.firstObject;
     
-    return [self fetchImageWithAsset:asset targetSize:targetSize progress:nil completion:completion];
+    return [self fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:YES progress:nil completion:completion];
 }
 
--(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
+-(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
-
+    
     PHAssetImageProgressHandler progressHandler = nil;
     if (progress) {
         progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
@@ -245,10 +249,30 @@
     }
     
     return [self.phManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:nil resultHandler:^(UIImage *result, NSDictionary *info) {
-        if (completion) {
-            DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
-            [model configWithAsset:asset media:result info:info];
-            completion(self,model);
+        if (result) {
+            ///本地相册
+            result = [self fixOrientation:result];
+            BOOL downloadFinined = (![[info objectForKey:PHImageCancelledKey] boolValue] && ![info objectForKey:PHImageErrorKey]);
+            if (downloadFinined && completion) {
+                DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
+                [model configWithAsset:asset media:result info:info];
+                completion(self,model);
+            }
+        } else if (networkAccessAllowed && [info objectForKey:PHImageResultIsInCloudKey]) {
+            ///iCloud
+            PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+            options.progressHandler = progressHandler;
+            options.networkAccessAllowed = YES;
+            options.resizeMode = PHImageRequestOptionsResizeModeFast;
+            [[PHImageManager defaultManager] requestImageDataForAsset:asset options:options resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary * remoteinfo) {
+                UIImage *resultImage = [UIImage imageWithData:imageData];
+                resultImage = [self fixOrientation:resultImage];
+                if (completion) {
+                    DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
+                    [model configWithAsset:asset media:resultImage info:remoteinfo];
+                    completion(self,model);
+                }
+            }];
         }
     }];
 }
@@ -257,8 +281,8 @@
     return [self fetchImageWithAlbum:album index:index targetSize:PHImageManagerMaximumSize progress:progress completion:completion];
 }
 
--(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
-    return [self fetchImageWithAsset:asset targetSize:PHImageManagerMaximumSize progress:progress completion:completion];
+-(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
+    return [self fetchImageWithAsset:asset targetSize:PHImageManagerMaximumSize networkAccessAllowed:networkAccessAllowed progress:progress completion:completion];
 }
 
 -(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
@@ -287,7 +311,7 @@
         return PHInvalidImageRequestID;
     }
     
-    return [self fetchImageWithAsset:asset targetSize:targetSize progress:progress completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+    return [self fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (obj && !obj.isDegraded) {
             [album.albumCache setObject:obj forKey:@(index)];
         }
@@ -297,8 +321,9 @@
     }];
 }
 
--(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
+-(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
     PHVideoRequestOptions *option = [[PHVideoRequestOptions alloc] init];
+    option.networkAccessAllowed = networkAccessAllowed;
     option.progressHandler = ^(double progress_num, NSError *error, BOOL *stop, NSDictionary *info) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (progress) {
@@ -340,7 +365,7 @@
         return PHInvalidImageRequestID;
     }
     
-    return [self fetchVideoWithAsset:asset progress:progress completion:^(DWAlbumManager *mgr, DWVideoAssetModel *obj) {
+    return [self fetchVideoWithAsset:asset networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager *mgr, DWVideoAssetModel *obj) {
         if (obj) {
             [album.albumCache setObject:obj forKey:@(index)];
         }
@@ -524,6 +549,7 @@
         _mediaType = DWAlbumMediaTypeAll;
         _sortType = DWAlbumSortTypeCreationDateDesending;
         _albumType = DWAlbumFetchAlbumTypeAll;
+        _networkAccessAllowed = YES;
     }
     return self;
 }

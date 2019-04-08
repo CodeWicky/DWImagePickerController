@@ -85,6 +85,7 @@ typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVid
 
  @param asset 相册数据
  @param targetSize 指定尺寸
+ @param networkAccessAllowed 是否允许从远端加载网络图片
  @param progress 获取进度
  @param completion 完成回调
  @return 获取请求的id
@@ -92,9 +93,9 @@ typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVid
  注：
  completion会回调两次，第一次返回一个缩略图，第二次返回原始图片
  */
--(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
--(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
--(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset progress:(nullable PHAssetImageProgressHandler)progress
+-(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+-(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+-(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress
                 completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
 
@@ -148,6 +149,8 @@ typedef NS_OPTIONS(NSUInteger, DWAlbumFetchAlbumType) {
 @property (nonatomic ,assign) DWAlbumMediaType mediaType;
 
 @property (nonatomic ,assign) DWAlbumSortType sortType;
+
+@property (nonatomic ,assign) BOOL networkAccessAllowed;
 
 @end
 
