@@ -12,12 +12,12 @@
 static const PHImageRequestID PHCachedImageRequestID = -1;
 
 @class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel;
-typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * mgr ,DWAlbumModel * obj);
-typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * mgr ,NSArray <DWAlbumModel *>* obj);
-typedef void(^DWAlbumFetchImageCompletion)(DWAlbumManager * mgr ,DWImageAssetModel * obj);
-typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * mgr ,DWVideoAssetModel * obj);
-
 NS_ASSUME_NONNULL_BEGIN
+
+typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * _Nullable mgr ,DWAlbumModel * _Nullable obj);
+typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * _Nullable mgr ,NSArray <DWAlbumModel *>* _Nullable obj);
+typedef void(^DWAlbumFetchImageCompletion)(DWAlbumManager * _Nullable mgr ,DWImageAssetModel * _Nullable obj);
+typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVideoAssetModel * _Nullable obj);
 
 @interface DWAlbumManager : NSObject
 
