@@ -129,7 +129,7 @@ typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,PHAsse
  注：
  若albumName为空，则保存至系统相册cameraRoll
  */
--(void)saveImage:(UIImage *)image toAlbum:(nullable NSString *)albumName location:(CLLocation *)loc  createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion;
+-(void)saveImage:(UIImage *)image toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc  createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion;
 
 
 @end
