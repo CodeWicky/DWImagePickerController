@@ -412,7 +412,7 @@
         requestToCameraRoll.location = loc;
         requestToCameraRoll.creationDate = creationDate;
         
-        if (!albumName) {
+        if (albumName) {
             PHObjectPlaceholder * placeHolder = requestToCameraRoll.placeholderForCreatedAsset;
             PHAssetCollectionChangeRequest * requestToAlbum = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:album];
             [requestToAlbum addAssets:@[placeHolder]];
