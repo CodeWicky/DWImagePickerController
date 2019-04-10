@@ -67,13 +67,24 @@
             }];
         }
             break;
-        default:
+        case 3:
         {
             UIImage * image = [UIImage imageNamed:@"icon"];
-            [self.imgMgr saveImage:image toAlbum:@"Hello" location:nil createIfNotExist:YES completion:^(DWAlbumManager * _Nullable mgr, PHAsset * _Nullable asset, NSError * _Nullable error) {
+            [self.imgMgr saveImage:image toAlbum:@"Hello" location:nil createIfNotExist:YES completion:^(DWAlbumManager * _Nullable mgr, DWAssetModel * _Nullable asset, NSError * _Nullable error) {
                 NSLog(@"%@",asset);
             }];
         }
+            break;
+        case 4:
+        {
+            NSString * path = [[NSBundle mainBundle] pathForResource:@"video" ofType:@"mp4"];
+            NSURL * url = [NSURL fileURLWithPath:path];
+            [self.imgMgr saveVideoToCameraRoll:url completion:^(DWAlbumManager * _Nullable mgr, __kindof DWAssetModel * _Nullable obj, NSError * _Nullable error) {
+                NSLog(@"%@",obj);
+            }];
+        }
+            break;
+        default:
             break;
     }
     self.step ++;

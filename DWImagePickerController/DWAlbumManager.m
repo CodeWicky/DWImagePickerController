@@ -52,7 +52,7 @@
 
 @implementation DWAssetModel
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
     _asset = asset;
     _originSize = CGSizeMake(asset.pixelWidth, asset.pixelHeight);
     _creationDate = asset.creationDate;
@@ -71,9 +71,11 @@
 @implementation DWImageAssetModel
 @dynamic media;
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
     [super configWithAsset:asset media:media info:info];
-    _isDegraded = [[info valueForKey:@"PHImageResultIsDegradedKey"] boolValue];
+    if ([info isKindOfClass:[NSDictionary class]]) {
+        _isDegraded = [[info valueForKey:@"PHImageResultIsDegradedKey"] boolValue];
+    }
 }
 
 @end
@@ -380,56 +382,19 @@
 }
 
 -(void)saveImage:(UIImage *)image toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
-    PHAssetCollection * album = nil;
-    if (!albumName.length) {
-        album = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil].firstObject;
-    } else {
-        ///遍历所有相册
-        PHFetchResult * results = [PHAssetCollection fetchAssetCollectionsWithType:(PHAssetCollectionTypeAlbum) subtype:(PHAssetCollectionSubtypeAny) options:nil];
-        for (PHAssetCollection * obj in results) {
-            if ([obj.localizedTitle isEqualToString:albumName]) {
-                album = obj;
-                break;
-            }
-        }
-        ///如果不存在则按需创建
-        if (!album) {
-            if (createIfNotExist) {
-                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                    [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
-                } completionHandler:^(BOOL success, NSError * _Nullable error) {
-                    [self saveImage:image toAlbum:albumName location:loc createIfNotExist:NO completion:completion];
-                }];
-            }
-            return;
-        }
-    }
-    __block NSString *localIdentifier = nil;
-    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-        NSDate * creationDate = [NSDate date];
-        PHAssetChangeRequest *requestToCameraRoll = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
-        localIdentifier = requestToCameraRoll.placeholderForCreatedAsset.localIdentifier;
-        requestToCameraRoll.location = loc;
-        requestToCameraRoll.creationDate = creationDate;
-        
-        if (albumName) {
-            PHObjectPlaceholder * placeHolder = requestToCameraRoll.placeholderForCreatedAsset;
-            PHAssetCollectionChangeRequest * requestToAlbum = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:album];
-            [requestToAlbum addAssets:@[placeHolder]];
-        }
-        
-    } completionHandler:^(BOOL success, NSError * _Nullable error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (success && completion) {
-                PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil] firstObject];
-                completion(self,asset, nil);
-            } else if (error) {
-                if (completion) {
-                    completion(self,nil, error);
-                }
-            }
-        });
-    }];
+    [self saveMedia:image isPhoto:YES toAlbum:albumName location:loc createIfNotExist:createIfNotExist completion:completion];
+}
+
+-(void)saveImageToCameraRoll:(UIImage *)image completion:(DWAlbumSaveMediaCompletion)completion {
+    [self saveImage:image toAlbum:nil location:nil createIfNotExist:NO completion:completion];
+}
+
+-(void)saveVideo:(NSURL *)videoURL toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
+    [self saveMedia:videoURL isPhoto:NO toAlbum:albumName location:loc createIfNotExist:createIfNotExist completion:completion];
+}
+
+-(void)saveVideoToCameraRoll:(NSURL *)videoURL completion:(DWAlbumSaveMediaCompletion)completion {
+    [self saveVideo:videoURL toAlbum:nil location:nil createIfNotExist:NO completion:completion];
 }
 
 #pragma mark --- tool method ---
@@ -568,6 +533,92 @@
     CGContextRelease(ctx);
     CGImageRelease(cgimg);
     return img;
+}
+
+-(void)saveMedia:(id)media isPhoto:(BOOL)isPhoto toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
+    
+    if (![media isKindOfClass:[UIImage class]] && ![media isKindOfClass:[NSURL class]]) {
+        return;
+    }
+    
+    if ([media isKindOfClass:[UIImage class]] && !isPhoto) {
+        return;
+    }
+    
+    PHAssetCollection * album = nil;
+    if (!albumName.length) {
+        album = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil].firstObject;
+    } else {
+        ///遍历所有相册
+        PHFetchResult * results = [PHAssetCollection fetchAssetCollectionsWithType:(PHAssetCollectionTypeAlbum) subtype:(PHAssetCollectionSubtypeAny) options:nil];
+        for (PHAssetCollection * obj in results) {
+            if ([obj.localizedTitle isEqualToString:albumName]) {
+                album = obj;
+                break;
+            }
+        }
+        ///如果不存在则按需创建
+        if (!album) {
+            if (createIfNotExist) {
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
+                } completionHandler:^(BOOL success, NSError * _Nullable error) {
+                    [self saveMedia:media isPhoto:isPhoto toAlbum:albumName location:loc createIfNotExist:NO completion:completion];
+                }];
+            }
+            return;
+        }
+    }
+    __block NSString *localIdentifier = nil;
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        PHAssetChangeRequest *requestToCameraRoll = nil;
+        if (isPhoto) {
+            if ([media isKindOfClass:[NSURL class]]) {
+                requestToCameraRoll = [PHAssetCreationRequest creationRequestForAssetFromImageAtFileURL:media];
+            } else if ([media isKindOfClass:[UIImage class]]) {
+                requestToCameraRoll = [PHAssetChangeRequest creationRequestForAssetFromImage:media];
+            }
+        } else {
+            if ([media isKindOfClass:[NSURL class]]) {
+                requestToCameraRoll = [PHAssetCreationRequest creationRequestForAssetFromVideoAtFileURL:media];
+            }
+        }
+        
+        localIdentifier = requestToCameraRoll.placeholderForCreatedAsset.localIdentifier;
+        requestToCameraRoll.location = loc;
+        requestToCameraRoll.creationDate = [NSDate date];
+        
+        if (albumName) {
+            PHObjectPlaceholder * placeHolder = requestToCameraRoll.placeholderForCreatedAsset;
+            PHAssetCollectionChangeRequest * requestToAlbum = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:album];
+            [requestToAlbum addAssets:@[placeHolder]];
+        }
+        
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (success && completion) {
+                PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil] firstObject];
+                DWAssetModel * model = nil;
+                if (isPhoto) {
+                    model = [[DWImageAssetModel alloc] init];
+                } else {
+                    model = [[DWVideoAssetModel alloc] init];
+                }
+                
+                if ([media isKindOfClass:[UIImage class]]) {
+                    [model configWithAsset:asset media:media info:nil];
+                } else {
+                    [model configWithAsset:asset media:nil info:media];
+                }
+                
+                completion(self,model, nil);
+            } else if (error) {
+                if (completion) {
+                    completion(self,nil, error);
+                }
+            }
+        });
+    }];
 }
 
 #pragma mark --- setter/getter ---
