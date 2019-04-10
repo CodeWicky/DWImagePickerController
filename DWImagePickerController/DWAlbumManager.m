@@ -292,12 +292,12 @@
     
     PHAsset * asset = [album.fetchResult objectAtIndex:index];
     
-    if (asset.mediaType != PHAssetMediaTypeImage) {
-        if (completion) {
-            completion(self,nil);
-        }
-        return PHInvalidImageRequestID;
-    }
+//    if (asset.mediaType != PHAssetMediaTypeImage) {
+//        if (completion) {
+//            completion(self,nil);
+//        }
+//        return PHInvalidImageRequestID;
+//    }
     
     return [self fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (obj && !obj.isDegraded) {

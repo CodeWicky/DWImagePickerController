@@ -40,7 +40,7 @@
         case 1:
         {
             DWAlbumFetchOption * opt = [[DWAlbumFetchOption alloc] init];
-            opt.sortType = DWAlbumSortTypeCreationDateAscending;
+            opt.sortType = DWAlbumSortTypeCreationDateDesending;
             opt.mediaType = DWAlbumMediaTypeAll;
             [self.imgMgr fetchAlbumsWithOption:opt completion:^(DWAlbumManager *mgr, NSArray<DWAlbumModel *> *obj) {
                 for (DWAlbumModel * model in obj) {
@@ -48,7 +48,7 @@
                         self.album = model;
                         printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
                         
-                        [mgr fetchImageWithAlbum:model index:2 targetSize:(CGSize)CGSizeMake(160, 160) progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+                        [mgr fetchImageWithAlbum:model index:0 targetSize:(CGSize)CGSizeMake(160, 160) progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
                             printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
                             self.imageView.image = obj.media;
                         }];
@@ -61,7 +61,7 @@
         case 2:
         {
             printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
-            [self.imgMgr fetchOriginImageWithAlbum:self.album index:2 progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+            [self.imgMgr fetchOriginImageWithAlbum:self.album index:0 progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
                 printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
                 self.imageView.image = obj.media;
             }];
