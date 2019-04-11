@@ -39,48 +39,72 @@
             break;
         case 1:
         {
+//            DWAlbumFetchOption * opt = [[DWAlbumFetchOption alloc] init];
+//            opt.sortType = DWAlbumSortTypeCreationDateDesending;
+//            opt.mediaType = DWAlbumMediaTypeImage;
+//            [self.imgMgr fetchAlbumsWithOption:opt completion:^(DWAlbumManager *mgr, NSArray<DWAlbumModel *> *obj) {
+//                for (DWAlbumModel * model in obj) {
+//                    if (model.mediaType == DWAlbumMediaTypeAll || model.mediaType == DWAlbumMediaTypeImage) {
+//                        self.album = model;
+//                        printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+//
+//                        [mgr fetchImageWithAlbum:model index:0 targetSize:(CGSize)CGSizeMake(160, 160) progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+//                            printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+//                            self.imageView.image = obj.media;
+//                        }];
+//                        break;
+//                    }
+//                }
+//            }];
+//        }
+//            break;
+//        case 2:
+//        {
+//            printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+//            [self.imgMgr fetchOriginImageWithAlbum:self.album index:0 progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+//                printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
+//                self.imageView.image = obj.media;
+//            }];
+//        }
+//            break;
+//        case 3:
+//        {
+//            UIImage * image = [UIImage imageNamed:@"icon"];
+//            [self.imgMgr saveImage:image toAlbum:@"Hello" location:nil createIfNotExist:YES completion:^(DWAlbumManager * _Nullable mgr,BOOL success ,DWAssetModel * _Nullable asset, NSError * _Nullable error) {
+//                NSLog(@"%@",asset);
+//            }];
+//        }
+//            break;
+//        case 4:
+//        {
+//            NSString * path = [[NSBundle mainBundle] pathForResource:@"video" ofType:@"mp4"];
+//            NSURL * url = [NSURL fileURLWithPath:path];
+//            [self.imgMgr saveVideoToCameraRoll:url completion:^(DWAlbumManager * _Nullable mgr,BOOL success , __kindof DWAssetModel * _Nullable obj, NSError * _Nullable error) {
+//                NSLog(@"%@",obj);
+//            }];
+//        }
+//            break;
+//        case 5:
+//        {
             DWAlbumFetchOption * opt = [[DWAlbumFetchOption alloc] init];
             opt.sortType = DWAlbumSortTypeCreationDateDesending;
-            opt.mediaType = DWAlbumMediaTypeAll;
+            opt.mediaType = DWAlbumMediaTypeVideo;
             [self.imgMgr fetchAlbumsWithOption:opt completion:^(DWAlbumManager *mgr, NSArray<DWAlbumModel *> *obj) {
                 for (DWAlbumModel * model in obj) {
-                    if (model.mediaType == DWAlbumMediaTypeAll || model.mediaType == DWAlbumFetchAlbumTypeCameraRoll) {
+                    if (model.mediaType == DWAlbumMediaTypeAll || model.mediaType == DWAlbumMediaTypeVideo) {
                         self.album = model;
                         printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
                         
-                        [mgr fetchImageWithAlbum:model index:0 targetSize:(CGSize)CGSizeMake(160, 160) progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
-                            printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
-                            self.imageView.image = obj.media;
+                        [mgr fetchVideoWithAlbum:model index:0 progrss:nil completion:^(DWAlbumManager * _Nullable mgr, DWVideoAssetModel * _Nullable obj) {
+                            DWAlbumExportVideoOption * opt = [DWAlbumExportVideoOption new];
+                            opt.presetType = DWAlbumExportPresetType640x480;
+                            [mgr exportVideo:obj.asset option:opt completion:^(DWAlbumManager * _Nullable mgr, BOOL success, DWVideoAssetModel * _Nullable obj, NSError * _Nullable error) {
+                                NSLog(@"completion");
+                            }];
                         }];
                         break;
                     }
                 }
-            }];
-        }
-            break;
-        case 2:
-        {
-            printf("start %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
-            [self.imgMgr fetchOriginImageWithAlbum:self.album index:0 progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
-                printf("end %f\n",[[NSDate date] timeIntervalSince1970] * 1000);
-                self.imageView.image = obj.media;
-            }];
-        }
-            break;
-        case 3:
-        {
-            UIImage * image = [UIImage imageNamed:@"icon"];
-            [self.imgMgr saveImage:image toAlbum:@"Hello" location:nil createIfNotExist:YES completion:^(DWAlbumManager * _Nullable mgr, DWAssetModel * _Nullable asset, NSError * _Nullable error) {
-                NSLog(@"%@",asset);
-            }];
-        }
-            break;
-        case 4:
-        {
-            NSString * path = [[NSBundle mainBundle] pathForResource:@"video" ofType:@"mp4"];
-            NSURL * url = [NSURL fileURLWithPath:path];
-            [self.imgMgr saveVideoToCameraRoll:url completion:^(DWAlbumManager * _Nullable mgr, __kindof DWAssetModel * _Nullable obj, NSError * _Nullable error) {
-                NSLog(@"%@",obj);
             }];
         }
             break;

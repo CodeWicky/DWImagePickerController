@@ -8,6 +8,13 @@
 
 #import "DWAlbumManager.h"
 
+NSString * const DWAlbumMediaSourceURL = @"DWAlbumMediaSourceURL";
+NSString * const DWAlbumErrorDomain = @"com.DWAlbumManager.error";
+const NSInteger DWAlbumNilObjectErrorCode = 10001;
+const NSInteger DWAlbumInvalidTypeErrorCode = 10002;
+const NSInteger DWAlbumSaveErrorCode = 10003;
+const NSInteger DWAlbumExportErrorCode = 10004;
+
 @interface DWAlbumModel ()
 
 @property (nonatomic ,strong) NSCache * albumCache;
@@ -73,15 +80,64 @@
 
 -(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
     [super configWithAsset:asset media:media info:info];
-    if ([info isKindOfClass:[NSDictionary class]]) {
-        _isDegraded = [[info valueForKey:@"PHImageResultIsDegradedKey"] boolValue];
-    }
+    _isDegraded = [[info valueForKey:@"PHImageResultIsDegradedKey"] boolValue];
 }
 
 @end
 
 @implementation DWVideoAssetModel
 @dynamic media;
+
+@end
+
+@interface DWAlbumExportVideoOption ()
+
+@property (nonatomic ,copy) NSString * presetStr;
+
+@end
+
+@implementation DWAlbumExportVideoOption
+
+-(instancetype)init {
+    if (self = [super init]) {
+        _createIfNotExist = YES;
+        _presetType = DWAlbumExportPresetTypePassthrough;
+    }
+    return self;
+}
+
+-(NSString *)presetStr {
+    switch (_presetType) {
+        case DWAlbumExportPresetTypeLowQuality:
+            return AVAssetExportPresetLowQuality;
+        case DWAlbumExportPresetTypeMediumQuality:
+            return AVAssetExportPresetMediumQuality;
+        case DWAlbumExportPresetTypeHighestQuality:
+            return AVAssetExportPresetHighestQuality;
+        case DWAlbumExportPresetTypeHEVCHighestQuality:
+            return AVAssetExportPresetHEVCHighestQuality;
+        case DWAlbumExportPresetType640x480:
+            return AVAssetExportPreset640x480;
+        case DWAlbumExportPresetType960x540:
+            return AVAssetExportPreset960x540;
+        case DWAlbumExportPresetType1280x720:
+            return AVAssetExportPreset1280x720;
+        case DWAlbumExportPresetType1920x1080:
+            return AVAssetExportPreset1920x1080;
+        case DWAlbumExportPresetType3840x2160:
+            return AVAssetExportPreset3840x2160;
+        case DWAlbumExportPresetTypeHEVC1920x1080:
+            return AVAssetExportPresetHEVC1920x1080;
+        case DWAlbumExportPresetTypeHEVC3840x2160:
+            return AVAssetExportPresetHEVC3840x2160;
+        case DWAlbumExportPresetTypeAppleM4A:
+            return AVAssetExportPresetAppleM4A;
+        case DWAlbumExportPresetTypePassthrough:
+            return AVAssetExportPresetPassthrough;
+        default:
+            return AVAssetExportPresetPassthrough;
+    }
+}
 
 @end
 
@@ -223,6 +279,10 @@
 }
 
 -(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
+    
+    if (!asset) {
+        return PHInvalidImageRequestID;
+    }
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
     
@@ -310,6 +370,10 @@
 }
 
 -(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
+    
+    if (!asset) {
+        return PHInvalidImageRequestID;
+    }
     PHVideoRequestOptions *option = [[PHVideoRequestOptions alloc] init];
     option.networkAccessAllowed = networkAccessAllowed;
     option.progressHandler = ^(double progress_num, NSError *error, BOOL *stop, NSDictionary *info) {
@@ -395,6 +459,23 @@
 
 -(void)saveVideoToCameraRoll:(NSURL *)videoURL completion:(DWAlbumSaveMediaCompletion)completion {
     [self saveVideo:videoURL toAlbum:nil location:nil createIfNotExist:NO completion:completion];
+}
+
+-(void)exportVideo:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportVideoCompletion)completion {
+    if (!asset) {
+        if (completion) {
+            completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumNilObjectErrorCode userInfo:@{@"errMsg":@"Invalid asset who is nil."}]);
+        }
+        return;
+    }
+    
+    PHVideoRequestOptions* options = [[PHVideoRequestOptions alloc] init];
+    options.version = PHVideoRequestOptionsVersionOriginal;
+    options.deliveryMode = PHVideoRequestOptionsDeliveryModeAutomatic;
+    options.networkAccessAllowed = YES;
+    [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:options resultHandler:^(AVAsset* avasset, AVAudioMix* audioMix, NSDictionary* info){
+        [self exportVideoWithAVAsset:(AVURLAsset *)avasset asset:asset option:opt completion:completion];
+    }];
 }
 
 #pragma mark --- tool method ---
@@ -537,11 +618,24 @@
 
 -(void)saveMedia:(id)media isPhoto:(BOOL)isPhoto toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
     
+    if (!media) {
+        if (completion) {
+            completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumNilObjectErrorCode userInfo:@{@"errMsg":@"Invalid media which is nil."}]);
+        }
+        return;
+    }
+    
     if (![media isKindOfClass:[UIImage class]] && ![media isKindOfClass:[NSURL class]]) {
+        if (completion) {
+            completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumInvalidTypeErrorCode userInfo:@{@"errMsg":@"Invalid media which should be UIImage or NSURL."}]);
+        }
         return;
     }
     
     if ([media isKindOfClass:[UIImage class]] && !isPhoto) {
+        if (completion) {
+            completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumInvalidTypeErrorCode userInfo:@{@"errMsg":@"Invalid media which should be NSURL."}]);
+        }
         return;
     }
     
@@ -565,6 +659,10 @@
                 } completionHandler:^(BOOL success, NSError * _Nullable error) {
                     [self saveMedia:media isPhoto:isPhoto toAlbum:albumName location:loc createIfNotExist:NO completion:completion];
                 }];
+            } else {
+                if (completion) {
+                    completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumSaveErrorCode userInfo:@{@"errMsg":@"Save error for target path is not exist."}]);
+                }
             }
             return;
         }
@@ -596,7 +694,7 @@
         
     } completionHandler:^(BOOL success, NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (success && completion) {
+            if (success) {
                 PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil] firstObject];
                 DWAssetModel * model = nil;
                 if (isPhoto) {
@@ -608,17 +706,102 @@
                 if ([media isKindOfClass:[UIImage class]]) {
                     [model configWithAsset:asset media:media info:nil];
                 } else {
-                    [model configWithAsset:asset media:nil info:media];
+                    [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:media}];
                 }
                 
-                completion(self,model, nil);
-            } else if (error) {
                 if (completion) {
-                    completion(self,nil, error);
+                    completion(self,YES,model, nil);
+                }
+            } else {
+                if (completion) {
+                    completion(self,NO,nil, error);
                 }
             }
         });
     }];
+}
+
+-(void)exportVideoWithAVAsset:(AVURLAsset *)avasset asset:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportVideoCompletion)completion {
+    NSArray * presets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avasset];
+    if (opt.presetType == DWAlbumExportPresetTypePassthrough || [presets containsObject:opt.presetStr]) {
+        AVAssetExportSession *session = [[AVAssetExportSession alloc] initWithAsset:avasset presetName:opt.presetStr];
+        NSString * fileName = opt.exportName?: [[NSNumber numberWithInteger:[[NSDate date] timeIntervalSince1970] * 1000] stringValue];
+        if (avasset.URL && avasset.URL.pathExtension) {
+            fileName = [fileName stringByAppendingPathExtension:avasset.URL.pathExtension];
+        } else {
+            fileName = [fileName stringByAppendingPathExtension:@"mp4"];
+        }
+        
+        NSString * exportPath = opt.savePath?:NSTemporaryDirectory();
+        
+        if (![[NSFileManager defaultManager] fileExistsAtPath:exportPath]) {
+            if (!opt.createIfNotExist) {
+                if (completion) {
+                    completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export error for target path is not exist!"}]);
+                }
+            } else {
+                [[NSFileManager defaultManager] createDirectoryAtPath:exportPath withIntermediateDirectories:YES attributes:nil error:nil];
+            }
+        }
+        
+        exportPath = [exportPath stringByAppendingPathComponent:fileName];
+        session.outputURL = [NSURL fileURLWithPath:exportPath];
+        session.shouldOptimizeForNetworkUse = YES;
+        
+        NSArray *supportedTypeArray = session.supportedFileTypes;
+        if ([supportedTypeArray containsObject:AVFileTypeMPEG4]) {
+            session.outputFileType = AVFileTypeMPEG4;
+        } else if (supportedTypeArray.count == 0) {
+            if (completion) {
+                completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export error for media does't support exporting."}]);
+            }
+            return;
+        } else {
+            session.outputFileType = [supportedTypeArray objectAtIndex:0];
+        }
+        
+        [session exportAsynchronouslyWithCompletionHandler:^(void) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (completion) {
+                    NSError * error;
+                    switch (session.status) {
+                        case AVAssetExportSessionStatusCompleted:
+                        {
+                            //doNothing
+                        }
+                            break;
+                        case AVAssetExportSessionStatusFailed:
+                        {
+                            error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export Error!",@"detail":session.error}];
+                        }
+                            break;
+                        case AVAssetExportSessionStatusCancelled:
+                        {
+                            error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export Error by canceling exporting."}];
+                        }
+                            break;
+                        default:
+                        {
+                            error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export error with unknown status"}];
+                        }
+                            break;
+                    }
+                    
+                    if (error) {
+                        completion(self,NO,nil,error);
+                    } else {
+                        DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
+                        [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:exportPath}];
+                        completion(self,YES,model,nil);
+                    }
+                }
+            });
+        }];
+    } else {
+        if (completion) {
+            completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Invalid export type which is not supported!"}]);
+        }
+    }
 }
 
 #pragma mark --- setter/getter ---

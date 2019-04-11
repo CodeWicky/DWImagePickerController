@@ -11,14 +11,22 @@
 
 static const PHImageRequestID PHCachedImageRequestID = -1;
 
-@class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel;
+UIKIT_EXTERN NSString * _Nonnull const DWAlbumMediaSourceURL;
+UIKIT_EXTERN const NSInteger DWAlbumNilObjectErrorCode;
+UIKIT_EXTERN const NSInteger DWAlbumInvalidTypeErrorCode;
+UIKIT_EXTERN const NSInteger DWAlbumSaveErrorCode;
+UIKIT_EXTERN const NSInteger DWAlbumExportErrorCode;
+
+@class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel,DWAlbumExportVideoOption;
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * _Nullable mgr ,DWAlbumModel * _Nullable obj);
 typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * _Nullable mgr ,NSArray <DWAlbumModel *>* _Nullable obj);
 typedef void(^DWAlbumFetchImageCompletion)(DWAlbumManager * _Nullable mgr ,DWImageAssetModel * _Nullable obj);
 typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVideoAssetModel * _Nullable obj);
-typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,__kindof DWAssetModel * _Nullable obj ,NSError * _Nullable error);
+typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,__kindof DWAssetModel * _Nullable obj ,NSError * _Nullable error);
+
+typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,DWVideoAssetModel * _Nullable obj ,NSError * _Nullable error);
 
 @interface DWAlbumManager : NSObject
 
@@ -40,7 +48,7 @@ typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,__kind
 
  @param completion 用户授权完成回调
  */
--(void)requestAuthorization:(void(^)(PHAuthorizationStatus status))completion;
+-(void)requestAuthorization:(nullable void(^)(PHAuthorizationStatus status))completion;
 
 
 /**
@@ -129,8 +137,8 @@ typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,__kind
  注：
  若albumName为空，则保存至系统相册cameraRoll
  */
--(void)saveImage:(UIImage *)image toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc  createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion;
--(void)saveImageToCameraRoll:(UIImage *)image completion:(DWAlbumSaveMediaCompletion)completion;
+-(void)saveImage:(UIImage *)image toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc  createIfNotExist:(BOOL)createIfNotExist completion:(nullable DWAlbumSaveMediaCompletion)completion;
+-(void)saveImageToCameraRoll:(UIImage *)image completion:(nullable DWAlbumSaveMediaCompletion)completion;
 
 
 /**
@@ -145,9 +153,18 @@ typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,__kind
  注：
  若albumName为空，则保存至系统相册cameraRoll
  */
--(void)saveVideo:(NSURL *)videoURL toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion;
--(void)saveVideoToCameraRoll:(NSURL *)videoURL completion:(DWAlbumSaveMediaCompletion)completion;
+-(void)saveVideo:(NSURL *)videoURL toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(nullable DWAlbumSaveMediaCompletion)completion;
+-(void)saveVideoToCameraRoll:(NSURL *)videoURL completion:(nullable DWAlbumSaveMediaCompletion)completion;
 
+
+/**
+ 要导出的视频asset对象
+
+ @param asset asset对象
+ @param opt 导出配置信息
+ @param completion 完成回调
+ */
+-(void)exportVideo:(PHAsset *)asset option:(nullable DWAlbumExportVideoOption *)opt completion:(nullable DWAlbumExportVideoCompletion)completion;
 
 @end
 
@@ -175,15 +192,61 @@ typedef NS_OPTIONS(NSUInteger, DWAlbumFetchAlbumType) {
     DWAlbumFetchAlbumTypeAllUnited = 1 << 5,
 };
 
+/**
+ 视频导出格式配置，具体释义见 AVAssetExportPreset 释义。
+ */
+typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
+    DWAlbumExportPresetTypeLowQuality,
+    DWAlbumExportPresetTypeMediumQuality,
+    DWAlbumExportPresetTypeHighestQuality,
+    DWAlbumExportPresetTypeHEVCHighestQuality,
+    DWAlbumExportPresetType640x480,
+    DWAlbumExportPresetType960x540,
+    DWAlbumExportPresetType1280x720,
+    DWAlbumExportPresetType1920x1080,
+    DWAlbumExportPresetType3840x2160,
+    DWAlbumExportPresetTypeHEVC1920x1080,
+    DWAlbumExportPresetTypeHEVC3840x2160,
+    DWAlbumExportPresetTypeAppleM4A,
+    DWAlbumExportPresetTypePassthrough,
+};
+
+
+/**
+ 相册获取配置项
+ */
 @interface DWAlbumFetchOption : NSObject
 
+///获取相册类型，默认为 DWAlbumFetchAlbumTypeAll
 @property (nonatomic ,assign) DWAlbumFetchAlbumType albumType;
 
+///获取媒体类型，默认为 DWAlbumMediaTypeAll
 @property (nonatomic ,assign) DWAlbumMediaType mediaType;
 
+///排序方式，默认为 DWAlbumSortTypeCreationDateDesending
 @property (nonatomic ,assign) DWAlbumSortType sortType;
 
+///是否允许拉取远端资源，默认为YES
 @property (nonatomic ,assign) BOOL networkAccessAllowed;
+
+@end
+
+/**
+ 视频导出配置项
+ */
+@interface DWAlbumExportVideoOption : NSObject
+
+///导出文件名称，若为空将自动生成文件名
+@property (nonatomic ,copy) NSString * exportName;
+
+///导出路径，若为空，将导出至 NSTemporaryDirectory()
+@property (nonatomic ,copy) NSString * savePath;
+
+///导出文件夹不存在的话是否穿自动创建，默认为YES
+@property (nonatomic ,assign) BOOL createIfNotExist;
+
+///导出格式配置，默认为 DWAlbumExportPresetTypePassthrough ,即为导出原始视频
+@property (nonatomic ,assign) DWAlbumExportPresetType presetType;
 
 @end
 
