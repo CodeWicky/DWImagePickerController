@@ -272,6 +272,10 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 
 @property (nonatomic ,strong ,readonly) PHAsset * asset;
 
+@property (nonatomic ,assign ,readonly) PHAssetMediaType mediaType;
+
+@property (nonatomic ,copy ,readonly) NSString * localIdentifier;
+
 @property (nonatomic ,strong ,readonly) id media;
 
 @property (nonatomic ,assign ,readonly) CGSize originSize;

@@ -68,6 +68,15 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     _info = info;
 }
 
+#pragma mark --- setter/getter ---
+-(PHAssetMediaType)mediaType {
+    return _asset.mediaType;
+}
+
+-(NSString *)localIdentifier {
+    return _asset.localIdentifier;
+}
+
 #pragma mark --- override ---
 -(NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p> (Media: %@ - Info: %@)",NSStringFromClass([self class]),self,self.media,self.info];
