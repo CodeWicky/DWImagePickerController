@@ -109,6 +109,14 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 
 
 /**
+ 取消获取媒体的请求
+
+ @param requestID 请求ID
+ */
+-(void)cancelRequestByID:(PHImageRequestID)requestID;
+
+
+/**
  缓存获取的asset
 
  @param asset asset模型
@@ -252,18 +260,25 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 
 @interface DWAlbumModel : NSObject
 
+///结果集
 @property (nonatomic ,strong ,readonly) PHFetchResult * fetchResult;
 
+///相册类型
 @property (nonatomic ,assign ,readonly) DWAlbumFetchAlbumType albumType;
 
+///媒体类型
 @property (nonatomic ,assign ,readonly) DWAlbumMediaType mediaType;
 
+///排序类型
 @property (nonatomic ,assign ,readonly) DWAlbumSortType sortType;
 
+///相册名称
 @property (nonatomic ,copy ,readonly) NSString * name;
 
+///是否是胶卷
 @property (nonatomic ,assign ,readonly) BOOL isCameraRoll;
 
+///结果数
 @property (nonatomic ,assign ,readonly) NSInteger count;
 
 @end

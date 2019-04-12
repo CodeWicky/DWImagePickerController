@@ -16,6 +16,7 @@
 		9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B244059223666AD004A6E34 /* DWAlbumManager.m */; };
 		9B83ED49225CD71A005A9125 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B83ED48225CD71A005A9125 /* icon.png */; };
 		9BFD273E225E3F81009B27D6 /* video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 9BFD273D225E3EE6009B27D6 /* video.mp4 */; };
+		9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BFD274922603089009B27D6 /* DWImagePickerController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,10 @@
 		9B244059223666AD004A6E34 /* DWAlbumManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWAlbumManager.m; sourceTree = "<group>"; };
 		9B83ED48225CD71A005A9125 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		9BFD273D225E3EE6009B27D6 /* video.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = video.mp4; sourceTree = "<group>"; };
+		9BFD274822603089009B27D6 /* DWImagePickerController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePickerController.h; sourceTree = "<group>"; };
+		9BFD274922603089009B27D6 /* DWImagePickerController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePickerController.m; sourceTree = "<group>"; };
+		9BFD274B2260769D009B27D6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
+		9BFD274C2260769D009B27D6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +76,8 @@
 				9B24404322365EE1004A6E34 /* AppDelegate.m */,
 				9B24404522365EE1004A6E34 /* ViewController.h */,
 				9B24404622365EE1004A6E34 /* ViewController.m */,
+				9BFD274822603089009B27D6 /* DWImagePickerController.h */,
+				9BFD274922603089009B27D6 /* DWImagePickerController.m */,
 				9B244058223666AD004A6E34 /* DWAlbumManager.h */,
 				9B244059223666AD004A6E34 /* DWAlbumManager.m */,
 				9B24404822365EE1004A6E34 /* Main.storyboard */,
@@ -123,6 +130,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 9B24403622365EE1004A6E34;
 			productRefGroup = 9B24404022365EE1004A6E34 /* Products */;
@@ -155,6 +163,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */,
+				9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */,
 				9B24404722365EE1004A6E34 /* ViewController.m in Sources */,
 				9B24405222365EE2004A6E34 /* main.m in Sources */,
 				9B24404422365EE1004A6E34 /* AppDelegate.m in Sources */,
@@ -168,6 +177,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				9B24404922365EE1004A6E34 /* Base */,
+				9BFD274B2260769D009B27D6 /* zh-Hans */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -176,6 +186,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				9B24404E22365EE2004A6E34 /* Base */,
+				9BFD274C2260769D009B27D6 /* zh-Hans */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -187,6 +198,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -246,6 +258,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

@@ -230,20 +230,20 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         albumArr = [NSMutableArray arrayWithCapacity:0];
     }
     
-    for (PHFetchResult * album in allAlbums) {
-        if (opt.albumType == DWAlbumFetchAlbumTypeAllUnited) {
-            if (!album.count) {
-                continue;
-            }
+    if (opt.albumType == DWAlbumFetchAlbumTypeAllUnited) {
+        PHFetchResult * album = allAlbums.firstObject;
+        if (album.count && needTransform) {
+            DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];
+            [albumModel configTypeWithFetchOption:opt name:nil result:album isCameraRoll:NO];
+            [albumArr addObject:albumModel];
+        }
+    } else {
+        
+        BOOL hasCamera = NO;
+        for (PHFetchResult * album in allAlbums) {
             
-            if (needTransform) {
-                DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];
-                [albumModel configTypeWithFetchOption:opt name:nil result:album isCameraRoll:NO];
-                [albumArr addObject:albumModel];
-            }
-        } else {
-            BOOL hasCamera = NO;
             for (PHAssetCollection * obj in album) {
+                
                 if (![obj isKindOfClass:[PHAssetCollection class]]) {
                     continue;
                 }
@@ -251,11 +251,18 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                 if (obj.assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumAllHidden) {
                     continue;
                 }
+                
                 if (obj.assetCollectionSubtype == 1000000201) {
                     continue; //『最近删除』相册
                 }
                 
-                BOOL isCamera = !hasCamera && [self isCameraRollAlbum:obj];
+                BOOL isCamera = YES;
+                if (hasCamera) {
+                    isCamera = NO;
+                } else {
+                    isCamera = [self isCameraRollAlbum:obj];
+                }
+
                 if (obj.estimatedAssetCount <= 0 && !isCamera) {
                     continue;
                 }
@@ -278,7 +285,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             }
         }
     }
-    
+
     if (needTransform) {
         completion(self,albumArr);
     }
@@ -314,7 +321,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         option.progressHandler = progressHandler;
     }
     
-    return [self.phManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:nil resultHandler:^(UIImage *result, NSDictionary *info) {
+    return [self.phManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option resultHandler:^(UIImage *result, NSDictionary *info) {
         if (result) {
             ///本地相册
             result = [self fixOrientation:result];
@@ -443,6 +450,10 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             completion(mgr,obj);
         }
     }];
+}
+
+-(void)cancelRequestByID:(PHImageRequestID)requestID {
+    [self.phManager cancelImageRequest:requestID];
 }
 
 -(void)cachedImageWithAsset:(DWAssetModel *)asset album:(DWAlbumModel *)album {
@@ -711,31 +722,29 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         }
         
     } completionHandler:^(BOOL success, NSError * _Nullable error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (success) {
-                PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil] firstObject];
-                DWAssetModel * model = nil;
-                if (isPhoto) {
-                    model = [[DWImageAssetModel alloc] init];
-                } else {
-                    model = [[DWVideoAssetModel alloc] init];
-                }
-                
-                if ([media isKindOfClass:[UIImage class]]) {
-                    [model configWithAsset:asset media:media info:nil];
-                } else {
-                    [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:media}];
-                }
-                
-                if (completion) {
-                    completion(self,YES,model, nil);
-                }
+        if (success) {
+            PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil] firstObject];
+            DWAssetModel * model = nil;
+            if (isPhoto) {
+                model = [[DWImageAssetModel alloc] init];
             } else {
-                if (completion) {
-                    completion(self,NO,nil, error);
-                }
+                model = [[DWVideoAssetModel alloc] init];
             }
-        });
+            
+            if ([media isKindOfClass:[UIImage class]]) {
+                [model configWithAsset:asset media:media info:nil];
+            } else {
+                [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:media}];
+            }
+            
+            if (completion) {
+                completion(self,YES,model, nil);
+            }
+        } else {
+            if (completion) {
+                completion(self,NO,nil, error);
+            }
+        }
     }];
 }
 
@@ -788,41 +797,40 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         }
         
         [session exportAsynchronouslyWithCompletionHandler:^(void) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (completion) {
-                    NSError * error;
-                    switch (session.status) {
-                        case AVAssetExportSessionStatusCompleted:
-                        {
-                            //doNothing
-                        }
-                            break;
-                        case AVAssetExportSessionStatusFailed:
-                        {
-                            error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export Error!",@"detail":session.error}];
-                        }
-                            break;
-                        case AVAssetExportSessionStatusCancelled:
-                        {
-                            error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export Error by canceling exporting."}];
-                        }
-                            break;
-                        default:
-                        {
-                            error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export error with unknown status"}];
-                        }
-                            break;
+            
+            if (completion) {
+                NSError * error;
+                switch (session.status) {
+                    case AVAssetExportSessionStatusCompleted:
+                    {
+                        //doNothing
                     }
-                    
-                    if (error) {
-                        completion(self,NO,nil,error);
-                    } else {
-                        DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
-                        [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:exportPath}];
-                        completion(self,YES,model,nil);
+                        break;
+                    case AVAssetExportSessionStatusFailed:
+                    {
+                        error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export Error!",@"detail":session.error}];
                     }
+                        break;
+                    case AVAssetExportSessionStatusCancelled:
+                    {
+                        error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export Error by canceling exporting."}];
+                    }
+                        break;
+                    default:
+                    {
+                        error = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export error with unknown status"}];
+                    }
+                        break;
                 }
-            });
+                
+                if (error) {
+                    completion(self,NO,nil,error);
+                } else {
+                    DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
+                    [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:exportPath}];
+                    completion(self,YES,model,nil);
+                }
+            }
         }];
     } else {
         if (completion) {
