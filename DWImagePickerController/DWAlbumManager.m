@@ -61,11 +61,29 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 -(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
     _asset = asset;
-    _originSize = CGSizeMake(asset.pixelWidth, asset.pixelHeight);
-    _creationDate = asset.creationDate;
-    _modificationDate = asset.modificationDate;
     _media = media;
     _info = info;
+}
+
+#pragma mark --- setter/getter ---
+-(PHAssetMediaType)mediaType {
+    return _asset.mediaType;
+}
+
+-(NSString *)localIdentifier {
+    return _asset.localIdentifier;
+}
+
+-(NSDate *)creationDate {
+    return _asset.creationDate;
+}
+
+-(NSDate *)modificationDate {
+    return _asset.modificationDate;
+}
+
+-(CGSize)originSize {
+    return CGSizeMake(_asset.pixelWidth, _asset.pixelHeight);
 }
 
 #pragma mark --- override ---
@@ -723,8 +741,16 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 -(void)exportVideoWithAVAsset:(AVURLAsset *)avasset asset:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportVideoCompletion)completion {
     NSArray * presets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avasset];
-    if (opt.presetType == DWAlbumExportPresetTypePassthrough || [presets containsObject:opt.presetStr]) {
-        AVAssetExportSession *session = [[AVAssetExportSession alloc] initWithAsset:avasset presetName:opt.presetStr];
+    DWAlbumExportPresetType presetType = DWAlbumExportPresetTypePassthrough;
+    NSString * presetString = AVAssetExportPresetPassthrough;
+    BOOL createInNotExist = YES;
+    if (opt) {
+        presetType = opt.presetType;
+        presetString = opt.presetStr;
+        createInNotExist = opt.createIfNotExist;
+    }
+    if (opt.presetType == presetType || [presets containsObject:opt.presetStr]) {
+        AVAssetExportSession *session = [[AVAssetExportSession alloc] initWithAsset:avasset presetName:presetString];
         NSString * fileName = opt.exportName?: [[NSNumber numberWithInteger:[[NSDate date] timeIntervalSince1970] * 1000] stringValue];
         if (avasset.URL && avasset.URL.pathExtension) {
             fileName = [fileName stringByAppendingPathExtension:avasset.URL.pathExtension];
@@ -735,10 +761,11 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         NSString * exportPath = opt.savePath?:NSTemporaryDirectory();
         
         if (![[NSFileManager defaultManager] fileExistsAtPath:exportPath]) {
-            if (!opt.createIfNotExist) {
+            if (!createInNotExist) {
                 if (completion) {
                     completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumExportErrorCode userInfo:@{@"errMsg":@"Export error for target path is not exist!"}]);
                 }
+                return;
             } else {
                 [[NSFileManager defaultManager] createDirectoryAtPath:exportPath withIntermediateDirectories:YES attributes:nil error:nil];
             }

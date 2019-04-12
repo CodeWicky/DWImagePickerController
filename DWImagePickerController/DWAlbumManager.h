@@ -276,16 +276,23 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///媒体对象
 @property (nonatomic ,strong ,readonly) id media;
 
+///媒体类型
+@property (nonatomic ,assign ,readonly) PHAssetMediaType mediaType;
+
+///本地标示
+@property (nonatomic ,copy ,readonly) NSString * localIdentifier;
+
+///创建时间
+@property (nonatomic, strong, readonly) NSDate * creationDate;
+
+///修改时间
+@property (nonatomic, strong, readonly) NSDate * modificationDate;
+
 ///媒体尺寸
 @property (nonatomic ,assign ,readonly) CGSize originSize;
 
 ///额外信息
 @property (nonatomic ,strong ,readonly) id info;
-
-///创建时间
-@property (nonatomic, strong, readonly) NSDate * creationDate;
-
-@property (nonatomic, strong, readonly) NSDate * modificationDate;
 
 @end
 
