@@ -270,14 +270,19 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 
 @interface DWAssetModel : NSObject
 
+///asset对象
 @property (nonatomic ,strong ,readonly) PHAsset * asset;
 
+///媒体对象
 @property (nonatomic ,strong ,readonly) id media;
 
+///媒体尺寸
 @property (nonatomic ,assign ,readonly) CGSize originSize;
 
+///额外信息
 @property (nonatomic ,strong ,readonly) id info;
 
+///创建时间
 @property (nonatomic, strong, readonly) NSDate * creationDate;
 
 @property (nonatomic, strong, readonly) NSDate * modificationDate;
@@ -288,6 +293,7 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 
 @property (nonatomic ,strong ,readonly) UIImage * media;
 
+///是否是缩略图
 @property (nonatomic ,assign ,readonly) BOOL isDegraded;
 
 @end
