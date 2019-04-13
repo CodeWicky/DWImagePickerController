@@ -98,7 +98,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 -(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
     [super configWithAsset:asset media:media info:info];
-    _isDegraded = [[info valueForKey:@"PHImageResultIsDegradedKey"] boolValue];
+    _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
 }
 
 @end
@@ -325,7 +325,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         if (result) {
             ///本地相册
             result = [self fixOrientation:result];
-            BOOL downloadFinined = (![[info objectForKey:PHImageCancelledKey] boolValue] && ![info objectForKey:PHImageErrorKey]);
+            BOOL downloadFinined = (![info[PHImageCancelledKey] boolValue] && !info[PHImageErrorKey]);
             if (downloadFinined && completion) {
                 DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
                 [model configWithAsset:asset media:result info:info];
@@ -346,6 +346,10 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                     completion(self,model);
                 }
             }];
+        } else {
+            if (completion) {
+                completion(self,nil);
+            }
         }
     }];
 }
@@ -367,13 +371,13 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         return PHInvalidImageRequestID;
     }
     
-    DWImageAssetModel * model = [album.albumCache objectForKey:@(index)];
-    if (model) {
-        if (completion) {
-            completion(self,model);
-        }
-        return PHCachedImageRequestID;
-    }
+//    DWImageAssetModel * model = [album.albumCache objectForKey:@(index)];
+//    if (model) {
+//        if (completion) {
+//            completion(self,model);
+//        }
+//        return PHCachedImageRequestID;
+//    }
     
     PHAsset * asset = [album.fetchResult objectAtIndex:index];
     
@@ -385,9 +389,9 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
     
     return [self fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
-        if (obj && !obj.isDegraded) {
-            [album.albumCache setObject:obj forKey:@(index)];
-        }
+//        if (obj && !obj.isDegraded) {
+//            [album.albumCache setObject:obj forKey:@(index)];
+//        }
         if (completion) {
             completion(mgr,obj);
         }
@@ -450,6 +454,22 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             completion(mgr,obj);
         }
     }];
+}
+
+-(void)startCachingImagesForIndexs:(NSArray <PHAsset *>*)indexs targetSize:(CGSize)targetSize {
+    PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
+    option.resizeMode = PHImageRequestOptionsResizeModeFast;
+    [self.phManager startCachingImagesForAssets:indexs targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
+}
+
+-(void)stopCachingImagesForIndexs:(NSArray<PHAsset *> *)indexs targetSize:(CGSize)targetSize {
+    PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
+    option.resizeMode = PHImageRequestOptionsResizeModeFast;
+    [self.phManager stopCachingImagesForAssets:indexs targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
+}
+
+-(void)stopCachingAllImages {
+    [self.phManager stopCachingImagesForAllAssets];
 }
 
 -(void)cancelRequestByID:(PHImageRequestID)requestID {

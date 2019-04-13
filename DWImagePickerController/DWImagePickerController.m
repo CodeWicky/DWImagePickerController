@@ -46,14 +46,14 @@
     return _gridImage;
 }
 
--(void)prepareForReuse {
-    [super prepareForReuse];
-    self.gridImage.image = nil;
-}
+//-(void)prepareForReuse {
+//    [super prepareForReuse];
+//    self.gridImage.image = nil;
+//}
 
 @end
 
-@interface DWAlbumGridViewController : UICollectionViewController
+@interface DWAlbumGridViewController : UICollectionViewController<UICollectionViewDataSourcePrefetching>
 
 @property (nonatomic ,strong) DWAlbumModel * album;
 
@@ -61,9 +61,9 @@
 
 @property (nonatomic ,strong) DWAlbumManager * albumManager;
 
-@property (nonatomic ,assign) CGSize cellSize;
+@property (nonatomic ,assign) CGSize photoSize;
 
-@property (nonatomic ,strong) dispatch_queue_t q;
+@property (nonatomic ,assign) CGRect previousPreheatRect;
 
 @end
 
@@ -75,9 +75,8 @@
     self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWGridCell class] forCellWithReuseIdentifier:@"cell"];
     UICollectionViewFlowLayout * layout = (UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout;
-    CGFloat scale = [UIScreen mainScreen].scale;
-    self.cellSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
-    self.q = dispatch_queue_create("dispatch_get_global_queue", DISPATCH_QUEUE_CONCURRENT);
+    CGFloat scale = 2;
+    self.photoSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
 }
 
 -(void)configWithAlbum:(DWAlbumModel *)model {
@@ -97,20 +96,47 @@
     PHAsset * asset = [self.results objectAtIndex:indexPath.row];
     cell.requestLocalID = asset.localIdentifier;
     
-    PHImageRequestID requestID = [self.albumManager fetchImageWithAlbum:self.album index:indexPath.row targetSize:self.cellSize progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                cell.gridImage.image = obj.media;
-            });
+    PHImageRequestID requestID = [self.albumManager fetchImageWithAsset:asset targetSize:self.photoSize networkAccessAllowed:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        if (!obj) {
+            cell.gridImage.image = nil;
         } else {
-            [mgr cancelRequestByID:cell.requestID];
+            if ([cell.requestLocalID isEqualToString:obj.asset.localIdentifier]) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    cell.gridImage.image = obj.media;
+                });
+            } else {
+                [mgr cancelRequestByID:cell.requestID];
+            }
         }
     }];
+
     if (cell.requestID != requestID) {
         [self.albumManager cancelRequestByID:cell.requestID];
         cell.requestID = requestID;
     }
     return cell;
+}
+
+#pragma mark --- tool method ---
+-(void)resetCachedAssets {
+    [self.albumManager stopCachingAllImages];
+    self.previousPreheatRect = CGRectZero;
+}
+
+-(void)updateCacheAssets {
+    
+    if (!self.isViewLoaded || !self.view.window) {
+        return;
+    }
+    
+    CGRect visibleRect = CGRectMake(self.collectionView.contentOffset.x, self.collectionView.contentOffset.y, self.collectionView.bounds.size.width, self.collectionView.bounds.size.height);
+    CGRect preheatRect = CGRectInset(visibleRect, 0, -0.5 * visibleRect.size.height);
+    CGFloat delta = ABS(CGRectGetMidY(preheatRect) - CGRectGetMidY(self.previousPreheatRect));
+    if (delta <= self.view.bounds.size.height / 3) {
+        return;
+    }
+    
+    
 }
 
 @end
@@ -151,9 +177,13 @@
 
 -(void)fetchCameraRoll {
     self.colVC.albumManager = self.albumManager;
-    [self.albumManager fetchCameraRollWithOption:self.fetchOption completion:^(DWAlbumManager * _Nullable mgr, DWAlbumModel * _Nullable obj) {
-        [self.colVC configWithAlbum:obj];
-    }];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [self.albumManager fetchCameraRollWithOption:self.fetchOption completion:^(DWAlbumManager * _Nullable mgr, DWAlbumModel * _Nullable obj) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.colVC configWithAlbum:obj];
+            });
+        }];
+    });
 }
 
 #pragma mark --- setter/getter ---

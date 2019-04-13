@@ -107,6 +107,10 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 -(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress
                 completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
+-(void)startCachingImagesForIndexs:(NSArray <PHAsset *>*)indexs targetSize:(CGSize)targetSize;
+-(void)stopCachingImagesForIndexs:(NSArray <PHAsset *>*)indexs targetSize:(CGSize)targetSize;
+-(void)stopCachingAllImages;
+
 
 /**
  取消获取媒体的请求
