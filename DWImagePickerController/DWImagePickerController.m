@@ -46,10 +46,10 @@
     return _gridImage;
 }
 
-//-(void)prepareForReuse {
-//    [super prepareForReuse];
-//    self.gridImage.image = nil;
-//}
+-(void)prepareForReuse {
+    [super prepareForReuse];
+    self.gridImage.image = nil;
+}
 
 @end
 
@@ -63,6 +63,8 @@
 
 @property (nonatomic ,assign) CGSize photoSize;
 
+@property (nonatomic ,assign) CGSize thumailSize;
+
 @property (nonatomic ,assign) CGRect previousPreheatRect;
 
 @end
@@ -71,12 +73,27 @@
 
 -(void)viewDidLoad {
     [super viewDidLoad];
+    
+    PHFetchOptions * opt = [[PHFetchOptions alloc] init];
+    opt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+    self.results = [PHAsset fetchAssetsWithOptions:opt];
+    [self resetCachedAssets];
     self.view.backgroundColor = [UIColor whiteColor];
     self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWGridCell class] forCellWithReuseIdentifier:@"cell"];
-    UICollectionViewFlowLayout * layout = (UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout;
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
     CGFloat scale = 2;
+    UICollectionViewFlowLayout * layout = (UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout;
+    self.thumailSize = layout.itemSize;
     self.photoSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+}
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self updateCacheAssets];
 }
 
 -(void)configWithAlbum:(DWAlbumModel *)model {
@@ -96,25 +113,33 @@
     PHAsset * asset = [self.results objectAtIndex:indexPath.row];
     cell.requestLocalID = asset.localIdentifier;
     
-    PHImageRequestID requestID = [self.albumManager fetchImageWithAsset:asset targetSize:self.photoSize networkAccessAllowed:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if (!obj) {
-            cell.gridImage.image = nil;
-        } else {
-            if ([cell.requestLocalID isEqualToString:obj.asset.localIdentifier]) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.gridImage.image = obj.media;
-                });
-            } else {
-                [mgr cancelRequestByID:cell.requestID];
-            }
+    CGSize targetSize = (collectionView.isDragging || collectionView.isDecelerating) ? self.thumailSize : self.photoSize;
+    
+    PHImageRequestOptions * opt = [[PHImageRequestOptions alloc] init];
+    opt.resizeMode = PHImageRequestOptionsResizeModeFast;
+    [self.albumManager.phManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:opt resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+        if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                cell.gridImage.image = result;
+            });
         }
     }];
-
-    if (cell.requestID != requestID) {
-        [self.albumManager cancelRequestByID:cell.requestID];
-        cell.requestID = requestID;
-    }
+//    [self.albumManager fetchImageWithAsset:asset targetSize:self.photoSize networkAccessAllowed:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+//        if (!obj) {
+//            cell.gridImage.image = nil;
+//        } else {
+//            if ([cell.requestLocalID isEqualToString:obj.asset.localIdentifier]) {
+//                dispatch_async(dispatch_get_main_queue(), ^{
+//                    cell.gridImage.image = obj.media;
+//                });
+//            }
+//        }
+//    }];
     return cell;
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    [self updateCacheAssets];
 }
 
 #pragma mark --- tool method ---
@@ -136,7 +161,34 @@
         return;
     }
     
-    
+    CGRect add = rectABeyondRectB(preheatRect, self.previousPreheatRect);
+    NSArray * addAssets = assetsInColletion(self.collectionView, add, self.results);
+    CGRect remove = rectABeyondRectB(self.previousPreheatRect, preheatRect);
+    NSArray * removeAssets = assetsInColletion(self.collectionView, remove, self.results);
+    [self.albumManager startCachingImagesForAssets:addAssets targetSize:self.photoSize];
+    [self.albumManager stopCachingImagesForAssets:removeAssets targetSize:self.photoSize];
+    self.previousPreheatRect = preheatRect;
+}
+
+NS_INLINE CGRect rectABeyondRectB(CGRect rectA,CGRect rectB) {
+    if (CGRectIsEmpty(CGRectIntersection(rectA, rectB))) {
+        if (CGRectGetMaxY(rectA) > CGRectGetMaxY(rectB)) {
+            return CGRectMake(rectA.origin.x, rectA.origin.y, rectA.size.width, CGRectGetMaxY(rectA) - CGRectGetMaxY(rectB));
+        } else {
+            return CGRectMake(rectA.origin.x, rectA.origin.y, rectA.size.width, CGRectGetMaxY(rectB) - CGRectGetMaxY(rectA));
+        }
+    } else {
+        return rectA;
+    }
+}
+
+NS_INLINE NSArray <PHAsset *>* assetsInColletion(UICollectionView * col,CGRect rect,PHFetchResult * result) {
+    NSArray * attrs = [col.collectionViewLayout layoutAttributesForElementsInRect:rect];
+    NSMutableArray * assets = [NSMutableArray arrayWithCapacity:attrs.count];
+    for (UICollectionViewLayoutAttributes * attr in attrs) {
+        [assets addObject:[result objectAtIndex:attr.indexPath.row]];
+    }
+    return [assets copy];
 }
 
 @end

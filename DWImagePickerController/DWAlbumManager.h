@@ -107,8 +107,15 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 -(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress
                 completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
--(void)startCachingImagesForIndexs:(NSArray <PHAsset *>*)indexs targetSize:(CGSize)targetSize;
--(void)stopCachingImagesForIndexs:(NSArray <PHAsset *>*)indexs targetSize:(CGSize)targetSize;
+
+/**
+ 预缓存指定asset
+
+ @param assets 要预加载的asset
+ @param targetSize 预加载的尺寸
+ */
+-(void)startCachingImagesForAssets:(NSArray <PHAsset *>*)assets targetSize:(CGSize)targetSize;
+-(void)stopCachingImagesForAssets:(NSArray <PHAsset *>*)assets targetSize:(CGSize)targetSize;
 -(void)stopCachingAllImages;
 
 

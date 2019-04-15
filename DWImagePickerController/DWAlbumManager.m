@@ -456,16 +456,16 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }];
 }
 
--(void)startCachingImagesForIndexs:(NSArray <PHAsset *>*)indexs targetSize:(CGSize)targetSize {
+-(void)startCachingImagesForAssets:(NSArray <PHAsset *>*)assets targetSize:(CGSize)targetSize {
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
-    [self.phManager startCachingImagesForAssets:indexs targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
+    [self.phManager startCachingImagesForAssets:assets targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
 }
 
--(void)stopCachingImagesForIndexs:(NSArray<PHAsset *> *)indexs targetSize:(CGSize)targetSize {
+-(void)stopCachingImagesForAssets:(NSArray<PHAsset *> *)assets targetSize:(CGSize)targetSize {
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
     option.resizeMode = PHImageRequestOptionsResizeModeFast;
-    [self.phManager stopCachingImagesForAssets:indexs targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
+    [self.phManager stopCachingImagesForAssets:assets targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
 }
 
 -(void)stopCachingAllImages {
