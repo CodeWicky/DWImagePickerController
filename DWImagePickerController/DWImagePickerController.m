@@ -20,6 +20,7 @@
 
 @implementation DWGridCell
 
+#pragma mark --- override ---
 -(void)layoutSubviews {
     [super layoutSubviews];
     if (!CGRectEqualToRect(self.gridImage.frame, self.bounds)) {
@@ -27,6 +28,12 @@
     }
 }
 
+-(void)prepareForReuse {
+    [super prepareForReuse];
+    self.gridImage.image = nil;
+}
+
+#pragma mark --- setter/getter ---
 -(UIImageView *)gridImage {
     if (!_gridImage) {
         _gridImage = [[UIImageView alloc] initWithFrame:self.bounds];
@@ -36,12 +43,6 @@
     }
     return _gridImage;
 }
-
--(void)prepareForReuse {
-    [super prepareForReuse];
-    self.gridImage.image = nil;
-}
-
 @end
 
 @interface DWAlbumGridViewController : UICollectionViewController<UICollectionViewDataSourcePrefetching,PHPhotoLibraryChangeObserver>
@@ -61,8 +62,6 @@
 @property (nonatomic ,assign) CGFloat velocity;
 
 @property (nonatomic ,assign) CGFloat lastOffsetY;
-
-@property (nonatomic ,strong) PHImageRequestOptions * opt;
 
 @end
 
@@ -85,21 +84,28 @@
     CGFloat thumnailScale = 0.5;
     self.photoSize = CGSizeMake(itemSize.width * scale, itemSize.height * scale);
     self.thumnailSize = CGSizeMake(itemSize.width * thumnailScale, itemSize.height * thumnailScale);
-    PHImageRequestOptions * opt = [[PHImageRequestOptions alloc] init];
-    opt.resizeMode = PHImageRequestOptionsResizeModeFast;
-    self.opt = opt;
-
-    [self.collectionView setContentOffset:CGPointMake(0, [self.collectionView.collectionViewLayout collectionViewContentSize].height - self.collectionView.bounds.size.height)];
+    
+    CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
+    if (self.results.count) {
+        if (contentSize.height > self.collectionView.bounds.size.height) {
+            [self.collectionView setContentOffset:CGPointMake(0, contentSize.height - self.collectionView.bounds.size.height)];
+            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+        } else {
+            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
+        }
+    }
+    
 }
 
--(void)configWithAlbum:(DWAlbumModel *)model {
+#pragma mark --- tool method ---
+-(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager {
     _album = model;
+    _albumManager = albumManager;
     _results = model.fetchResult;
     self.title = model.name;
     [self.collectionView reloadData];
 }
 
-#pragma mark --- tool method ---
 -(void)loadRealPhoto {
     CGRect visibleRect = (CGRect){self.collectionView.contentOffset,self.collectionView.bounds.size};
     NSArray <UICollectionViewLayoutAttributes *>* attrs = [self.collectionView.collectionViewLayout layoutAttributesForElementsInRect:visibleRect];
@@ -195,6 +201,7 @@
             });
         }
     }];
+    [cell setNeedsLayout];
     
     return cell;
 }
@@ -245,11 +252,193 @@
 
 @end
 
+@interface DWPosterCell : UITableViewCell
 
+@property (nonatomic ,strong) UIImageView * posterImageView;
+
+@property (nonatomic ,strong) UILabel * titleLabel;
+
+@property (nonatomic ,strong) UILabel * countLabel;
+
+@property (nonatomic ,strong) DWAlbumModel * albumModel;
+
+@end
+
+@implementation DWPosterCell
+
+#pragma mark --- override ---
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+-(void)prepareForReuse {
+    [super prepareForReuse];
+    self.posterImageView.image = nil;
+    self.titleLabel.text = nil;
+    self.countLabel.text = nil;
+}
+
+-(void)layoutSubviews {
+    [super layoutSubviews];
+    CGFloat width = self.bounds.size.width;
+    CGFloat height = self.bounds.size.height;
+    CGFloat indicatorMargin = 50;
+    CGFloat labelMargin = 10;
+    CGRect posterFrm = CGRectMake(0, 0, height, height);
+    if (!CGRectEqualToRect(self.posterImageView.frame, posterFrm)) {
+        self.posterImageView.frame = posterFrm;
+    }
+    
+    [self.titleLabel sizeToFit];
+    CGPoint origin = CGPointMake(height + labelMargin, (height - self.titleLabel.bounds.size.height) * 0.5);
+    CGRect titleFrm = self.titleLabel.bounds;
+    titleFrm.origin = origin;
+    
+    BOOL needCountLb = YES;
+    if (CGRectGetMaxX(titleFrm) > width - indicatorMargin) {
+        CGSize size = titleFrm.size;
+        size.width = width - height - labelMargin - indicatorMargin;
+        titleFrm.size = size;
+        needCountLb = NO;
+    } else if (CGRectGetMaxX(titleFrm) > width - indicatorMargin - labelMargin - labelMargin) {
+        needCountLb = NO;
+    }
+    self.titleLabel.frame = titleFrm;
+    
+    if (needCountLb) {
+        [self.countLabel sizeToFit];
+        CGPoint origin = CGPointMake(CGRectGetMaxX(titleFrm) + labelMargin, (height - self.countLabel.bounds.size.height) * 0.5);
+        CGRect countFrm = self.countLabel.bounds;
+        countFrm.origin = origin;
+        if (CGRectGetMaxX(countFrm) > width - indicatorMargin - labelMargin) {
+            CGSize size = countFrm.size;
+            size.width = width - origin.x - indicatorMargin - labelMargin;
+            if (size.width <= 0) {
+                self.countLabel.hidden = YES;
+                return;
+            }
+            countFrm.size = size;
+        }
+        self.countLabel.hidden = NO;
+        self.countLabel.frame = countFrm;
+    } else {
+        self.countLabel.hidden = YES;
+    }
+}
+
+#pragma mark --- setter/getter ---
+-(UIImageView *)posterImageView {
+    if (!_posterImageView) {
+        _posterImageView = [[UIImageView alloc] init];
+        _posterImageView.contentMode = UIViewContentModeScaleAspectFill;
+        _posterImageView.clipsToBounds = YES;
+        [self.contentView addSubview:_posterImageView];
+    }
+    return _posterImageView;
+}
+
+-(UILabel *)titleLabel {
+    if (!_titleLabel) {
+        _titleLabel = [[UILabel alloc] init];
+        _titleLabel.font = [UIFont boldSystemFontOfSize:17];
+        _titleLabel.textColor = [UIColor blackColor];
+        [self.contentView addSubview:_titleLabel];
+    }
+    return _titleLabel;
+}
+
+-(UILabel *)countLabel {
+    if (!_countLabel) {
+        _countLabel = [[UILabel alloc] init];
+        _countLabel.font = [UIFont systemFontOfSize:17];
+        _countLabel.textColor = [UIColor lightGrayColor];
+        [self.contentView addSubview:_countLabel];
+    }
+    return _countLabel;
+}
+
+@end
+
+@interface DWAlbumListViewController : UITableViewController
+
+@property (nonatomic ,strong) NSArray * albums;
+
+@property (nonatomic ,strong) DWAlbumManager * albumManager;
+
+@property (nonatomic ,weak) DWAlbumGridViewController * gridVC;
+
+@property (nonatomic ,assign) CGFloat cellHeight;
+
+@property (nonatomic ,assign) CGSize photoSize;
+
+@end
+
+@implementation DWAlbumListViewController
+
+#pragma mark --- life cycle ---
+-(void)viewDidLoad {
+    [super viewDidLoad];
+    self.tableView.tableFooterView = [[UIView alloc] init];
+    self.tableView.backgroundColor = [UIColor whiteColor];
+    [self.tableView registerClass:[DWPosterCell class] forCellReuseIdentifier:@"PosterCell"];
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    self.cellHeight = 70;
+    CGFloat scale = 2;
+    self.photoSize = CGSizeMake(self.cellHeight * scale, self.cellHeight * scale);
+}
+
+#pragma mark --- tool method ---
+-(void)configWithAlbums:(NSArray <DWAlbumModel *>*)albums albumManager:(DWAlbumManager *)albumManager gridVC:(DWAlbumGridViewController *)gridVC {
+    _albums = albums;
+    _albumManager = albumManager;
+    _gridVC = gridVC;
+    [self.tableView reloadData];
+}
+
+#pragma mark --- tableView delegate ---
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.albums.count;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    DWPosterCell * cell = [tableView dequeueReusableCellWithIdentifier:@"PosterCell" forIndexPath:indexPath];
+    DWAlbumModel * albumModel = self.albums[indexPath.row];
+    cell.titleLabel.text = albumModel.name;
+    cell.countLabel.text = [NSString stringWithFormat:@"(%ld)",albumModel.count];
+    cell.albumModel = albumModel;
+    [self.albumManager fetchPostForAlbum:albumModel targetSize:self.photoSize completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        if ([albumModel isEqual:cell.albumModel]) {
+            cell.posterImageView.image = obj.media;
+        }
+    }];
+    [cell setNeedsLayout];
+    return cell;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return self.cellHeight;
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    DWAlbumModel * albumModel = self.albums[indexPath.row];
+    [self.gridVC configWithAlbum:albumModel albumManager:self.albumManager];
+    [self.navigationController pushViewController:self.gridVC animated:YES];
+}
+
+@end
 
 @interface DWImagePickerController ()
 
-@property (nonatomic ,strong) DWAlbumGridViewController * colVC;
+@property (nonatomic ,strong) DWAlbumGridViewController * gridVC;
+
+@property (nonatomic ,strong) DWAlbumListViewController * listVC;
 
 @end
 
@@ -264,32 +453,57 @@
 
 #pragma mark --- interface method ---
 -(instancetype)initWithAlbumManager:(DWAlbumManager *)albumManager option:(DWAlbumFetchOption *)opt columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing {
-    UICollectionViewFlowLayout * flowlayout = [[UICollectionViewFlowLayout alloc] init];
-    flowlayout.minimumLineSpacing = spacing;
-    flowlayout.minimumInteritemSpacing = spacing;
-    CGFloat width = ([UIScreen mainScreen].bounds.size.width - (columnCount - 1) * spacing) / columnCount;
-    flowlayout.itemSize = CGSizeMake(width, width);
-    DWAlbumGridViewController * grid = [[DWAlbumGridViewController alloc] initWithCollectionViewLayout:flowlayout];
     if (self = [super init]) {
         _albumManager = albumManager;
         _fetchOption = opt;
         _columnCount = columnCount;
-        _colVC = grid;
+        _spacing = spacing;
     }
     return self;
 }
 
 -(void)fetchCameraRoll {
-    self.colVC.albumManager = self.albumManager;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [self.albumManager fetchCameraRollWithOption:self.fetchOption completion:^(DWAlbumManager * _Nullable mgr, DWAlbumModel * _Nullable obj) {
+        [self.albumManager fetchAlbumsWithOption:self.fetchOption completion:^(DWAlbumManager * _Nullable mgr, NSArray<DWAlbumModel *> * _Nullable obj) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self.colVC configWithAlbum:obj];
-                [self setViewControllers:@[self.colVC]];
+                [self.listVC configWithAlbums:obj albumManager:self.albumManager gridVC:self.gridVC];
+                [self.gridVC configWithAlbum:obj.firstObject albumManager:self.albumManager];
+                [self setViewControllers:@[self.listVC,self.gridVC]];
             });
         }];
     });
 }
+
+#pragma mark --- tool method ---
+-(void)dismiss {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+
+#pragma mark --- setter/getter ---
+-(DWAlbumListViewController *)listVC {
+    if (!_listVC) {
+        _listVC = [[DWAlbumListViewController alloc] init];
+        _listVC.navigationItem.title = @"照片";
+        _listVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismiss)];
+        _listVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];
+    }
+    return _listVC;
+}
+
+-(DWAlbumGridViewController *)gridVC {
+    if (!_gridVC) {
+        UICollectionViewFlowLayout * flowlayout = [[UICollectionViewFlowLayout alloc] init];
+            flowlayout.minimumLineSpacing = _spacing;
+            flowlayout.minimumInteritemSpacing = _spacing;
+            CGFloat width = ([UIScreen mainScreen].bounds.size.width - (_columnCount - 1) * _spacing) / _columnCount;
+            flowlayout.itemSize = CGSizeMake(width, width);
+            _gridVC = [[DWAlbumGridViewController alloc] initWithCollectionViewLayout:flowlayout];
+    }
+    return _gridVC;
+}
+
+
 
 #pragma mark --- setter/getter ---
 -(DWAlbumManager *)albumManager {

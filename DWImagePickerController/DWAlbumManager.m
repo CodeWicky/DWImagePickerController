@@ -197,31 +197,35 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     PHFetchOptions * phOpt = [self phOptFromDWOpt:opt];
     NSMutableArray * allAlbums = [NSMutableArray arrayWithCapacity:5];
     
-    if (!opt || opt.albumType == DWAlbumFetchAlbumTypeAllUnited) {
+    DWAlbumFetchAlbumType albumType = opt.albumType;
+    if (!opt) {
+        albumType = DWAlbumFetchAlbumTypeAll;
+    }
+    if (albumType == DWAlbumFetchAlbumTypeAllUnited) {
         PHFetchResult * allAlbum = [PHAsset fetchAssetsWithOptions:phOpt];
         [allAlbums addObject:allAlbum];
     } else {
-        if (opt.albumType & DWAlbumFetchAlbumTypeMyPhotoSteam) {
+        if (albumType & DWAlbumFetchAlbumTypeMyPhotoSteam) {
             PHFetchResult *myPhotoStreamAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream options:nil];
             [allAlbums addObject:myPhotoStreamAlbum];
         }
         
-        if (opt.albumType & DWAlbumFetchAlbumTypeCameraRoll) {
+        if (albumType & DWAlbumFetchAlbumTypeCameraRoll) {
             PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
             [allAlbums addObject:smartAlbums];
         }
         
-        if (opt.albumType & DWAlbumFetchAlbumTypeTopLevelUser) {
+        if (albumType & DWAlbumFetchAlbumTypeTopLevelUser) {
             PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
             [allAlbums addObject:topLevelUserCollections];
         }
         
-        if (opt.albumType & DWAlbumFetchAlbumTypeSyncedAlbum) {
+        if (albumType & DWAlbumFetchAlbumTypeSyncedAlbum) {
             PHFetchResult *syncedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumSyncedAlbum options:nil];
             [allAlbums addObject:syncedAlbums];
         }
         
-        if (opt.albumType & DWAlbumFetchAlbumTypeAlbumCloudShared) {
+        if (albumType & DWAlbumFetchAlbumTypeAlbumCloudShared) {
             PHFetchResult *sharedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumCloudShared options:nil];
             [allAlbums addObject:sharedAlbums];
         }
@@ -232,7 +236,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         albumArr = [NSMutableArray arrayWithCapacity:0];
     }
     
-    if (opt.albumType == DWAlbumFetchAlbumTypeAllUnited) {
+    if (albumType == DWAlbumFetchAlbumTypeAllUnited) {
         PHFetchResult * album = allAlbums.firstObject;
         if (album.count && needTransform) {
             DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];

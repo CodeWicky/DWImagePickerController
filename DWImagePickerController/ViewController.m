@@ -127,7 +127,7 @@
 //        }];
 //    }];
     
-    DWImagePickerController * picker = [[DWImagePickerController alloc] initWithAlbumManager:nil option:nil columnCount:6 spacing:0.5];
+    DWImagePickerController * picker = [[DWImagePickerController alloc] initWithAlbumManager:nil option:nil columnCount:4 spacing:0.5];
     [picker fetchCameraRoll];
     [self presentViewController:picker animated:YES completion:nil];
     
