@@ -77,6 +77,7 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  @param album album模型
  @param index 要获取的图片在album中角标
  @param targetSize 指定尺寸
+ @param shouldCache 是否缓存
  @param progress 获取进度
  @param completion 完成回调
  @return 获取请求的id
@@ -84,7 +85,7 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  注：
  获取过程completion会回调两次，第一次返回一个缩略图，第二次返回原始图片。若命中缓存，至只走一次完成回调。
  */
--(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+-(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
 -(PHImageRequestID)fetchOriginImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
 -(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progrss:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
@@ -117,6 +118,9 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 -(void)startCachingImagesForAssets:(NSArray <PHAsset *>*)assets targetSize:(CGSize)targetSize;
 -(void)stopCachingImagesForAssets:(NSArray <PHAsset *>*)assets targetSize:(CGSize)targetSize;
 -(void)stopCachingAllImages;
+
+-(NSIndexSet *)startCachingImagesForAlbum:(DWAlbumModel *)album indexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
+-(void)stopCachingImagesForAlbum:(DWAlbumModel *)album indexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
 
 
 /**

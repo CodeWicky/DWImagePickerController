@@ -161,6 +161,8 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 @interface DWAlbumManager ()
 
+@property (nonatomic ,strong) PHImageRequestOptions * defaultOpt;
+
 @end
 
 @implementation DWAlbumManager
@@ -308,9 +310,8 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     if (!asset) {
         return PHInvalidImageRequestID;
     }
-    PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
-    option.resizeMode = PHImageRequestOptionsResizeModeFast;
     
+    PHImageRequestOptions * option = nil;
     PHAssetImageProgressHandler progressHandler = nil;
     if (progress) {
         progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
@@ -318,7 +319,11 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                 progress(progress_num,error,stop,info);
             });
         };
+        option = [[PHImageRequestOptions alloc] init];
+        option.resizeMode = PHImageRequestOptionsResizeModeFast;
         option.progressHandler = progressHandler;
+    } else {
+        option = self.defaultOpt;
     }
     
     return [self.phManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option resultHandler:^(UIImage *result, NSDictionary *info) {
@@ -355,14 +360,14 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(PHImageRequestID)fetchOriginImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
-    return [self fetchImageWithAlbum:album index:index targetSize:PHImageManagerMaximumSize progress:progress completion:completion];
+    return [self fetchImageWithAlbum:album index:index targetSize:PHImageManagerMaximumSize shouldCache:YES progress:progress completion:completion];
 }
 
 -(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
     return [self fetchImageWithAsset:asset targetSize:PHImageManagerMaximumSize networkAccessAllowed:networkAccessAllowed progress:progress completion:completion];
 }
 
--(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
+-(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
     
     if (index >= album.fetchResult.count) {
         if (completion) {
@@ -371,13 +376,13 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         return PHInvalidImageRequestID;
     }
     
-//    DWImageAssetModel * model = [album.albumCache objectForKey:@(index)];
-//    if (model) {
-//        if (completion) {
-//            completion(self,model);
-//        }
-//        return PHCachedImageRequestID;
-//    }
+    DWImageAssetModel * model = [album.albumCache objectForKey:@(index)];
+    if (model) {
+        if (completion) {
+            completion(self,model);
+        }
+        return PHCachedImageRequestID;
+    }
     
     PHAsset * asset = [album.fetchResult objectAtIndex:index];
     
@@ -389,9 +394,9 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
     
     return [self fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
-//        if (obj && !obj.isDegraded) {
-//            [album.albumCache setObject:obj forKey:@(index)];
-//        }
+        if (obj && shouldCache && !obj.isDegraded) {
+            [album.albumCache setObject:obj forKey:@(index)];
+        }
         if (completion) {
             completion(mgr,obj);
         }
@@ -457,19 +462,44 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(void)startCachingImagesForAssets:(NSArray <PHAsset *>*)assets targetSize:(CGSize)targetSize {
-    PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
-    option.resizeMode = PHImageRequestOptionsResizeModeFast;
-    [self.phManager startCachingImagesForAssets:assets targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
+    [self.phManager startCachingImagesForAssets:assets targetSize:targetSize contentMode:PHImageContentModeAspectFill options:self.defaultOpt];
 }
 
 -(void)stopCachingImagesForAssets:(NSArray<PHAsset *> *)assets targetSize:(CGSize)targetSize {
-    PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
-    option.resizeMode = PHImageRequestOptionsResizeModeFast;
-    [self.phManager stopCachingImagesForAssets:assets targetSize:targetSize contentMode:PHImageContentModeAspectFill options:option];
+    [self.phManager stopCachingImagesForAssets:assets targetSize:targetSize contentMode:PHImageContentModeAspectFill options:self.defaultOpt];
 }
 
 -(void)stopCachingAllImages {
     [self.phManager stopCachingImagesForAllAssets];
+}
+
+-(NSIndexSet *)startCachingImagesForAlbum:(DWAlbumModel *)album indexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize {
+    if (!album || indexes.count == 0) {
+        return nil;
+    }
+    
+    NSMutableArray <PHAsset *>* filtered = [NSMutableArray arrayWithCapacity:indexes.count];
+    NSMutableIndexSet * filteredSet = [NSMutableIndexSet indexSet];
+    PHFetchResult * result = album.fetchResult;
+    [self filterAlbum:album indexes:indexes handler:^(NSUInteger idx, BOOL *stop) {
+        [filtered addObject:[result objectAtIndex:idx]];
+        [filteredSet addIndex:idx];
+    }];
+    [self startCachingImagesForAssets:filtered targetSize:targetSize];
+    return filteredSet;
+}
+
+-(void)stopCachingImagesForAlbum:(DWAlbumModel *)album indexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize {
+    if (!album || indexes.count == 0) {
+        return ;
+    }
+    
+    NSMutableArray <PHAsset *>* filtered = [NSMutableArray arrayWithCapacity:indexes.count];
+    PHFetchResult * result = album.fetchResult;
+    [self filterAlbum:album indexes:indexes handler:^(NSUInteger idx, BOOL *stop) {
+        [filtered addObject:[result objectAtIndex:idx]];
+    }];
+    [self stopCachingImagesForAssets:filtered targetSize:targetSize];
 }
 
 -(void)cancelRequestByID:(PHImageRequestID)requestID {
@@ -859,12 +889,34 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
 }
 
+-(void)filterAlbum:(DWAlbumModel *)album indexes:(NSIndexSet *)indexes handler:(void (^)(NSUInteger idx, BOOL *stop))handler {
+    if (!handler) {
+        return;
+    }
+    PHFetchResult * result = album.fetchResult;
+    NSUInteger count = result.count;
+    NSCache * albumCache = album.albumCache;
+    [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+        if (idx < count && ![albumCache objectForKey:@(idx)]) {
+            handler(idx,stop);
+        }
+    }];
+}
+
 #pragma mark --- setter/getter ---
 -(PHCachingImageManager *)phManager {
     if (!_phManager) {
         _phManager = (PHCachingImageManager *)[PHCachingImageManager defaultManager];
     }
     return _phManager;
+}
+
+-(PHImageRequestOptions *)defaultOpt {
+    if (!_defaultOpt) {
+        _defaultOpt = [[PHImageRequestOptions alloc] init];
+        _defaultOpt.resizeMode = PHImageRequestOptionsResizeModeFast;
+    }
+    return _defaultOpt;
 }
 
 @end
