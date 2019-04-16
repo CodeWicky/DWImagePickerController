@@ -63,6 +63,8 @@
 
 @property (nonatomic ,assign) CGFloat lastOffsetY;
 
+@property (nonatomic ,assign) BOOL firstAppear;
+
 @end
 
 @implementation DWAlbumGridViewController
@@ -75,6 +77,7 @@
     self.collectionView.backgroundColor = [UIColor whiteColor];
     self.collectionView.prefetchDataSource = self;
     [self.collectionView registerClass:[DWGridCell class] forCellWithReuseIdentifier:@"GridCell"];
+    self.firstAppear = YES;
 }
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -85,15 +88,23 @@
     self.photoSize = CGSizeMake(itemSize.width * scale, itemSize.height * scale);
     self.thumnailSize = CGSizeMake(itemSize.width * thumnailScale, itemSize.height * thumnailScale);
     
-    CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
     if (self.results.count) {
+        CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
         if (contentSize.height > self.collectionView.bounds.size.height) {
             [self.collectionView setContentOffset:CGPointMake(0, contentSize.height - self.collectionView.bounds.size.height)];
-            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+            if (self.firstAppear) {
+                ///防止第一次进入时，无法滚动至底部（差20px）
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+                });
+            } else {
+                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+            }
         } else {
             [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
         }
     }
+    self.firstAppear = NO;
 }
 
 #pragma mark --- tool method ---
