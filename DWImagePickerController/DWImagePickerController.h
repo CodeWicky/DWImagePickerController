@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(instancetype)initWithAlbumManager:(nullable DWAlbumManager *)albumManager option:(nullable DWAlbumFetchOption *)opt columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing;
 -(void)fetchCameraRoll;
 
++(instancetype)showImagePickerWithAlbumManager:(nullable DWAlbumManager *)albumManager option:(nullable DWAlbumFetchOption *)opt currentVC:(UIViewController *)currentVC;
+
 @end
 
 NS_ASSUME_NONNULL_END

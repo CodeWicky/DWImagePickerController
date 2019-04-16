@@ -94,7 +94,6 @@
             [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
         }
     }
-    
 }
 
 #pragma mark --- tool method ---
@@ -472,6 +471,16 @@
             });
         }];
     });
+}
+
++(instancetype)showImagePickerWithAlbumManager:(DWAlbumManager *)albumManager option:(DWAlbumFetchOption *)opt currentVC:(UIViewController *)currentVC {
+    if (!currentVC) {
+        return nil;
+    }
+    DWImagePickerController * imagePicker = [((DWImagePickerController *)[self alloc]) initWithAlbumManager:albumManager option:opt columnCount:4 spacing:0.5];
+    [imagePicker fetchCameraRoll];
+    [currentVC presentViewController:imagePicker animated:YES completion:nil];
+    return imagePicker;
 }
 
 #pragma mark --- tool method ---
