@@ -72,6 +72,7 @@
     [super viewDidLoad];
     
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+    self.view.backgroundColor = [UIColor whiteColor];
     self.collectionView.backgroundColor = [UIColor whiteColor];
     self.collectionView.prefetchDataSource = self;
     [self.collectionView registerClass:[DWGridCell class] forCellWithReuseIdentifier:@"GridCell"];
@@ -381,8 +382,9 @@
 #pragma mark --- life cycle ---
 -(void)viewDidLoad {
     [super viewDidLoad];
-    self.tableView.tableFooterView = [[UIView alloc] init];
+    self.view.backgroundColor = [UIColor whiteColor];
     self.tableView.backgroundColor = [UIColor whiteColor];
+    self.tableView.tableFooterView = [[UIView alloc] init];
     [self.tableView registerClass:[DWPosterCell class] forCellReuseIdentifier:@"PosterCell"];
 }
 
