@@ -87,7 +87,7 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  */
 -(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
 -(PHImageRequestID)fetchOriginImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
--(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progrss:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchVideoCompletion)completion;
+-(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index shouldCache:(BOOL)shouldCache progrss:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
 
 /**
@@ -246,7 +246,7 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///获取媒体类型，默认为 DWAlbumMediaTypeAll
 @property (nonatomic ,assign) DWAlbumMediaType mediaType;
 
-///排序方式，默认为 DWAlbumSortTypeCreationDateDesending
+///排序方式，默认为 DWAlbumSortTypeCreationDateAscending
 @property (nonatomic ,assign) DWAlbumSortType sortType;
 
 ///是否允许拉取远端资源，默认为YES

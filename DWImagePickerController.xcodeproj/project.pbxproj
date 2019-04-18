@@ -15,11 +15,16 @@
 		9B24405222365EE2004A6E34 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B24405122365EE2004A6E34 /* main.m */; };
 		9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B244059223666AD004A6E34 /* DWAlbumManager.m */; };
 		9B83ED49225CD71A005A9125 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B83ED48225CD71A005A9125 /* icon.png */; };
+		9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */; };
+		9BCA5CC822688DED002AA175 /* DWImagePreviewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */; };
 		9BFD273E225E3F81009B27D6 /* video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 9BFD273D225E3EE6009B27D6 /* video.mp4 */; };
 		9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BFD274922603089009B27D6 /* DWImagePickerController.m */; };
+		AB99CF40775617CF102F6736 /* libPods-DWImagePickerController.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B566239D1EDEE581E1FB6D38 /* libPods-DWImagePickerController.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1B5AD7AEBBF446E6566CD9B0 /* Pods-DWImagePickerController.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWImagePickerController.release.xcconfig"; path = "Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController.release.xcconfig"; sourceTree = "<group>"; };
+		979E10F113466871E73911E6 /* Pods-DWImagePickerController.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWImagePickerController.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController.debug.xcconfig"; sourceTree = "<group>"; };
 		9B24403F22365EE1004A6E34 /* DWImagePickerController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DWImagePickerController.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B24404222365EE1004A6E34 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9B24404322365EE1004A6E34 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -33,11 +38,16 @@
 		9B244058223666AD004A6E34 /* DWAlbumManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWAlbumManager.h; sourceTree = "<group>"; };
 		9B244059223666AD004A6E34 /* DWAlbumManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWAlbumManager.m; sourceTree = "<group>"; };
 		9B83ED48225CD71A005A9125 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		9BCA5CC322684F2E002AA175 /* DWImagePreviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePreviewController.h; sourceTree = "<group>"; };
+		9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePreviewController.m; sourceTree = "<group>"; };
+		9BCA5CC622688DED002AA175 /* DWImagePreviewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePreviewCell.h; sourceTree = "<group>"; };
+		9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePreviewCell.m; sourceTree = "<group>"; };
 		9BFD273D225E3EE6009B27D6 /* video.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = video.mp4; sourceTree = "<group>"; };
 		9BFD274822603089009B27D6 /* DWImagePickerController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePickerController.h; sourceTree = "<group>"; };
 		9BFD274922603089009B27D6 /* DWImagePickerController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePickerController.m; sourceTree = "<group>"; };
 		9BFD274B2260769D009B27D6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		9BFD274C2260769D009B27D6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		B566239D1EDEE581E1FB6D38 /* libPods-DWImagePickerController.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DWImagePickerController.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,17 +55,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB99CF40775617CF102F6736 /* libPods-DWImagePickerController.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		379E6721EC9566B92F8925B9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				979E10F113466871E73911E6 /* Pods-DWImagePickerController.debug.xcconfig */,
+				1B5AD7AEBBF446E6566CD9B0 /* Pods-DWImagePickerController.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		9B24403622365EE1004A6E34 = {
 			isa = PBXGroup;
 			children = (
 				9B24404122365EE1004A6E34 /* DWImagePickerController */,
 				9B24404022365EE1004A6E34 /* Products */,
+				379E6721EC9566B92F8925B9 /* Pods */,
+				A5FA307B774395EE99429D73 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -78,6 +100,10 @@
 				9B24404622365EE1004A6E34 /* ViewController.m */,
 				9BFD274822603089009B27D6 /* DWImagePickerController.h */,
 				9BFD274922603089009B27D6 /* DWImagePickerController.m */,
+				9BCA5CC622688DED002AA175 /* DWImagePreviewCell.h */,
+				9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */,
+				9BCA5CC322684F2E002AA175 /* DWImagePreviewController.h */,
+				9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */,
 				9B244058223666AD004A6E34 /* DWAlbumManager.h */,
 				9B244059223666AD004A6E34 /* DWAlbumManager.m */,
 				9B24404822365EE1004A6E34 /* Main.storyboard */,
@@ -89,6 +115,14 @@
 			path = DWImagePickerController;
 			sourceTree = "<group>";
 		};
+		A5FA307B774395EE99429D73 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B566239D1EDEE581E1FB6D38 /* libPods-DWImagePickerController.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -96,6 +130,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9B24405522365EE2004A6E34 /* Build configuration list for PBXNativeTarget "DWImagePickerController" */;
 			buildPhases = (
+				A20FE52BE42D7F51D56B50FF /* [CP] Check Pods Manifest.lock */,
 				9B24403B22365EE1004A6E34 /* Sources */,
 				9B24403C22365EE1004A6E34 /* Frameworks */,
 				9B24403D22365EE1004A6E34 /* Resources */,
@@ -157,12 +192,35 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A20FE52BE42D7F51D56B50FF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-DWImagePickerController-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		9B24403B22365EE1004A6E34 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */,
+				9BCA5CC822688DED002AA175 /* DWImagePreviewCell.m in Sources */,
+				9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */,
 				9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */,
 				9B24404722365EE1004A6E34 /* ViewController.m in Sources */,
 				9B24405222365EE2004A6E34 /* main.m in Sources */,
@@ -310,6 +368,7 @@
 		};
 		9B24405622365EE2004A6E34 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 979E10F113466871E73911E6 /* Pods-DWImagePickerController.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -328,6 +387,7 @@
 		};
 		9B24405722365EE2004A6E34 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1B5AD7AEBBF446E6566CD9B0 /* Pods-DWImagePickerController.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

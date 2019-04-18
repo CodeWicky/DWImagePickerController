@@ -17,7 +17,9 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 @interface DWAlbumModel ()
 
-@property (nonatomic ,strong) NSCache * albumCache;
+@property (nonatomic ,strong) NSCache * albumImageCache;
+
+@property (nonatomic ,strong) NSCache * albumVideoCache;
 
 @property (nonatomic ,assign) BOOL networkAccessAllowed;
 
@@ -28,7 +30,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 -(instancetype)init {
     if (self = [super init]) {
         _mediaType = DWAlbumMediaTypeAll;
-        _sortType = DWAlbumSortTypeCreationDateDesending;
+        _sortType = DWAlbumSortTypeCreationDateAscending;
         _albumType = DWAlbumFetchAlbumTypeAll;
         _networkAccessAllowed = YES;
     }
@@ -48,11 +50,18 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     _count = result.count;
 }
 
--(NSCache *)albumCache {
-    if (!_albumCache) {
-        _albumCache = [[NSCache alloc] init];
+-(NSCache *)albumImageCache {
+    if (!_albumImageCache) {
+        _albumImageCache = [[NSCache alloc] init];
     }
-    return _albumCache;
+    return _albumImageCache;
+}
+
+-(NSCache *)albumVideoCache {
+    if (!_albumVideoCache) {
+        _albumVideoCache = [[NSCache alloc] init];
+    }
+    return _albumVideoCache;
 }
 
 @end
@@ -380,7 +389,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         return PHInvalidImageRequestID;
     }
     
-    DWImageAssetModel * model = [album.albumCache objectForKey:@(index)];
+    DWImageAssetModel * model = [album.albumImageCache objectForKey:@(index)];
     if (model) {
         if (completion) {
             completion(self,model);
@@ -399,7 +408,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     
     return [self fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (obj && shouldCache && !obj.isDegraded) {
-            [album.albumCache setObject:obj forKey:@(index)];
+            [album.albumImageCache setObject:obj forKey:@(index)];
         }
         if (completion) {
             completion(mgr,obj);
@@ -430,7 +439,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }];
 }
 
--(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progrss:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
+-(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index shouldCache:(BOOL)shouldCache progrss:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
     if (index >= album.fetchResult.count) {
         if (completion) {
             completion(self,nil);
@@ -438,7 +447,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         return PHInvalidImageRequestID;
     }
     
-    DWVideoAssetModel * model = [album.albumCache objectForKey:@(index)];
+    DWVideoAssetModel * model = [album.albumVideoCache objectForKey:@(index)];
     if (model) {
         if (completion) {
             completion(self,model);
@@ -456,8 +465,8 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
     
     return [self fetchVideoWithAsset:asset networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager *mgr, DWVideoAssetModel *obj) {
-        if (obj) {
-            [album.albumCache setObject:obj forKey:@(index)];
+        if (obj && shouldCache) {
+            [album.albumVideoCache setObject:obj forKey:@(index)];
         }
         if (completion) {
             completion(mgr,obj);
@@ -518,14 +527,14 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     if (index == NSNotFound) {
         return;
     }
-    [album.albumCache setObject:asset forKey:@(index)];
+    [album.albumImageCache setObject:asset forKey:@(index)];
 }
 
 -(void)clearCacheForAlbum:(DWAlbumModel *)album {
     if (!album) {
         return;
     }
-    [album.albumCache removeAllObjects];
+    [album.albumImageCache removeAllObjects];
 }
 
 -(void)saveImage:(UIImage *)image toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
@@ -565,7 +574,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 -(PHFetchOptions *)phOptFromDWOpt:(DWAlbumFetchOption *)fetchOpt {
     PHFetchOptions * opt = [[PHFetchOptions alloc] init];
     if (!fetchOpt) {
-        opt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+        opt.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:YES]];
     } else {
         switch (fetchOpt.mediaType) {
             case DWAlbumMediaTypeImage:
@@ -899,7 +908,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
     PHFetchResult * result = album.fetchResult;
     NSUInteger count = result.count;
-    NSCache * albumCache = album.albumCache;
+    NSCache * albumCache = album.albumImageCache;
     [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
         if (idx < count && ![albumCache objectForKey:@(idx)]) {
             handler(idx,stop);
@@ -931,7 +940,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 -(instancetype)init {
     if (self = [super init]) {
         _mediaType = DWAlbumMediaTypeAll;
-        _sortType = DWAlbumSortTypeCreationDateDesending;
+        _sortType = DWAlbumSortTypeCreationDateAscending;
         _albumType = DWAlbumFetchAlbumTypeAll;
         _networkAccessAllowed = YES;
     }
