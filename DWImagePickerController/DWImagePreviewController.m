@@ -44,6 +44,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
+
 /*
 #pragma mark - Navigation
 
