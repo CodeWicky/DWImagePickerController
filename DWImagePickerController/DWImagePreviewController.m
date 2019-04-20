@@ -42,6 +42,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     [self.navigationController setNavigationBarHidden:NO animated:YES];
+    
 }
 
 
