@@ -44,6 +44,8 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 @property (nonatomic ,assign ,readonly) CGSize previewSize;
 
+-(void)previewAtIndex:(NSUInteger)index;
+
 @end
 
 NS_ASSUME_NONNULL_END

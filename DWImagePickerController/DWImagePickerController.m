@@ -89,8 +89,8 @@
     CGSize itemSize = ((UICollectionViewFlowLayout *)self.collectionViewLayout).itemSize;
     CGFloat scale = 2;
     CGFloat thumnailScale = 0.5;
-    self.photoSize = CGSizeMake(itemSize.width * scale, itemSize.height * scale);
-    self.thumnailSize = CGSizeMake(itemSize.width * thumnailScale, itemSize.height * thumnailScale);
+    self.photoSize = CGSizeMake(floor(itemSize.width * scale), floor(itemSize.height * scale));
+    self.thumnailSize = CGSizeMake(floor(itemSize.width * thumnailScale), floor(itemSize.height * thumnailScale));
     
     if (self.results.count) {
         CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
@@ -136,10 +136,11 @@
 }
 
 -(void)fetchPreviewMediaWithIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType asset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
-    [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:targetSize shouldCache:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+    [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if (fetchCompletion) {
             fetchCompletion(obj.media,index,YES);
         }
+        
         switch (previewType) {
             case DWImagePreviewTypePhotoLive:
             {
@@ -163,6 +164,10 @@
                 break;
             default:
             {
+                ///因为本身获取的就是图片类型做封面，如果此时已经满足尺寸的话，则无需再次请求
+                if ([obj satisfiedSize:targetSize]) {
+                    return ;
+                }
                 [self fetchOriginImageWithIndex:index progress:progress fetchCompletion:fetchCompletion];
             }
                 break;
@@ -365,6 +370,7 @@ NS_INLINE NSArray * animateExtensions() {
 }
 
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    [self.previewVC previewAtIndex:indexPath.row];
     [self.navigationController pushViewController:self.previewVC animated:YES];
 }
 

@@ -110,6 +110,18 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
 }
 
+-(BOOL)satisfiedSize:(CGSize)targetSize {
+    if (CGSizeEqualToSize(self.media.size, self.originSize)) {
+        return YES;
+    }
+    
+    if (CGSizeEqualToSize(targetSize, PHImageManagerMaximumSize)) {
+        return CGSizeEqualToSize(self.media.size, self.originSize);
+    }
+    
+    return self.media.size.width >= targetSize.width && self.media.size.height >= targetSize.height;
+}
+
 @end
 
 @implementation DWVideoAssetModel
@@ -390,7 +402,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
     
     DWImageAssetModel * model = [album.albumImageCache objectForKey:@(index)];
-    if (model) {
+    if (model && [model satisfiedSize:targetSize]) {
         if (completion) {
             completion(self,model);
         }

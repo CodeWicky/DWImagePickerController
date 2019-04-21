@@ -371,6 +371,7 @@
 			baseConfigurationReference = 979E10F113466871E73911E6 /* Pods-DWImagePickerController.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z26Y87B8NH;
 				INFOPLIST_FILE = DWImagePickerController/Info.plist;
@@ -381,6 +382,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = Wicky.DWImagePickerController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -390,6 +392,7 @@
 			baseConfigurationReference = 1B5AD7AEBBF446E6566CD9B0 /* Pods-DWImagePickerController.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z26Y87B8NH;
 				INFOPLIST_FILE = DWImagePickerController/Info.plist;
@@ -400,6 +403,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = Wicky.DWImagePickerController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

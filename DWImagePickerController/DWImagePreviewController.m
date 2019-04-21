@@ -15,6 +15,10 @@
 
 @property (nonatomic ,assign) CGFloat cellWidth;
 
+@property (nonatomic ,assign) NSInteger index;
+
+@property (nonatomic ,assign) BOOL indexChanged;
+
 @end
 
 
@@ -25,9 +29,34 @@ static NSString * const animateImageID = @"DWAnimateImagePreviewCell";
 static NSString * const photoLiveID = @"DWPhotoLivePreviewCell";
 static NSString * const videoImageID = @"DWVideoPreviewCell";
 
+#pragma mark --- interface method ---
+-(void)previewAtIndex:(NSUInteger)index {
+    if (index != _index && index < [self collectionView:self.collectionView numberOfItemsInSection:0]) {
+        _index = index;
+        _indexChanged = YES;
+    }
+}
+
+#pragma mark --- tool method ---
+-(void)showPreview {
+    NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
+    if (_indexChanged) {
+        _indexChanged = NO;
+        [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:(UICollectionViewScrollPositionCenteredHorizontally) animated:NO];
+    } else {
+        [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+    }
+}
+
+-(void)clearPreview {
+    DWImagePreviewCell * cell = (DWImagePreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
+    [cell clearCell];
+}
+
+#pragma mark --- life cycle ---
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.collectionView.backgroundColor = [UIColor blackColor];
+    self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWNormalImagePreviewCell class] forCellWithReuseIdentifier:normalImageID];
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];
     [self.collectionView registerClass:[DWPhotoLivePreviewCell class] forCellWithReuseIdentifier:photoLiveID];
@@ -37,12 +66,13 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [self.navigationController setNavigationBarHidden:YES animated:NO];
+    [self showPreview];
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     [self.navigationController setNavigationBarHidden:NO animated:YES];
-    
+    [self clearPreview];
 }
 
 
@@ -95,6 +125,14 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             break;
     }
     
+    if (previewType != DWImagePreviewTypeNone) {
+        __weak typeof(self)weakSelf = self;
+        cell.tapAction = ^(DWImagePreviewCell * _Nonnull cell) {
+            __strong typeof(weakSelf)strongSelf = weakSelf;
+            [strongSelf cellDidTapped:cell indexPath:indexPath previewType:previewType];
+        };
+    }
+    
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchMediaAtIndex:previewType:progress:fetchCompletion:)]) {
         [self.dataSource previewController:self fetchMediaAtIndex:indexPath.row previewType:previewType progress:^(double progress) {
             NSLog(@"%f",progress);
@@ -115,10 +153,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     return cell;
 }
 
--(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    [self.navigationController setNavigationBarHidden:!self.navigationController.navigationBarHidden animated:YES];
-}
-
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView
                      withVelocity:(CGPoint)velocity
               targetContentOffset:(inout CGPoint *)targetContentOffset {
@@ -127,7 +161,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (velocity.x > 0) page++;
     if (velocity.x < 0) page--;
     page = MAX(page,0);
-
+    _index = page;
     CGFloat newOffset = page * (_cellWidth + _cellSpacing);
     targetContentOffset->x = newOffset;
 }
@@ -150,13 +184,19 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+#pragma mark --- action ---
+-(void)cellDidTapped:(DWImagePreviewCell *)cell indexPath:(NSIndexPath *)indexpath previewType:(DWImagePreviewType)previewType {
+    [self.navigationController setNavigationBarHidden:!self.navigationController.navigationBarHidden animated:YES];
+}
 
 #pragma mark --- override ---
 -(instancetype)init {
     UICollectionViewFlowLayout * layout = [[UICollectionViewFlowLayout alloc] init];
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     layout.itemSize = [UIScreen mainScreen].bounds.size;
+    layout.minimumLineSpacing = 40;
     if ([self initWithCollectionViewLayout:layout]) {
+        _index = -1;
         _cellSpacing = layout.minimumLineSpacing;
         _cellWidth = layout.itemSize.width;
         _previewSize = layout.itemSize;

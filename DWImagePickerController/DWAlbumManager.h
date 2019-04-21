@@ -333,6 +333,8 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///是否是缩略图
 @property (nonatomic ,assign ,readonly) BOOL isDegraded;
 
+-(BOOL)satisfiedSize:(CGSize)targetSize;
+
 @end
 
 @interface DWVideoAssetModel : DWAssetModel
