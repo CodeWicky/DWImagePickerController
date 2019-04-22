@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class DWImagePreviewCell;
 typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
+typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell ,CGPoint point);
 
 @interface DWImagePreviewCell : UICollectionViewCell
 
@@ -29,7 +30,7 @@ typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
 
 @property (nonatomic ,copy) DWImagePreviewActionCallback tapAction;
 
-@property (nonatomic ,copy) DWImagePreviewActionCallback doubleClickAction;
+@property (nonatomic ,copy) DWImagePreviewDoubleClickActionCallback doubleClickAction;
 
 -(void)resetCellZoom;
 
@@ -46,6 +47,10 @@ typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
 -(void)zoomableHasBeenChangedTo:(BOOL)zoomable;
 
 -(void)initializingSubviews;
+
++(Class)classForPosterImageView;
+
+-(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point;
 
 @end
 

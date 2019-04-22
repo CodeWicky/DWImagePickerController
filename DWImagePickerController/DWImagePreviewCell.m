@@ -19,9 +19,30 @@
 
 @property (nonatomic ,strong) UIScrollView * zoomContainerView;
 
+@property (nonatomic ,strong) UIImageView * imageView;
+
 @end
 
 @implementation DWImagePreviewCell
+
+#pragma mark --- interface method ---
++(Class)classForPosterImageView {
+    return [UIImageView class];
+}
+
+-(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point {
+    if (self.zoomable) {
+        UIScrollView *scrollView = (UIScrollView *)self.containerView;
+        if (!CGRectContainsPoint(self.imageView.bounds, point)) {
+            return;
+        }
+        if (!zoomIn) {
+            [scrollView setZoomScale:1 animated:YES];
+        } else {
+            [scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
+        }
+    }
+}
 
 #pragma mark --- tool method ---
 
@@ -31,6 +52,7 @@
 
 -(void)clearCell {
     [self resetCellZoom];
+    self.imageView.image = nil;
 }
 
 -(void)configGestureTarget:(UIView *)target {
@@ -44,10 +66,13 @@
 
 -(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
     _zoomContainerView.hidden = !zoomable;
+    [self.containerView addSubview:self.imageView];
 }
 
 -(void)initializingSubviews {
     _zoomContainerView.contentSize = self.bounds.size;
+    [self.containerView addSubview:self.imageView];
+    self.imageView.frame = self.bounds;
 }
 
 #pragma mark --- action ---
@@ -59,8 +84,14 @@
 
 -(void)doubleClickAction:(UITapGestureRecognizer *)doubleClick {
     if (self.doubleClickAction) {
-        self.doubleClickAction(self);
+        CGPoint point = [doubleClick locationInView:self.imageView];
+        self.doubleClickAction(self,point);
     }
+}
+
+#pragma mark --- scroll delegate ---
+-(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+    return self.imageView;
 }
 
 #pragma mark --- override ---
@@ -81,6 +112,18 @@
 }
 
 #pragma mark --- setter/getter ---
+-(UIImageView *)imageView {
+    if (!_imageView) {
+        Class clazz = [[self class] classForPosterImageView];
+        _imageView = [[clazz alloc] init];
+        _imageView.contentMode = UIViewContentModeScaleAspectFit;
+        _imageView.clipsToBounds = YES;
+        _imageView.userInteractionEnabled = YES;
+        [self configGestureTarget:_imageView];
+    }
+    return _imageView;
+}
+
 -(void)setZoomable:(BOOL)zoomable {
     if (_zoomable != zoomable) {
         _zoomable = zoomable;
@@ -109,20 +152,45 @@
     return _zoomContainerView;
 }
 
+-(BOOL)zooming {
+    return self.zoomable && !CGFLOATEQUAL(((UIScrollView *)self.containerView).zoomScale, 1);
+}
+
 @end
 
 @interface DWNormalImagePreviewCell ()
-
-@property (nonatomic ,strong) UIImageView * imageView;
 
 @end
 
 @implementation DWNormalImagePreviewCell
 @dynamic media;
 
-#pragma mark --- scroll delegate ---
--(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
-    return self.imageView;
+#pragma mark --- override ---
+-(instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        self.zoomable = YES;
+    }
+    return self;
+}
+
+#pragma mark --- setter/getter ---
+-(void)setMedia:(UIImage *)media {
+    [super setMedia:media];
+    self.imageView.image = media;
+}
+
+@end
+
+@interface DWAnimateImagePreviewCell ()
+
+@end
+
+@implementation DWAnimateImagePreviewCell
+@dynamic media;
+
+#pragma mark --- interface method ---
++(Class)classForPosterImageView {
+    return [YYAnimatedImageView class];
 }
 
 #pragma mark --- override ---
@@ -133,63 +201,11 @@
     return self;
 }
 
--(void)clearCell {
-    [super clearCell];
-    self.imageView.image = nil;
-}
-
--(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
-    [super zoomableHasBeenChangedTo:zoomable];
-    [self.containerView addSubview:self.imageView];
-}
-
--(void)initializingSubviews {
-    [super initializingSubviews];
-    [self.containerView addSubview:self.imageView];
-    self.imageView.frame = self.bounds;
-}
-
--(void)doubleClickAction:(UITapGestureRecognizer *)doubleClick {
-    [super doubleClickAction:doubleClick];
-    if (self.zoomable) {
-        UIScrollView *scrollView = (UIScrollView *)self.containerView;
-        CGPoint point = [doubleClick locationInView:self.imageView];
-        if (!CGRectContainsPoint(self.imageView.bounds, point)) {
-            return;
-        }
-        if (scrollView.zoomScale == scrollView.maximumZoomScale) {
-            [scrollView setZoomScale:1 animated:YES];
-        } else {
-            [scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
-        }
-    }
-}
-
 #pragma mark --- setter/getter ---
--(void)setMedia:(UIImage *)media {
+-(void)setMedia:(YYImage *)media {
     [super setMedia:media];
     self.imageView.image = media;
 }
-
--(UIImageView *)imageView {
-    if (!_imageView) {
-        _imageView = [[UIImageView alloc] init];
-        _imageView.contentMode = UIViewContentModeScaleAspectFit;
-        _imageView.clipsToBounds = YES;
-        _imageView.userInteractionEnabled = YES;
-        [self configGestureTarget:_imageView];
-    }
-    return _imageView;
-}
-
--(BOOL)zooming {
-    return self.zoomable && !CGFLOATEQUAL(((UIScrollView *)self.containerView).zoomScale, 1);
-}
-
-@end
-
-@implementation DWAnimateImagePreviewCell
-@dynamic media;
 
 @end
 

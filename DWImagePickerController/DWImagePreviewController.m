@@ -45,16 +45,13 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (_indexChanged) {
         _indexChanged = NO;
         [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:(UICollectionViewScrollPositionCenteredHorizontally) animated:NO];
-    } else {
-        [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
     }
-    [self setToolBarHidden:NO];
+    [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
 }
 
 -(void)clearPreview {
     DWImagePreviewCell * cell = (DWImagePreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
     [cell clearCell];
-    [self setToolBarHidden:YES];
 }
 
 -(void)setToolBarHidden:(BOOL)hidden {
@@ -68,6 +65,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 #pragma mark --- life cycle ---
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWNormalImagePreviewCell class] forCellWithReuseIdentifier:normalImageID];
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];
     [self.collectionView registerClass:[DWPhotoLivePreviewCell class] forCellWithReuseIdentifier:photoLiveID];
@@ -150,7 +148,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             NSLog(@"%@,%lu,%d",media,index,preview);
             
             if (index == indexPath.row) {
-                if (previewType == DWImagePreviewTypeAnimateImage && media) {
+                if (!preview && previewType == DWImagePreviewTypeAnimateImage && media) {
                     YYImage * image = [[YYImage alloc] initWithData:media];
                     cell.media = image;
                 } else {
@@ -204,11 +202,12 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [StrongSelf setToolBarHidden:StrongSelf.isToolBarShowing];
     };
     
-    cell.doubleClickAction = ^(DWImagePreviewCell * _Nonnull cell) {
+    cell.doubleClickAction = ^(DWImagePreviewCell * _Nonnull cell ,CGPoint point) {
         __strong typeof(weakSelf)StrongSelf = weakSelf;
-        if (!StrongSelf.isToolBarShowing) {
+        if (StrongSelf.isToolBarShowing) {
             [StrongSelf setToolBarHidden:YES];
         }
+        [cell zoomPosterImageView:!cell.zooming point:point];
     };
 }
 
@@ -229,6 +228,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _cellSpacing = layout.minimumLineSpacing;
         _cellWidth = layout.itemSize.width;
         _previewSize = layout.itemSize;
+        _isToolBarShowing = YES;
         self.collectionView.decelerationRate = 0.5;
         self.collectionView.showsHorizontalScrollIndicator = NO;
         self.collectionView.showsVerticalScrollIndicator = NO;
