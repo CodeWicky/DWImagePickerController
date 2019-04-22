@@ -24,7 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic ,assign ) NSInteger maxSelectCount;
 
 -(instancetype)initWithAlbumManager:(nullable DWAlbumManager *)albumManager option:(nullable DWAlbumFetchOption *)opt columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing;
--(void)fetchCameraRoll;
+
+-(void)fetchCameraRollWithCompletion:(dispatch_block_t)completion;
 
 +(instancetype)showImagePickerWithAlbumManager:(nullable DWAlbumManager *)albumManager option:(nullable DWAlbumFetchOption *)opt currentVC:(UIViewController *)currentVC;
 

@@ -19,6 +19,8 @@
 
 @property (nonatomic ,assign) BOOL indexChanged;
 
+@property (nonatomic ,assign) BOOL sourceInteractivePopGestureEnabled;
+
 @end
 
 
@@ -46,17 +48,26 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     } else {
         [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
     }
+    [self setToolBarHidden:NO];
 }
 
 -(void)clearPreview {
     DWImagePreviewCell * cell = (DWImagePreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
     [cell clearCell];
+    [self setToolBarHidden:YES];
+}
+
+-(void)setToolBarHidden:(BOOL)hidden {
+    if (_isToolBarShowing == hidden) {
+        [self.navigationController setNavigationBarHidden:hidden animated:YES];
+        [self turnToDarkBackground:hidden];
+        _isToolBarShowing = !hidden;
+    }
 }
 
 #pragma mark --- life cycle ---
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWNormalImagePreviewCell class] forCellWithReuseIdentifier:normalImageID];
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];
     [self.collectionView registerClass:[DWPhotoLivePreviewCell class] forCellWithReuseIdentifier:photoLiveID];
@@ -65,26 +76,28 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.navigationController setNavigationBarHidden:YES animated:NO];
     [self showPreview];
+}
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
+        self.sourceInteractivePopGestureEnabled = self.navigationController.interactivePopGestureRecognizer.enabled;
+        self.navigationController.interactivePopGestureRecognizer.enabled = NO;
+    }
+}
+
+-(void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
+        self.navigationController.interactivePopGestureRecognizer.enabled = self.sourceInteractivePopGestureEnabled;
+    }
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
-    [self.navigationController setNavigationBarHidden:NO animated:YES];
     [self clearPreview];
 }
-
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 #pragma mark <UICollectionViewDataSource>
 
@@ -126,11 +139,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
     
     if (previewType != DWImagePreviewTypeNone) {
-        __weak typeof(self)weakSelf = self;
-        cell.tapAction = ^(DWImagePreviewCell * _Nonnull cell) {
-            __strong typeof(weakSelf)strongSelf = weakSelf;
-            [strongSelf cellDidTapped:cell indexPath:indexPath previewType:previewType];
-        };
+        [self configGestureActionForCell:cell indexPath:indexPath previewType:previewType];
     }
     
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchMediaAtIndex:previewType:progress:fetchCompletion:)]) {
@@ -151,6 +160,10 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         }];
     }
     return cell;
+}
+
+-(void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(DWImagePreviewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    [cell resetCellZoom];
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView
@@ -184,9 +197,25 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
-#pragma mark --- action ---
--(void)cellDidTapped:(DWImagePreviewCell *)cell indexPath:(NSIndexPath *)indexpath previewType:(DWImagePreviewType)previewType {
-    [self.navigationController setNavigationBarHidden:!self.navigationController.navigationBarHidden animated:YES];
+-(void)configGestureActionForCell:(DWImagePreviewCell *)cell indexPath:(NSIndexPath *)indexPath previewType:(DWImagePreviewType)previewType {
+    __weak typeof(self)weakSelf = self;
+    cell.tapAction = ^(DWImagePreviewCell * _Nonnull cell) {
+        __strong typeof(weakSelf)StrongSelf = weakSelf;
+        [StrongSelf setToolBarHidden:StrongSelf.isToolBarShowing];
+    };
+    
+    cell.doubleClickAction = ^(DWImagePreviewCell * _Nonnull cell) {
+        __strong typeof(weakSelf)StrongSelf = weakSelf;
+        if (!StrongSelf.isToolBarShowing) {
+            [StrongSelf setToolBarHidden:YES];
+        }
+    };
+}
+
+-(void)turnToDarkBackground:(BOOL)dark {
+    [UIView animateWithDuration:0.2 animations:^{
+        self.collectionView.backgroundColor = [UIColor colorWithWhite:dark?0:1 alpha:1];
+    }];
 }
 
 #pragma mark --- override ---

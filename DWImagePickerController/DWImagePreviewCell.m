@@ -8,7 +8,9 @@
 
 #import "DWImagePreviewCell.h"
 
-@interface DWImagePreviewCell ()
+#define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
+
+@interface DWImagePreviewCell ()<UIScrollViewDelegate>
 {
     BOOL _finishInitializingLayout;
 }
@@ -22,8 +24,22 @@
 @implementation DWImagePreviewCell
 
 #pragma mark --- tool method ---
+
+-(void)resetCellZoom {
+    _zoomContainerView.zoomScale = 1;
+}
+
 -(void)clearCell {
-    //implementation this in subclass
+    [self resetCellZoom];
+}
+
+-(void)configGestureTarget:(UIView *)target {
+    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
+    [target addGestureRecognizer:tap];
+    UITapGestureRecognizer * doubleClick = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleClickAction:)];
+    doubleClick.numberOfTapsRequired = 2;
+    [target addGestureRecognizer:doubleClick];
+    [tap requireGestureRecognizerToFail:doubleClick];
 }
 
 -(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
@@ -31,7 +47,20 @@
 }
 
 -(void)initializingSubviews {
-    //implementation this in subclass
+    _zoomContainerView.contentSize = self.bounds.size;
+}
+
+#pragma mark --- action ---
+-(void)tapAction:(UITapGestureRecognizer *)tap {
+    if (self.tapAction) {
+        self.tapAction(self);
+    }
+}
+
+-(void)doubleClickAction:(UITapGestureRecognizer *)doubleClick {
+    if (self.doubleClickAction) {
+        self.doubleClickAction(self);
+    }
 }
 
 #pragma mark --- override ---
@@ -68,6 +97,13 @@
         _zoomContainerView = [[UIScrollView alloc] initWithFrame:self.bounds];
         _zoomContainerView.showsVerticalScrollIndicator = NO;
         _zoomContainerView.showsHorizontalScrollIndicator = NO;
+        _zoomContainerView.delegate = self;
+        _zoomContainerView.maximumZoomScale = 5;
+        _zoomContainerView.minimumZoomScale = 1;
+        _zoomContainerView.bounces = NO;
+        if (@available(iOS 11.0,*)) {
+            _zoomContainerView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        }
         [self.contentView addSubview:_zoomContainerView];
     }
     return _zoomContainerView;
@@ -84,11 +120,9 @@
 @implementation DWNormalImagePreviewCell
 @dynamic media;
 
-#pragma mark --- action ---
--(void)tapAction:(UITapGestureRecognizer *)tap {
-    if (self.tapAction) {
-        self.tapAction(self);
-    }
+#pragma mark --- scroll delegate ---
+-(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+    return self.imageView;
 }
 
 #pragma mark --- override ---
@@ -100,21 +134,35 @@
 }
 
 -(void)clearCell {
+    [super clearCell];
     self.imageView.image = nil;
 }
 
 -(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
+    [super zoomableHasBeenChangedTo:zoomable];
     [self.containerView addSubview:self.imageView];
 }
 
 -(void)initializingSubviews {
     [super initializingSubviews];
     [self.containerView addSubview:self.imageView];
+    self.imageView.frame = self.bounds;
 }
 
--(void)layoutSubviews {
-    [super layoutSubviews];
-    self.imageView.frame = self.bounds;
+-(void)doubleClickAction:(UITapGestureRecognizer *)doubleClick {
+    [super doubleClickAction:doubleClick];
+    if (self.zoomable) {
+        UIScrollView *scrollView = (UIScrollView *)self.containerView;
+        CGPoint point = [doubleClick locationInView:self.imageView];
+        if (!CGRectContainsPoint(self.imageView.bounds, point)) {
+            return;
+        }
+        if (scrollView.zoomScale == scrollView.maximumZoomScale) {
+            [scrollView setZoomScale:1 animated:YES];
+        } else {
+            [scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
+        }
+    }
 }
 
 #pragma mark --- setter/getter ---
@@ -129,10 +177,13 @@
         _imageView.contentMode = UIViewContentModeScaleAspectFit;
         _imageView.clipsToBounds = YES;
         _imageView.userInteractionEnabled = YES;
-        UITapGestureRecognizer * tapGes = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
-        [_imageView addGestureRecognizer:tapGes];
+        [self configGestureTarget:_imageView];
     }
     return _imageView;
+}
+
+-(BOOL)zooming {
+    return self.zoomable && !CGFLOATEQUAL(((UIScrollView *)self.containerView).zoomScale, 1);
 }
 
 @end

@@ -25,9 +25,23 @@ typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
 
 @property (nonatomic ,assign) BOOL zoomable;
 
+@property (nonatomic ,assign ,readonly) BOOL zooming;
+
 @property (nonatomic ,copy) DWImagePreviewActionCallback tapAction;
 
+@property (nonatomic ,copy) DWImagePreviewActionCallback doubleClickAction;
+
+-(void)resetCellZoom;
+
 -(void)clearCell;
+
+-(void)configGestureTarget:(UIView *)target;
+
+///GestureAction for target view.You may implement it in subclass to do anything else.
+///call the tapAction block if exist.
+-(void)tapAction:(UITapGestureRecognizer *)tap;
+///call the doubleClickAction block if exist.
+-(void)doubleClickAction:(UITapGestureRecognizer *)doubleClick;
 
 -(void)zoomableHasBeenChangedTo:(BOOL)zoomable;
 

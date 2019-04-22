@@ -636,13 +636,16 @@ NS_INLINE NSArray * animateExtensions() {
     return self;
 }
 
--(void)fetchCameraRoll {
+-(void)fetchCameraRollWithCompletion:(dispatch_block_t)completion {
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [self.albumManager fetchAlbumsWithOption:self.fetchOption completion:^(DWAlbumManager * _Nullable mgr, NSArray<DWAlbumModel *> * _Nullable obj) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.listVC configWithAlbums:obj albumManager:self.albumManager];
                 [self.gridVC configWithAlbum:obj.firstObject albumManager:self.albumManager];
                 [self setViewControllers:@[self.listVC,self.gridVC]];
+                if (completion) {
+                    completion();
+                }
             });
         }];
     });
@@ -653,8 +656,9 @@ NS_INLINE NSArray * animateExtensions() {
         return nil;
     }
     DWImagePickerController * imagePicker = [((DWImagePickerController *)[self alloc]) initWithAlbumManager:albumManager option:opt columnCount:4 spacing:0.5];
-    [imagePicker fetchCameraRoll];
-    [currentVC presentViewController:imagePicker animated:YES completion:nil];
+    [imagePicker fetchCameraRollWithCompletion:^{
+        [currentVC presentViewController:imagePicker animated:YES completion:nil];
+    }];
     return imagePicker;
 }
 

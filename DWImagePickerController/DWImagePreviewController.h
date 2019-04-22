@@ -44,6 +44,8 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 @property (nonatomic ,assign ,readonly) CGSize previewSize;
 
+@property (nonatomic ,assign ,readonly) BOOL isToolBarShowing;
+
 -(void)previewAtIndex:(NSUInteger)index;
 
 @end
