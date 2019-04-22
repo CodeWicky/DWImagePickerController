@@ -17,13 +17,14 @@ UIKIT_EXTERN const NSInteger DWAlbumInvalidTypeErrorCode;
 UIKIT_EXTERN const NSInteger DWAlbumSaveErrorCode;
 UIKIT_EXTERN const NSInteger DWAlbumExportErrorCode;
 
-@class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel,DWAlbumExportVideoOption;
+@class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel,DWImageDataAssetModel,DWAlbumExportVideoOption;
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * _Nullable mgr ,DWAlbumModel * _Nullable obj);
 typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * _Nullable mgr ,NSArray <DWAlbumModel *>* _Nullable obj);
 typedef void(^DWAlbumFetchImageCompletion)(DWAlbumManager * _Nullable mgr ,DWImageAssetModel * _Nullable obj);
 typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVideoAssetModel * _Nullable obj);
+typedef void(^DWAlbumFetchImageDataCompletion)(DWAlbumManager * _Nullable mgr ,DWImageDataAssetModel * _Nullable obj);
 typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,__kindof DWAssetModel * _Nullable obj ,NSError * _Nullable error);
 
 typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,DWVideoAssetModel * _Nullable obj ,NSError * _Nullable error);
@@ -86,7 +87,9 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  获取过程completion会回调两次，第一次返回一个缩略图，第二次返回原始图片。若命中缓存，至只走一次完成回调。
  */
 -(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+-(PHImageRequestID)fetchImageDataWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
 -(PHImageRequestID)fetchOriginImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+-(PHImageRequestID)fetchOriginImageDataWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
 -(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index shouldCache:(BOOL)shouldCache progrss:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
 
@@ -104,7 +107,9 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  completion会回调两次，第一次返回一个缩略图，第二次返回原始图片
  */
 -(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+-(PHImageRequestID)fetchImageDataWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
 -(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+-(PHImageRequestID)fetchOriginImageDataWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
 -(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress
                 completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
@@ -324,6 +329,8 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///额外信息
 @property (nonatomic ,strong ,readonly) id info;
 
+-(BOOL)satisfiedSize:(CGSize)targetSize;
+
 @end
 
 @interface DWImageAssetModel : DWAssetModel
@@ -333,13 +340,21 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///是否是缩略图
 @property (nonatomic ,assign ,readonly) BOOL isDegraded;
 
--(BOOL)satisfiedSize:(CGSize)targetSize;
-
 @end
 
 @interface DWVideoAssetModel : DWAssetModel
 
 @property (nonatomic ,strong ,readonly) AVPlayerItem * media;
+
+@end
+
+@interface DWImageDataAssetModel : DWAssetModel
+
+@property (nonatomic ,strong ,readonly) NSData * media;
+
+@property (nonatomic ,assign ,readonly) CGSize targetSize;
+
+
 
 @end
 
