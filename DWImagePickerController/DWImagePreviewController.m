@@ -39,6 +39,10 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+-(void)photoCountHasChanged {
+    [self.collectionView reloadData];
+}
+
 #pragma mark --- tool method ---
 -(void)showPreview {
     NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];

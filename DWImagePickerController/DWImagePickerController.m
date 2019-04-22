@@ -11,6 +11,12 @@
 #import "DWImagePickerController.h"
 #import "DWImagePreviewController.h"
 
+@interface DWAlbumModel ()
+
+-(void)configWithResult:(PHFetchResult *)result;
+
+@end
+
 @interface DWGridCell : UICollectionViewCell
 
 @property (nonatomic ,strong) UIImageView * gridImage;
@@ -113,15 +119,22 @@
 
 #pragma mark --- tool method ---
 -(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager {
-    _album = model;
-    _albumManager = albumManager;
-    _results = model.fetchResult;
-    self.title = model.name;
-    [self.collectionView reloadData];
+    if (![_album isEqual:model]) {
+        _album = model;
+        _results = model.fetchResult;
+        self.title = model.name;
+        [self.collectionView reloadData];
+        [_previewVC photoCountHasChanged];
+    }
+    if (![_albumManager isEqual:albumManager]) {
+        _albumManager = albumManager;
+    }
 }
 
 -(void)configWithPreviewVC:(DWImagePreviewController *)previewVC {
-    _previewVC = previewVC;
+    if (![_previewVC isEqual:previewVC]) {
+        _previewVC = previewVC;
+    }
 }
 
 -(void)loadRealPhoto {
@@ -254,6 +267,7 @@ NS_INLINE NSArray * animateExtensions() {
     }
     dispatch_async(dispatch_get_main_queue(), ^{
         self.results = changes.fetchResultAfterChanges;
+        [self.album configWithResult:self.results];
         if (changes.hasIncrementalChanges) {
             UICollectionView * col = self.collectionView;
             if (col) {
@@ -309,7 +323,7 @@ NS_INLINE NSArray * animateExtensions() {
     if (asset.mediaType == PHAssetMediaTypeImage) {
         if (asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive) {
             return DWImagePreviewTypePhotoLive;
-        } else if ([animateExtensions() containsObject:[[asset valueForKey:@"filename"] lowercaseString]]) {
+        } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
             return DWImagePreviewTypeAnimateImage;
         } else {
             return DWImagePreviewTypeImage;
@@ -565,13 +579,19 @@ NS_INLINE NSArray * animateExtensions() {
 
 #pragma mark --- tool method ---
 -(void)configWithAlbums:(NSArray <DWAlbumModel *>*)albums albumManager:(DWAlbumManager *)albumManager {
-    _albums = albums;
-    _albumManager = albumManager;
-    [self.tableView reloadData];
+    if (![_albums isEqual:albums]) {
+        _albums = albums;
+        [self.tableView reloadData];
+    }
+    if (![_albumManager isEqual:albumManager]) {
+        _albumManager = albumManager;
+    }
 }
 
 -(void)configWithGridVC:(DWAlbumGridViewController *)gridVC {
-    _gridVC = gridVC;
+    if (![_gridVC isEqual:gridVC]) {
+        _gridVC = gridVC;
+    }
 }
 
 #pragma mark --- tableView delegate ---
@@ -706,8 +726,6 @@ NS_INLINE NSArray * animateExtensions() {
     }
     return _previewVC;
 }
-
-
 
 #pragma mark --- setter/getter ---
 -(DWAlbumManager *)albumManager {

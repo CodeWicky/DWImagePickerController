@@ -201,10 +201,20 @@
     return self;
 }
 
+-(void)clearCell {
+    [super clearCell];
+    if (self.imageView.isAnimating) {
+        [self.imageView stopAnimating];
+    }
+}
+
 #pragma mark --- setter/getter ---
 -(void)setMedia:(YYImage *)media {
     [super setMedia:media];
     self.imageView.image = media;
+    if ([media isKindOfClass:[YYImage class]]) {
+        [self.imageView startAnimating];
+    }
 }
 
 @end

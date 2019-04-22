@@ -46,6 +46,10 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
     _name = name;
     _isCameraRoll = isCameraRoll;
+    [self configWithResult:result];
+}
+
+-(void)configWithResult:(PHFetchResult *)result {
     _fetchResult = result;
     _count = result.count;
 }

@@ -48,6 +48,8 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 -(void)previewAtIndex:(NSUInteger)index;
 
+-(void)photoCountHasChanged;
+
 @end
 
 NS_ASSUME_NONNULL_END
