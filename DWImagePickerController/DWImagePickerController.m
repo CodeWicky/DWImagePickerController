@@ -153,7 +153,7 @@
         if (fetchCompletion) {
             fetchCompletion(obj.media,index,YES);
         }
-        
+    
         switch (previewType) {
             case DWImagePreviewTypePhotoLive:
             {
@@ -220,19 +220,14 @@
 
 -(void)fetchAnimateImageWithAsset:(PHAsset *)asset index:(NSUInteger)index  progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     
-    PHImageRequestOptions * opt = nil;
-    if (progress) {
-        opt = [[PHImageRequestOptions alloc] init];
-        opt.progressHandler = ^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-            if (progress) {
-                progress(progressNum);
-            }
-        };
-    }
     
-    [self.albumManager.phManager requestImageDataForAsset:asset options:opt resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
+    [self.albumManager fetchOriginImageDataWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+        if (progress) {
+            progress(progressNum);
+        }
+    } completion:^(DWAlbumManager * _Nullable mgr, DWImageDataAssetModel * _Nullable obj) {
         if (fetchCompletion) {
-            fetchCompletion(imageData,index,NO);
+            fetchCompletion(obj.media,index,NO);
         }
     }];
 }
