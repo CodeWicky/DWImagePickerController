@@ -9,11 +9,39 @@
 #import "DWImagePreviewController.h"
 #import "DWImagePreviewCell.h"
 
+@interface DWImagePreviewLayout : UICollectionViewFlowLayout
+
+@property (nonatomic, assign) CGFloat distanceBetweenPages;
+
+@end
+
+@implementation DWImagePreviewLayout
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.distanceBetweenPages = 20;
+    }
+    return self;
+}
+
+- (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect {
+    NSArray<UICollectionViewLayoutAttributes *> *layoutAttsArray = [[NSArray alloc] initWithArray:[super layoutAttributesForElementsInRect:rect] copyItems:YES];
+    CGFloat halfWidth = self.collectionView.bounds.size.width / 2.0;
+    CGFloat centerX = self.collectionView.contentOffset.x + halfWidth;
+    [layoutAttsArray enumerateObjectsUsingBlock:^(UICollectionViewLayoutAttributes * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        obj.center = CGPointMake(obj.center.x + (obj.center.x - centerX) / halfWidth * self.distanceBetweenPages / 2, obj.center.y);
+    }];
+    return layoutAttsArray;
+}
+
+- (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds {
+    return YES;
+}
+
+@end
+
 @interface DWImagePreviewController ()
-
-@property (nonatomic ,assign) CGFloat cellSpacing;
-
-@property (nonatomic ,assign) CGFloat cellWidth;
 
 @property (nonatomic ,assign) NSInteger index;
 
@@ -112,6 +140,8 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     
+    NSLog(@"cell for row %ld",indexPath.row);
+    
     DWImagePreviewType previewType = DWImagePreviewTypeNone;
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:previewTypeAtIndex:)]) {
         previewType = [self.dataSource previewController:self previewTypeAtIndex:indexPath.row];
@@ -168,19 +198,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [cell resetCellZoom];
 }
 
-- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView
-                     withVelocity:(CGPoint)velocity
-              targetContentOffset:(inout CGPoint *)targetContentOffset {
-    NSInteger page = (scrollView.contentOffset.x - _cellWidth / 2) / (_cellWidth + _cellSpacing) + 1;
-
-    if (velocity.x > 0) page++;
-    if (velocity.x < 0) page--;
-    page = MAX(page,0);
-    _index = page;
-    CGFloat newOffset = page * (_cellWidth + _cellSpacing);
-    targetContentOffset->x = newOffset;
-}
-
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     [self previewDidChangedToIndex:scrollView];
 }
@@ -193,8 +210,9 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- tool method ---
 -(void)previewDidChangedToIndex:(UIScrollView *)scrollView {
+    NSInteger page = (scrollView.contentOffset.x + _previewSize.width / 2) / _previewSize.width;
+    _index = page;
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewContoller:hasChangedToIndex:)]) {
-        NSInteger page = (scrollView.contentOffset.x - _cellWidth / 2) / (_cellWidth + _cellSpacing) + 1;
         [self.dataSource previewContoller:self hasChangedToIndex:page];
     }
 }
@@ -223,17 +241,18 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- override ---
 -(instancetype)init {
-    UICollectionViewFlowLayout * layout = [[UICollectionViewFlowLayout alloc] init];
+    DWImagePreviewLayout * layout = [[DWImagePreviewLayout alloc] init];
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+    layout.distanceBetweenPages = 40;
+    layout.minimumLineSpacing = 0;
+    layout.minimumInteritemSpacing = 0;
     layout.itemSize = [UIScreen mainScreen].bounds.size;
-    layout.minimumLineSpacing = 40;
     if ([self initWithCollectionViewLayout:layout]) {
         _index = -1;
-        _cellSpacing = layout.minimumLineSpacing;
-        _cellWidth = layout.itemSize.width;
         _previewSize = layout.itemSize;
         _isToolBarShowing = YES;
-        self.collectionView.decelerationRate = 0.5;
+        self.collectionView.pagingEnabled = YES;
+        self.collectionView.decelerationRate = UIScrollViewDecelerationRateFast;
         self.collectionView.showsHorizontalScrollIndicator = NO;
         self.collectionView.showsVerticalScrollIndicator = NO;
         if (@available(iOS 11.0,*)) {
