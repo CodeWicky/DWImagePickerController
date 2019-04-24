@@ -54,9 +54,11 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(void)configWithResult:(PHFetchResult *)result {
-    _fetchResult = result;
-    _count = result.count;
-    [self clearCache];
+    if (![_fetchResult isEqual:result]) {
+        _fetchResult = result;
+        _count = result.count;
+        [self clearCache];
+    }
 }
 
 -(void)clearCache {
