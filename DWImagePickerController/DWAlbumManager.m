@@ -56,6 +56,14 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 -(void)configWithResult:(PHFetchResult *)result {
     _fetchResult = result;
     _count = result.count;
+    [self clearCache];
+}
+
+-(void)clearCache {
+    [_albumImageCache removeAllObjects];
+    [_albumDataCache removeAllObjects];
+    [_albumLivePhotoCache removeAllObjects];
+    [_albumVideoCache removeAllObjects];
 }
 
 #pragma mark --- setter/getter ---
@@ -760,13 +768,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(void)clearCacheForAlbum:(DWAlbumModel *)album {
-    if (!album) {
-        return;
-    }
-    [album.albumImageCache removeAllObjects];
-    [album.albumVideoCache removeAllObjects];
-    [album.albumDataCache removeAllObjects];
-    [album.albumLivePhotoCache removeAllObjects];
+    [album clearCache];
 }
 
 -(void)saveImage:(UIImage *)image toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
