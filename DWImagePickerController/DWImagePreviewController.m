@@ -351,6 +351,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     
     if (previewType != DWImagePreviewTypeNone) {
         [self configGestureActionForCell:cell indexPath:indexPath];
+        [cell configCollectionViewController:self];
     }
     
     if (cellData.media) {
@@ -397,6 +398,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _prefetchCount = 2;
         _previewSize = layout.itemSize;
         _isToolBarShowing = YES;
+        _closeOnSlidingDown = YES;
         self.collectionView.pagingEnabled = YES;
         self.collectionView.decelerationRate = UIScrollViewDecelerationRateFast;
         self.collectionView.showsHorizontalScrollIndicator = NO;

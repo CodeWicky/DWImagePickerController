@@ -52,6 +52,8 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 -(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point;
 
+-(void)configCollectionViewController:(DWImagePreviewController *)colVC;
+
 @end
 
 @interface DWNormalImagePreviewCell : DWImagePreviewCell

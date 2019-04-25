@@ -67,6 +67,9 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///工具栏是否正在展示
 @property (nonatomic ,assign ,readonly) BOOL isToolBarShowing;
 
+///下滑是否关闭
+@property (nonatomic ,assign) BOOL closeOnSlidingDown;
+
 /**
  配置当前应该展示的角标
 
