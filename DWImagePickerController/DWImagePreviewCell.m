@@ -35,10 +35,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,assign) DWImagePreviewZoomType zoomDirection;
 
-@property (nonatomic ,assign) BOOL scrollIsZooming;
-
-@property (nonatomic ,assign) CGFloat fix_anchor;
-
 @property (nonatomic ,strong) UIPanGestureRecognizer * panGes;
 
 @property (nonatomic ,assign) DWImagePanDirectionType panDirection;
@@ -85,8 +81,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
--(void)configCollectionViewController:(UICollectionViewController *)colVC {
-    _colVC = colVC;
+-(void)configCollectionViewController:(DWImagePreviewController *)colVC {
+    if (![_colVC isEqual:colVC]) {
+        _colVC = colVC;
+    }
 }
 
 #pragma mark --- tool method ---
@@ -94,8 +92,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)resetCellZoom {
     _zoomContainerView.zoomScale = 1;
     _zoomDirection = DWImagePreviewZoomTypeNone;
-    _scrollIsZooming = NO;
-    _fix_anchor = 0;
     _panDirection = DWImagePanDirectionTypeNone;
 }
 
@@ -153,28 +149,22 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return self.imageView;
 }
 
--(void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view {
-    self.scrollIsZooming = YES;
-}
-
--(void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale {
-    self.scrollIsZooming = NO;
-}
-
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if (self.zoomable && !self.scrollIsZooming && self.zooming) {
+    if (self.zooming) {
         switch (self.zoomDirection) {
             case DWImagePreviewZoomTypeHorizontal:
             {
-                if (scrollView.contentOffset.y != self.fix_anchor) {
-                    scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, self.fix_anchor);
+                CGFloat target = scrollView.contentSize.height * 0.5 - scrollView.bounds.size.height * 0.5;
+                if (scrollView.contentOffset.y != target) {
+                    scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, target);
                 }
             }
                 break;
             case DWImagePreviewZoomTypeVertical:
             {
-                if (scrollView.contentOffset.x != self.fix_anchor) {
-                    scrollView.contentOffset = CGPointMake(self.fix_anchor, scrollView.contentOffset.y);
+                CGFloat target = scrollView.contentSize.width * 0.5 - scrollView.bounds.size.width * 0.5;
+                if (scrollView.contentOffset.x != target) {
+                    scrollView.contentOffset = CGPointMake(target, scrollView.contentOffset.y);
                 }
             }
                 break;
@@ -194,6 +184,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     switch (ges.state) {
         case UIGestureRecognizerStateBegan:
         {
+            ///首先判断手势方向
             if (currentX == 0 && currentY == 0) {
                 self.panDirection = DWImagePanDirectionTypeNone;
             } else if (currentX == 0) {
@@ -211,15 +202,17 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             break;
         case UIGestureRecognizerStateChanged:
         {
+            ///根据手势方向决定动作
             if (self.panDirection == DWImagePanDirectionTypeVertical) {
+                ///纵向可能是关闭动作，还是要看当前的缩放方向是否是纵向，如果也为纵向，有可能是滑动动作
                 BOOL needClose = NO;
-                if (self.zoomable && self.zoomDirection == DWImagePreviewZoomTypeVertical && self.zooming) {
+                if (self.zooming && self.zoomDirection == DWImagePreviewZoomTypeVertical ) {
                     if (_zoomContainerView.contentOffset.y <= 0 && currentY > 0) {
                         needClose = YES;
                     } else if (_zoomContainerView.contentOffset.y - (_zoomContainerView.contentSize.height - _zoomContainerView.bounds.size.height) > 0 && currentY < 0) {
                         needClose = YES;
                     }
-                } else {
+                } else if (currentY > 0) {
                     needClose = YES;
                 }
                 
@@ -228,7 +221,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                 }
                 
             } else if (self.panDirection == DWImagePanDirectionTypeHorizontal) {
-                NSLog(@"横向--> %f",currentX);
+                ///横向可能是切换动作，还是要看当前的缩放方向是否是横向，如果是横向，则不需要用手势控制切换动作
+                if (self.zooming && self.zoomDirection == DWImagePreviewZoomTypeVertical) {
+                    NSLog(@"横向--> %f",currentX);
+                }
             }
         }
             break;
@@ -250,6 +246,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 #pragma mark --- gesture delegate ---
 -(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    if ([otherGestureRecognizer isEqual:_zoomContainerView.pinchGestureRecognizer]) {
+        return NO;
+    }
     return YES;
 }
 
@@ -358,14 +357,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             self.zoomContainerView.maximumZoomScale = zoomScale;
         } else if (mediaScale / previewScale > 1) {
             self.zoomDirection = DWImagePreviewZoomTypeHorizontal;
-            CGFloat zoomScale = mediaScale / previewScale;
-            self.zoomContainerView.maximumZoomScale = zoomScale;
-            self.fix_anchor = (self.bounds.size.height - self.bounds.size.width / mediaScale) * 0.5 * zoomScale;
+            self.zoomContainerView.maximumZoomScale = mediaScale / previewScale;
         } else {
             self.zoomDirection = DWImagePreviewZoomTypeVertical;
-            CGFloat zoomScale = previewScale / mediaScale;
-            self.zoomContainerView.maximumZoomScale = zoomScale;
-            self.fix_anchor = (self.bounds.size.width - self.bounds.size.height * mediaScale) * 0.5 * zoomScale;
+            self.zoomContainerView.maximumZoomScale = previewScale / mediaScale;
         }
     }
 }
