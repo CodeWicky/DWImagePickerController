@@ -41,6 +41,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,weak) DWImagePreviewController * colVC;
 
+@property (nonatomic ,assign) CGFloat verticalPanStartY;
+
 @end
 
 @implementation DWImagePreviewCell
@@ -211,11 +213,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                 self.panDirection = DWImagePanDirectionTypeNone;
             } else if (currentX == 0) {
                 self.panDirection = DWImagePanDirectionTypeVertical;
+                self.verticalPanStartY = currentY;
             } else if (currentY == 0) {
                 self.panDirection = DWImagePanDirectionTypeHorizontal;
             } else {
                 if (fabs(currentY / currentX) >= 5.0) {
                     self.panDirection = DWImagePanDirectionTypeVertical;
+                    self.verticalPanStartY = currentY;
                 } else {
                     self.panDirection = DWImagePanDirectionTypeHorizontal;
                 }
@@ -224,26 +228,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             break;
         case UIGestureRecognizerStateChanged:
         {
-            ///根据手势方向决定动作
-            if (self.panDirection == DWImagePanDirectionTypeVertical) {
-                ///纵向可能是关闭动作，还是要看当前的缩放方向是否是纵向，如果也为纵向，有可能是滑动动作
-                BOOL needClose = NO;
-                if (self.zooming && self.zoomDirection == DWImagePreviewZoomTypeVertical ) {
-                    if (_zoomContainerView.contentOffset.y <= 0 && currentY > 0) {
-                        needClose = YES;
-                    } else if (_zoomContainerView.contentOffset.y - (_zoomContainerView.contentSize.height - _zoomContainerView.bounds.size.height) > 0 && currentY < 0) {
-                        needClose = YES;
-                    }
-                } else if (currentY > 0) {
-                    needClose = YES;
-                }
-                
-                if (needClose) {
-                    [self closeActionOnSlidingDown];
-                }
-                
-            } else if (self.panDirection == DWImagePanDirectionTypeHorizontal) {
-                ///横向可能是切换动作，还是要看当前的缩放方向是否是横向，如果是横向，则不需要用手势控制切换动作
+            ///横向可能是切换动作，还是要看当前的缩放方向是否是横向，如果是横向，则不需要用手势控制切换动作
+            if (self.panDirection == DWImagePanDirectionTypeHorizontal) {
                 if (self.zooming && self.zoomDirection == DWImagePreviewZoomTypeVertical) {
                     NSLog(@"横向--> %f",currentX);
                 }
@@ -253,7 +239,19 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         case UIGestureRecognizerStateEnded:
         {
             if (self.panDirection == DWImagePanDirectionTypeVertical) {
-                NSLog(@"纵向结束了哦");
+                ///纵向可能是关闭动作，还是要看当前的缩放方向是否是横向，如果为非横向，有可能是滑动动作
+                BOOL needClose = NO;
+                if (self.zooming && self.zoomDirection != DWImagePreviewZoomTypeHorizontal ) {
+                    if (_zoomContainerView.contentOffset.y <= 0 && currentY > 30) {
+                        needClose = YES;
+                    }
+                } else if (currentY > 30) {
+                    needClose = YES;
+                }
+                
+                if (needClose) {
+                    [self closeActionOnSlidingDown];
+                }
             } else if (self.panDirection == DWImagePanDirectionTypeHorizontal) {
                 NSLog(@"横向结束了哦");
             }
@@ -263,7 +261,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         default:
             break;
     }
-    [ges setTranslation:CGPointZero inView:self];
+    if (self.panDirection != DWImagePanDirectionTypeVertical) {
+        [ges setTranslation:CGPointZero inView:self];
+    }
 }
 
 #pragma mark --- gesture delegate ---
