@@ -221,13 +221,13 @@
 
 @end
 
-@implementation DWPhotoLivePreviewCell
+@implementation DWLivePhotoPreviewCell
 @dynamic media;
 
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.previewType = DWImagePreviewTypePhotoLive;
+        self.previewType = DWImagePreviewTypeLivePhoto;
     }
     return self;
 }

@@ -72,6 +72,8 @@
 
 @property (nonatomic ,assign) BOOL firstAppear;
 
+@property (nonatomic ,assign) BOOL needScrollToEdge;
+
 @property (nonatomic ,strong) dispatch_queue_t preloadQueue;
 
 @end
@@ -92,13 +94,16 @@
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    CGSize itemSize = ((UICollectionViewFlowLayout *)self.collectionViewLayout).itemSize;
-    CGFloat scale = 2;
-    CGFloat thumnailScale = 0.5;
-    self.photoSize = CGSizeMake(floor(itemSize.width * scale), floor(itemSize.height * scale));
-    self.thumnailSize = CGSizeMake(floor(itemSize.width * thumnailScale), floor(itemSize.height * thumnailScale));
+    if (self.firstAppear) {
+        CGSize itemSize = ((UICollectionViewFlowLayout *)self.collectionViewLayout).itemSize;
+        CGFloat scale = 2;
+        CGFloat thumnailScale = 0.5;
+        self.photoSize = CGSizeMake(floor(itemSize.width * scale), floor(itemSize.height * scale));
+        self.thumnailSize = CGSizeMake(floor(itemSize.width * thumnailScale), floor(itemSize.height * thumnailScale));
+    }
     
-    if (self.results.count) {
+    
+    if (self.needScrollToEdge && self.results.count) {
         CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
         if (contentSize.height > self.collectionView.bounds.size.height) {
             [self.collectionView setContentOffset:CGPointMake(0, contentSize.height - self.collectionView.bounds.size.height)];
@@ -115,6 +120,7 @@
         }
     }
     self.firstAppear = NO;
+    self.needScrollToEdge = NO;
 }
 
 #pragma mark --- tool method ---
@@ -123,6 +129,7 @@
         _album = model;
         _results = model.fetchResult;
         self.title = model.name;
+        _needScrollToEdge = YES;
         [self.collectionView reloadData];
         [_previewVC resetOnChangeDatasource];
     }
@@ -150,9 +157,9 @@
 
 -(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWImagePreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     switch (previewType) {
-        case DWImagePreviewTypePhotoLive:
+        case DWImagePreviewTypeLivePhoto:
         {
-            [self fetchPhotoLiveWithAsset:asset index:index targetSize:targetSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            [self fetchLivePhotoWithAsset:asset index:index targetSize:targetSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
         }
             break;
         case DWImagePreviewTypeVideo:
@@ -178,20 +185,15 @@
     }
 }
 
--(void)fetchPhotoLiveWithAsset:(PHAsset *)asset index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
-    PHLivePhotoRequestOptions * opt = nil;
-    if (progressHandler) {
-        opt = [[PHLivePhotoRequestOptions alloc] init];
-        opt.progressHandler = ^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-            if (progressHandler) {
-                progressHandler(progressNum);
-            }
-        };
-    }
+-(void)fetchLivePhotoWithAsset:(PHAsset *)asset index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     
-    [self.albumManager.phManager requestLivePhotoForAsset:asset targetSize:targetSize contentMode:(PHImageContentModeAspectFit) options:opt resultHandler:^(PHLivePhoto * _Nullable livePhoto, NSDictionary * _Nullable info) {
+    [self.albumManager fetchLivePhotoWithAlbum:self.album index:index targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+        if (progressHandler) {
+            progressHandler(progress);
+        }
+    } completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
         if (fetchCompletion) {
-            fetchCompletion(livePhoto,index);
+            fetchCompletion(obj.media,index);
         }
     }];
 }
@@ -237,7 +239,7 @@
 -(DWImagePreviewType)previewTypeForAsset:(PHAsset *)asset {
     if (asset.mediaType == PHAssetMediaTypeImage) {
         if (asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive) {
-            return DWImagePreviewTypePhotoLive;
+            return DWImagePreviewTypeLivePhoto;
         } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
             return DWImagePreviewTypeAnimateImage;
         } else {
@@ -339,21 +341,22 @@ NS_INLINE NSArray * animateExtensions() {
     }
 }
 
--(void)previewController:(DWImagePreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+-(void)previewController:(DWImagePreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWImagePreviewFetchPosterCompletion)fetchCompletion {
     [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if (fetchCompletion) {
-            fetchCompletion(obj.media,index);
+            fetchCompletion(obj.media,index,[obj satisfiedSize:previewController.previewSize]);
         }
     }];
 }
 
--(void)previewController:(DWImagePreviewController *)previewController prefetchMediaAtIndexes:(NSIndexSet *)indexes fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
-    [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+-(void)previewController:(DWImagePreviewController *)previewController prefetchMediaAtIndexes:(NSArray *)indexes fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+    [indexes enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSInteger index = [obj integerValue];
         dispatch_async(self.preloadQueue, ^{
-            NSLog(@"start preload %lu",idx);
-            PHAsset * asset = [self.results objectAtIndex:idx];
+            NSLog(@"start preload %lu",index);
+            PHAsset * asset = [self.results objectAtIndex:index];
             DWImagePreviewType previewType = [self previewTypeForAsset:asset];
-            [self fetchMediaWithAsset:asset previewType:previewType index:idx targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
+            [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
         });
     }];
 }

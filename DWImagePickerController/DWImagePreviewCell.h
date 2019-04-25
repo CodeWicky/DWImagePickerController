@@ -66,7 +66,7 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 @end
 
-@interface DWPhotoLivePreviewCell : DWImagePreviewCell
+@interface DWLivePhotoPreviewCell : DWImagePreviewCell
 
 @property (nonatomic ,strong) PHLivePhoto * media;
 
