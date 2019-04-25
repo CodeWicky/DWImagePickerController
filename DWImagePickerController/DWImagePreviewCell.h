@@ -14,7 +14,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class DWImagePreviewCell;
+@class DWImagePreviewCell,DWTiledImageView;
 typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
 typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell ,CGPoint point);
 
@@ -77,6 +77,20 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 @interface DWVideoPreviewCell : DWImagePreviewCell
 
 @property (nonatomic ,strong) AVPlayerItem * media;
+
+@end
+
+@interface DWBigImagePreviewCell : DWImagePreviewCell
+
+@property (nonatomic ,strong) NSData * media;
+
+@end
+
+@interface DWTiledImageView : UIView
+
+@property (nonatomic ,strong) UIImage * image;
+
+@property (nonatomic ,assign) CGSize tileSize;
 
 @end
 
