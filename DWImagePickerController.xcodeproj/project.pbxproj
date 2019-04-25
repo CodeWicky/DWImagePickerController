@@ -134,6 +134,7 @@
 				9B24403B22365EE1004A6E34 /* Sources */,
 				9B24403C22365EE1004A6E34 /* Frameworks */,
 				9B24403D22365EE1004A6E34 /* Resources */,
+				A1C5048F70B181C1FFE36A14 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -193,6 +194,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		A1C5048F70B181C1FFE36A14 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources.sh",
+				"${PODS_ROOT}/DWCheckBox/DWCheckBox/DWCheckBoxBundle.bundle",
+				"${PODS_ROOT}/DWLogger/DWLogger/DWLoggerBundle.bundle",
+				"${PODS_ROOT}/DWTableViewHelper/DWTableViewHelper/DWTableViewHelperResource.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DWCheckBoxBundle.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DWLoggerBundle.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DWTableViewHelperResource.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		A20FE52BE42D7F51D56B50FF /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

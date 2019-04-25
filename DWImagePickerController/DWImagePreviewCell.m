@@ -241,7 +241,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             if (self.panDirection == DWImagePanDirectionTypeVertical) {
                 ///纵向可能是关闭动作，还是要看当前的缩放方向是否是横向，如果为非横向，有可能是滑动动作
                 BOOL needClose = NO;
-                if (self.zooming && self.zoomDirection != DWImagePreviewZoomTypeHorizontal ) {
+                if (self.zooming && self.zoomDirection != DWImagePreviewZoomTypeHorizontal) {
                     if (_zoomContainerView.contentOffset.y <= 0 && currentY > 30) {
                         needClose = YES;
                     }
@@ -253,16 +253,22 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                     [self closeActionOnSlidingDown];
                 }
             } else if (self.panDirection == DWImagePanDirectionTypeHorizontal) {
-                NSLog(@"横向结束了哦");
+                ///横向可能是切换动作，还是要看当前的缩放方向是否是横向，如果是横向，则不需要用手势控制切换动作
+                if (self.panDirection == DWImagePanDirectionTypeHorizontal) {
+                    if (self.zooming && self.zoomDirection == DWImagePreviewZoomTypeVertical) {
+                        if (fabs(currentX) > self.bounds.size.width * 0.5) {
+                            NSLog(@"横滑过半页了哦");
+                        } else {
+                            NSLog(@"横滑没够哟");
+                        }
+                    }
+                }
             }
             self.panDirection = DWImagePanDirectionTypeNone;
         }
             break;
         default:
             break;
-    }
-    if (self.panDirection != DWImagePanDirectionTypeVertical) {
-        [ges setTranslation:CGPointZero inView:self];
     }
 }
 
