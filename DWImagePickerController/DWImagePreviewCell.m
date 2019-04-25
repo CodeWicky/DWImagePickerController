@@ -130,6 +130,28 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
+-(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
+    if (self.zoomable) {
+        CGFloat mediaScale = mediaSize.width / mediaSize.height;
+        CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
+        CGFloat zoomScale = 1;
+        if (CGFLOATEQUAL(mediaScale, previewScale)) {
+            self.zoomDirection = DWImagePreviewZoomTypeNone;
+            zoomScale = mediaSize.width / self.bounds.size.width;
+            if (zoomScale < 2) {
+                zoomScale = 2;
+            }
+        } else if (mediaScale / previewScale > 1) {
+            self.zoomDirection = DWImagePreviewZoomTypeHorizontal;
+            zoomScale = mediaScale / previewScale;
+        } else {
+            self.zoomDirection = DWImagePreviewZoomTypeVertical;
+            zoomScale = previewScale / mediaScale;
+        }
+        _zoomContainerView.maximumZoomScale = zoomScale;
+    }
+}
+
 #pragma mark --- action ---
 -(void)tapAction:(UITapGestureRecognizer *)tap {
     if (self.tapAction) {
@@ -344,25 +366,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)setMedia:(UIImage *)media {
     [super setMedia:media];
     self.imageView.image = media;
-    
-    if (self.zoomable) {
-        CGFloat mediaScale = media.size.width / media.size.height;
-        CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
-        if (CGFLOATEQUAL(mediaScale, previewScale)) {
-            self.zoomDirection = DWImagePreviewZoomTypeNone;
-            CGFloat zoomScale = media.size.width / self.bounds.size.width;
-            if (zoomScale < 2) {
-                zoomScale = 2;
-            }
-            self.zoomContainerView.maximumZoomScale = zoomScale;
-        } else if (mediaScale / previewScale > 1) {
-            self.zoomDirection = DWImagePreviewZoomTypeHorizontal;
-            self.zoomContainerView.maximumZoomScale = mediaScale / previewScale;
-        } else {
-            self.zoomDirection = DWImagePreviewZoomTypeVertical;
-            self.zoomContainerView.maximumZoomScale = previewScale / mediaScale;
-        }
-    }
+    [self configZoomScaleWithMediaSize:media.size];
 }
 
 @end
@@ -401,6 +405,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     self.imageView.image = media;
     if ([media isKindOfClass:[YYImage class]]) {
         [self.imageView startAnimating];
+        [self configZoomScaleWithMediaSize:media.size];
     }
 }
 
