@@ -20,7 +20,7 @@ typedef NS_ENUM(NSUInteger, DWImagePreviewType) {
 
 typedef void(^DWImagePreviewFetchMediaProgress)(CGFloat progressNum);
 
-typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger index, BOOL preview);
+typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger index);
 
 @class DWImagePreviewController;
 
@@ -31,10 +31,15 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 -(DWImagePreviewType)previewController:(DWImagePreviewController *)previewController previewTypeAtIndex:(NSUInteger)index;
 
--(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion;
+-(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion;
 
 @optional
--(void)previewContoller:(DWImagePreviewController *)previewController hasChangedToIndex:(NSUInteger)index;
+
+-(void)previewController:(DWImagePreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion;
+
+-(void)previewController:(DWImagePreviewController *)previewController hasChangedToIndex:(NSUInteger)index;
+
+-(void)previewController:(DWImagePreviewController *)previewController prefetchMediaAtIndexes:(NSIndexSet *)indexes fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion;
 
 @end
 
@@ -44,11 +49,17 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 @property (nonatomic ,assign ,readonly) CGSize previewSize;
 
+@property (nonatomic ,assign) NSInteger cacheCount;
+
 @property (nonatomic ,assign ,readonly) BOOL isToolBarShowing;
 
 -(void)previewAtIndex:(NSUInteger)index;
 
 -(void)photoCountHasChanged;
+
+-(void)clearCache;
+
+-(void)resetOnChangeDatasource;
 
 @end
 

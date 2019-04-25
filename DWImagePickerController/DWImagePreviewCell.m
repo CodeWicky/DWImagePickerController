@@ -169,6 +169,7 @@
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.zoomable = YES;
+        self.previewType = DWImagePreviewTypeImage;
     }
     return self;
 }
@@ -197,6 +198,7 @@
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.zoomable = YES;
+        self.previewType = DWImagePreviewTypeAnimateImage;
     }
     return self;
 }
@@ -222,9 +224,25 @@
 @implementation DWPhotoLivePreviewCell
 @dynamic media;
 
+#pragma mark --- override ---
+-(instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        self.previewType = DWImagePreviewTypePhotoLive;
+    }
+    return self;
+}
+
 @end
 
 @implementation DWVideoPreviewCell
 @dynamic media;
+
+#pragma mark --- override ---
+-(instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        self.previewType = DWImagePreviewTypeVideo;
+    }
+    return self;
+}
 
 @end

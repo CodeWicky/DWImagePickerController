@@ -25,6 +25,7 @@
     return self;
 }
 
+///重写attr来在miniLineSpacing为0的情况下cell之间也有间距（如果设置miniLineSpacing不为0的时候，即使在全屏cell的情况下，滚动一次，collectionView也会加载两个cell）
 - (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect {
     NSArray<UICollectionViewLayoutAttributes *> *layoutAttsArray = [[NSArray alloc] initWithArray:[super layoutAttributesForElementsInRect:rect] copyItems:YES];
     CGFloat halfWidth = self.collectionView.bounds.size.width / 2.0;
@@ -41,6 +42,22 @@
 
 @end
 
+@interface DWImagePreviewData : NSObject
+
+@property (nonatomic ,strong) UIImage * previewImage;
+
+@property (nonatomic ,strong) id media;
+
+@property (nonatomic ,strong) YYImage * animateImage;
+
+@property (nonatomic ,assign) DWImagePreviewType previewType;
+
+@end
+
+@implementation DWImagePreviewData
+
+@end
+
 @interface DWImagePreviewController ()
 
 @property (nonatomic ,assign) NSInteger index;
@@ -49,8 +66,15 @@
 
 @property (nonatomic ,assign) BOOL sourceInteractivePopGestureEnabled;
 
+@property (nonatomic ,strong) NSCache * dataCache;
+
 @end
 
+@interface DWImagePreviewController ()
+
+@property (nonatomic ,strong) dispatch_queue_t asyncDecodeQueue;
+
+@end
 
 @implementation DWImagePreviewController
 
@@ -69,6 +93,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)photoCountHasChanged {
     [self.collectionView reloadData];
+}
+
+-(void)clearCache {
+    [self.dataCache removeAllObjects];
+}
+
+-(void)resetOnChangeDatasource {
+    [self clearCache];
+    [self photoCountHasChanged];
 }
 
 #pragma mark --- tool method ---
@@ -94,6 +127,18 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+-(DWImagePreviewData *)dataAtIndex:(NSUInteger)index {
+    DWImagePreviewData * data = [self.dataCache objectForKey:@(index)];
+    if (!data) {
+        data = [[DWImagePreviewData alloc] init];
+        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:previewTypeAtIndex:)]) {
+            data.previewType = [self.dataSource previewController:self previewTypeAtIndex:index];
+        }
+        [self.dataCache setObject:data forKey:@(index)];
+    }
+    return data;
+}
+
 #pragma mark --- life cycle ---
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -111,6 +156,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    ///按需关闭侧滑返回
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
         self.sourceInteractivePopGestureEnabled = self.navigationController.interactivePopGestureRecognizer.enabled;
         self.navigationController.interactivePopGestureRecognizer.enabled = NO;
@@ -119,6 +165,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    ///恢复侧滑返回
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
         self.navigationController.interactivePopGestureRecognizer.enabled = self.sourceInteractivePopGestureEnabled;
     }
@@ -140,12 +187,10 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     
-    NSLog(@"cell for row %ld",indexPath.row);
-    
-    DWImagePreviewType previewType = DWImagePreviewTypeNone;
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:previewTypeAtIndex:)]) {
-        previewType = [self.dataSource previewController:self previewTypeAtIndex:indexPath.row];
-    }
+    NSInteger originIndex = indexPath.row;
+    NSLog(@"cell for row %ld",originIndex);
+    DWImagePreviewData * cellData = [self dataAtIndex:originIndex];
+    DWImagePreviewType previewType = cellData.previewType;
     __kindof DWImagePreviewCell * cell;
     switch (previewType) {
         case DWImagePreviewTypeAnimateImage:
@@ -171,31 +216,24 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
     
     if (previewType != DWImagePreviewTypeNone) {
-        [self configGestureActionForCell:cell indexPath:indexPath previewType:previewType];
+        [self configGestureActionForCell:cell indexPath:indexPath];
     }
     
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchMediaAtIndex:previewType:progress:fetchCompletion:)]) {
-        [self.dataSource previewController:self fetchMediaAtIndex:indexPath.row previewType:previewType progress:^(double progress) {
-            NSLog(@"%f",progress);
-        } fetchCompletion:^(id  _Nonnull media, NSUInteger index ,BOOL preview) {
-            
-            NSLog(@"%@,%lu,%d",media,index,preview);
-            
-            if (index == indexPath.row) {
-                if (!preview && previewType == DWImagePreviewTypeAnimateImage && media) {
-                    YYImage * image = [[YYImage alloc] initWithData:media];
-                    cell.media = image;
-                } else {
-                    cell.media = media;
-                }
+    if (cellData.media) {
+        cell.media = cellData.media;
+    } else if (cellData.previewImage) {
+        [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex];
+    } else {
+        [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index) {
+            cellData.previewImage = media;
+            if (index == originIndex) {
+                [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex];
             }
         }];
     }
+    
+    [self prefetchMediaForCollection:collectionView indexPath:indexPath];
     return cell;
-}
-
--(void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(DWImagePreviewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
-    [cell resetCellZoom];
 }
 
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
@@ -208,16 +246,18 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+
+
 #pragma mark --- tool method ---
 -(void)previewDidChangedToIndex:(UIScrollView *)scrollView {
     NSInteger page = (scrollView.contentOffset.x + _previewSize.width / 2) / _previewSize.width;
     _index = page;
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewContoller:hasChangedToIndex:)]) {
-        [self.dataSource previewContoller:self hasChangedToIndex:page];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:hasChangedToIndex:)]) {
+        [self.dataSource previewController:self hasChangedToIndex:page];
     }
 }
 
--(void)configGestureActionForCell:(DWImagePreviewCell *)cell indexPath:(NSIndexPath *)indexPath previewType:(DWImagePreviewType)previewType {
+-(void)configGestureActionForCell:(DWImagePreviewCell *)cell indexPath:(NSIndexPath *)indexPath {
     __weak typeof(self)weakSelf = self;
     cell.tapAction = ^(DWImagePreviewCell * _Nonnull cell) {
         __strong typeof(weakSelf)StrongSelf = weakSelf;
@@ -239,6 +279,99 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }];
 }
 
+-(void)fetchPosterAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchPosterAtIndex:fetchCompletion:)]) {
+        [self.dataSource previewController:self fetchPosterAtIndex:index fetchCompletion:fetchCompletion];
+    } else {
+        if (fetchCompletion) {
+            fetchCompletion(nil,index);
+        }
+    }
+}
+
+-(void)fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion:)]) {
+        [self.dataSource previewController:self fetchMediaAtIndex:index previewType:previewType progressHandler:progressHandler fetchCompletion:fetchCompletion];
+    } else {
+        if (fetchCompletion) {
+            fetchCompletion(nil,NO);
+        }
+    }
+}
+
+-(void)configPosterAndFetchMediaWithCellData:(DWImagePreviewData *)cellData cell:(DWImagePreviewCell *)cell previewType:(DWImagePreviewType)previewType index:(NSUInteger)index {
+    NSUInteger originIndex = index;
+    cell.media = cellData.previewImage;
+    [self fetchMediaAtIndex:originIndex previewType:previewType progressHandler:^(CGFloat progressNum) {
+        NSLog(@"progress = %f",progressNum);
+    } fetchCompletion:^(id  _Nullable media, NSUInteger index) {
+        [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
+            if (index == originIndex) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    cell.media = cellData.media;
+                });
+            }
+        }];
+    }];
+}
+
+-(void)configMedia:(id)media forCellData:(DWImagePreviewData *)cellData asynchronous:(BOOL)asynchronous completion:(dispatch_block_t)completion {
+    if (cellData.previewType == DWImagePreviewTypeAnimateImage) {
+        dispatch_block_t decodeAction = ^(){
+            YYImage * image = nil;
+            if (media) {
+                image = [[YYImage alloc] initWithData:media];
+            }
+            cellData.media = image;
+            if (completion) {
+                completion();
+            }
+        };
+        if (asynchronous) {
+            dispatch_async(self.asyncDecodeQueue, decodeAction);
+        } else {
+            decodeAction();
+        }
+    } else {
+        cellData.media = media;
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+-(void)prefetchMediaForCollection:(UICollectionView *)collectionView indexPath:(NSIndexPath *)indexPath {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:prefetchMediaAtIndexes:fetchCompletion:)]) {
+        NSMutableIndexSet * indexes = [NSMutableIndexSet indexSet];
+        NSInteger count = [self collectionView:collectionView numberOfItemsInSection:0];
+        for (NSInteger i = indexPath.row,step = 0,target = 0; step > -2;) {
+            if (step > 0) {
+                step = -step;
+            } else {
+                step = -step + 1;
+            }
+            
+            target = i + step;
+            if (target < 0 || target >= count) {
+                continue;
+            }
+            
+            DWImagePreviewData * data = [self dataAtIndex:target];
+            if (data.media) {
+                continue;
+            }
+            [indexes addIndex:target];
+        }
+        if (indexes.count) {
+            [self.dataSource previewController:self prefetchMediaAtIndexes:indexes fetchCompletion:^(id  _Nullable media, NSUInteger index) {
+                NSLog(@"preload complete %lu",index);
+                DWImagePreviewData * cellData = [self dataAtIndex:index];
+                [self configMedia:media forCellData:cellData asynchronous:YES completion:nil];
+            }];
+        }
+    }
+}
+
 #pragma mark --- override ---
 -(instancetype)init {
     DWImagePreviewLayout * layout = [[DWImagePreviewLayout alloc] init];
@@ -247,8 +380,9 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     layout.minimumLineSpacing = 0;
     layout.minimumInteritemSpacing = 0;
     layout.itemSize = [UIScreen mainScreen].bounds.size;
-    if ([self initWithCollectionViewLayout:layout]) {
+    if (self = [self initWithCollectionViewLayout:layout]) {
         _index = -1;
+        _cacheCount = 10;
         _previewSize = layout.itemSize;
         _isToolBarShowing = YES;
         self.collectionView.pagingEnabled = YES;
@@ -265,6 +399,22 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         }
     }
     return self;
+}
+
+#pragma mark --- setter/getter ---
+-(NSCache *)dataCache {
+    if (!_dataCache) {
+        _dataCache = [[NSCache alloc] init];
+        _dataCache.countLimit = _cacheCount;
+    }
+    return _dataCache;
+}
+
+-(dispatch_queue_t)asyncDecodeQueue {
+    if (!_asyncDecodeQueue) {
+        _asyncDecodeQueue = dispatch_queue_create("com.wicky.dwimagepreviewcontroller", DISPATCH_QUEUE_CONCURRENT);
+    }
+    return _asyncDecodeQueue;
 }
 
 @end

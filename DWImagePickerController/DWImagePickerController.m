@@ -62,8 +62,6 @@
 
 @property (nonatomic ,weak) DWImagePreviewController * previewVC;
 
-@property (nonatomic ,strong) PHCachingImageManager * imageManager;
-
 @property (nonatomic ,assign) CGSize photoSize;
 
 @property (nonatomic ,assign) CGSize thumnailSize;
@@ -73,6 +71,8 @@
 @property (nonatomic ,assign) CGFloat lastOffsetY;
 
 @property (nonatomic ,assign) BOOL firstAppear;
+
+@property (nonatomic ,strong) dispatch_queue_t preloadQueue;
 
 @end
 
@@ -124,7 +124,7 @@
         _results = model.fetchResult;
         self.title = model.name;
         [self.collectionView reloadData];
-        [_previewVC photoCountHasChanged];
+        [_previewVC resetOnChangeDatasource];
     }
     if (![_albumManager isEqual:albumManager]) {
         _albumManager = albumManager;
@@ -148,100 +148,106 @@
     [self.collectionView reloadItemsAtIndexPaths:indexPaths];
 }
 
--(void)fetchPreviewMediaWithIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType asset:(PHAsset *)asset targetSize:(CGSize)targetSize progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
-    [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if (fetchCompletion) {
-            fetchCompletion(obj.media,index,YES);
+-(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWImagePreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+    switch (previewType) {
+        case DWImagePreviewTypePhotoLive:
+        {
+            [self fetchPhotoLiveWithAsset:asset index:index targetSize:targetSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
         }
-    
-        switch (previewType) {
-            case DWImagePreviewTypePhotoLive:
-            {
-                [self fetchPhotoLiveWithAsset:asset index:index targetSize:targetSize progress:progress fetchCompletion:fetchCompletion];
-            }
-                break;
-            case DWImagePreviewTypeVideo:
-            {
-                [self fetchVideoWithIndex:index progress:progress fetchCompletion:fetchCompletion];
-            }
-                break;
-            case DWImagePreviewTypeAnimateImage:
-            {
-                [self fetchAnimateImageWithAsset:asset index:index progress:progress fetchCompletion:fetchCompletion];
-            }
-                break;
-            case DWImagePreviewTypeNone:
-            {
-                ///do nothing
-            }
-                break;
-            default:
-            {
-                ///因为本身获取的就是图片类型做封面，如果此时已经满足尺寸的话，则无需再次请求
-                if ([obj satisfiedSize:targetSize]) {
-                    return ;
-                }
-                [self fetchOriginImageWithIndex:index progress:progress fetchCompletion:fetchCompletion];
-            }
-                break;
+            break;
+        case DWImagePreviewTypeVideo:
+        {
+            [self fetchVideoWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
         }
-    }];
+            break;
+        case DWImagePreviewTypeAnimateImage:
+        {
+            [self fetchAnimateImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+        }
+            break;
+        case DWImagePreviewTypeNone:
+        {
+            ///do nothing
+        }
+            break;
+        default:
+        {
+            [self fetchOriginImageWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+        }
+            break;
+    }
 }
 
--(void)fetchPhotoLiveWithAsset:(PHAsset *)asset index:(NSUInteger)index targetSize:(CGSize)targetSize progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+-(void)fetchPhotoLiveWithAsset:(PHAsset *)asset index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     PHLivePhotoRequestOptions * opt = nil;
-    if (progress) {
+    if (progressHandler) {
         opt = [[PHLivePhotoRequestOptions alloc] init];
         opt.progressHandler = ^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-            if (progress) {
-                progress(progressNum);
+            if (progressHandler) {
+                progressHandler(progressNum);
             }
         };
     }
     
     [self.albumManager.phManager requestLivePhotoForAsset:asset targetSize:targetSize contentMode:(PHImageContentModeAspectFit) options:opt resultHandler:^(PHLivePhoto * _Nullable livePhoto, NSDictionary * _Nullable info) {
         if (fetchCompletion) {
-            fetchCompletion(livePhoto,index,NO);
+            fetchCompletion(livePhoto,index);
         }
     }];
 }
 
--(void)fetchVideoWithIndex:(NSUInteger)index progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+-(void)fetchVideoWithIndex:(NSUInteger)index progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     [self.albumManager fetchVideoWithAlbum:self.album index:index shouldCache:YES progrss:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progress) {
-            progress(progressNum);
+        if (progressHandler) {
+            progressHandler(progressNum);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWVideoAssetModel * _Nullable obj) {
         if (fetchCompletion) {
-            fetchCompletion(obj.media,index,NO);
+            fetchCompletion(obj.media,index);
         }
     }];
 }
 
--(void)fetchAnimateImageWithAsset:(PHAsset *)asset index:(NSUInteger)index  progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+-(void)fetchAnimateImageWithAsset:(PHAsset *)asset index:(NSUInteger)index  progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     
     
     [self.albumManager fetchOriginImageDataWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progress) {
-            progress(progressNum);
+        if (progressHandler) {
+            progressHandler(progressNum);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageDataAssetModel * _Nullable obj) {
         if (fetchCompletion) {
-            fetchCompletion(obj.media,index,NO);
+            fetchCompletion(obj.media,index);
         }
     }];
 }
 
--(void)fetchOriginImageWithIndex:(NSUInteger)index progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+-(void)fetchOriginImageWithIndex:(NSUInteger)index progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     [self.albumManager fetchOriginImageWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progress) {
-            progress(progressNum);
+        if (progressHandler) {
+            progressHandler(progressNum);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if (fetchCompletion) {
-            fetchCompletion(obj.media,index,NO);
+            fetchCompletion(obj.media,index);
         }
     }];
+}
+
+-(DWImagePreviewType)previewTypeForAsset:(PHAsset *)asset {
+    if (asset.mediaType == PHAssetMediaTypeImage) {
+        if (asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive) {
+            return DWImagePreviewTypePhotoLive;
+        } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
+            return DWImagePreviewTypeAnimateImage;
+        } else {
+            return DWImagePreviewTypeImage;
+        }
+    } else if (asset.mediaType == PHAssetMediaTypeVideo) {
+        return DWImagePreviewTypeVideo;
+    } else {
+        return DWImagePreviewTypeNone;
+    }
 }
 
 #pragma mark --- tool func ---
@@ -287,6 +293,10 @@ NS_INLINE NSArray * animateExtensions() {
                         [col insertItemsAtIndexPaths:indexPaths];
                     }
                     
+                    if (remove.count * insert.count) {
+                        [self.previewVC photoCountHasChanged];
+                    }
+                    
                     NSIndexSet * change = changes.changedIndexes;
                     if (change.count > 0) {
                         NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:change.count];
@@ -315,31 +325,37 @@ NS_INLINE NSArray * animateExtensions() {
 
 -(DWImagePreviewType)previewController:(DWImagePreviewController *)previewController previewTypeAtIndex:(NSUInteger)index {
     PHAsset * asset = [self.results objectAtIndex:index];
-    if (asset.mediaType == PHAssetMediaTypeImage) {
-        if (asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive) {
-            return DWImagePreviewTypePhotoLive;
-        } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
-            return DWImagePreviewTypeAnimateImage;
-        } else {
-            return DWImagePreviewTypeImage;
-        }
-    } else if (asset.mediaType == PHAssetMediaTypeVideo) {
-        return DWImagePreviewTypeVideo;
-    } else {
-        return DWImagePreviewTypeNone;
-    }
+    return [self previewTypeForAsset:asset];
 }
 
--(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progress:(DWImagePreviewFetchMediaProgress)progress fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
-    
+-(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     if (previewType == DWImagePreviewTypeNone) {
         if (fetchCompletion) {
-            fetchCompletion(nil,index,NO);
+            fetchCompletion(nil,index);
         }
     } else {
         PHAsset * asset = [self.results objectAtIndex:index];
-        [self fetchPreviewMediaWithIndex:index previewType:previewType asset:asset targetSize:previewController.previewSize progress:progress fetchCompletion:fetchCompletion];
+        [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
     }
+}
+
+-(void)previewController:(DWImagePreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+    [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        if (fetchCompletion) {
+            fetchCompletion(obj.media,index);
+        }
+    }];
+}
+
+-(void)previewController:(DWImagePreviewController *)previewController prefetchMediaAtIndexes:(NSIndexSet *)indexes fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+    [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+        dispatch_async(self.preloadQueue, ^{
+            NSLog(@"start preload %lu",idx);
+            PHAsset * asset = [self.results objectAtIndex:idx];
+            DWImagePreviewType previewType = [self previewTypeForAsset:asset];
+            [self fetchMediaWithAsset:asset previewType:previewType index:idx targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
+        });
+    }];
 }
 
 #pragma mark --- collectionView delegate ---
@@ -420,12 +436,14 @@ NS_INLINE NSArray * animateExtensions() {
 }
 
 #pragma mark --- setter/getter ---
--(PHCachingImageManager *)imageManager {
-    if (!_imageManager) {
-        _imageManager = (PHCachingImageManager *)[PHCachingImageManager defaultManager];
+-(dispatch_queue_t)preloadQueue {
+    if (!_preloadQueue) {
+        _preloadQueue = dispatch_queue_create("com.wicky.dwimagepicker", DISPATCH_QUEUE_CONCURRENT);
     }
-    return _imageManager;
+    return _preloadQueue;
 }
+
+
 
 @end
 
