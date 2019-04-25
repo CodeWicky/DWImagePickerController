@@ -17,14 +17,15 @@ UIKIT_EXTERN const NSInteger DWAlbumInvalidTypeErrorCode;
 UIKIT_EXTERN const NSInteger DWAlbumSaveErrorCode;
 UIKIT_EXTERN const NSInteger DWAlbumExportErrorCode;
 
-@class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel,DWImageDataAssetModel,DWAlbumExportVideoOption;
+@class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel,DWImageDataAssetModel,DWLivePhotoAssetModel,DWAlbumExportVideoOption;
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * _Nullable mgr ,DWAlbumModel * _Nullable obj);
 typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * _Nullable mgr ,NSArray <DWAlbumModel *>* _Nullable obj);
 typedef void(^DWAlbumFetchImageCompletion)(DWAlbumManager * _Nullable mgr ,DWImageAssetModel * _Nullable obj);
-typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVideoAssetModel * _Nullable obj);
 typedef void(^DWAlbumFetchImageDataCompletion)(DWAlbumManager * _Nullable mgr ,DWImageDataAssetModel * _Nullable obj);
+typedef void(^DWAlbumFetchLivePhotoCompletion)(DWAlbumManager * _Nullable mgr ,DWLivePhotoAssetModel * _Nullable obj);
+typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVideoAssetModel * _Nullable obj);
 typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,__kindof DWAssetModel * _Nullable obj ,NSError * _Nullable error);
 
 typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,DWVideoAssetModel * _Nullable obj ,NSError * _Nullable error);
@@ -73,7 +74,7 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 
 
 /**
- 通过album及对应index获取图片或者视频，若对应角标可以命中缓存则立刻回调asset模型。
+ 以下系列为通过album及对应index获取图片或者视频，若对应角标可以命中缓存则立刻回调asset模型。
  
  @param album album模型
  @param index 要获取的图片在album中角标
@@ -86,15 +87,25 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  注：
  获取过程completion会回调两次，第一次返回一个缩略图，第二次返回原始图片。若命中缓存，至只走一次完成回调。
  */
+
+///获取图片对象
 -(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
--(PHImageRequestID)fetchImageDataWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
 -(PHImageRequestID)fetchOriginImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
+
+///获取data对象
+-(PHImageRequestID)fetchImageDataWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
 -(PHImageRequestID)fetchOriginImageDataWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
+
+///获取livePhoto对象
+-(PHImageRequestID)fetchLivePhotoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchLivePhotoCompletion)completion;
+-(PHImageRequestID)fetchOriginLivePhotoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchLivePhotoCompletion)completion;
+
+///获取视频对象
 -(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index shouldCache:(BOOL)shouldCache progrss:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
 
 /**
- 通过asset获取相册中的图片或者视频
+ 以下系列为通过asset获取相册中的图片或者视频
 
  @param asset 相册数据
  @param targetSize 指定尺寸
@@ -106,10 +117,20 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  注：
  completion会回调两次，第一次返回一个缩略图，第二次返回原始图片
  */
+
+///获取视频对象
 -(PHImageRequestID)fetchImageWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
 -(PHImageRequestID)fetchImageDataWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
+
+///获取data对象
 -(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageCompletion)completion;
 -(PHImageRequestID)fetchOriginImageDataWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchImageDataCompletion)completion;
+
+///获取livePhoto对象
+-(PHImageRequestID)fetchLivePhotoWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchLivePhotoCompletion)completion;
+-(PHImageRequestID)fetchOriginLivePhotoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress completion:(nullable DWAlbumFetchLivePhotoCompletion)completion;
+
+///获取视频对象
 -(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(nullable PHAssetImageProgressHandler)progress
                 completion:(nullable DWAlbumFetchVideoCompletion)completion;
 
@@ -329,6 +350,7 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///额外信息
 @property (nonatomic ,strong ,readonly) id info;
 
+///当前数据是否符合指定尺寸
 -(BOOL)satisfiedSize:(CGSize)targetSize;
 
 @end
@@ -352,9 +374,17 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 
 @property (nonatomic ,strong ,readonly) NSData * media;
 
+///获取data的指定尺寸
 @property (nonatomic ,assign ,readonly) CGSize targetSize;
 
+@end
 
+@interface DWLivePhotoAssetModel : DWAssetModel
+
+@property (nonatomic ,strong) PHLivePhoto * media;
+
+///是否是缩略图
+@property (nonatomic ,assign ,readonly) BOOL isDegraded;
 
 @end
 

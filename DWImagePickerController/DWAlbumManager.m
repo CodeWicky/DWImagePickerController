@@ -23,6 +23,8 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 @property (nonatomic ,strong) NSCache * albumDataCache;
 
+@property (nonatomic ,strong) NSCache * albumLivePhotoCache;
+
 @property (nonatomic ,assign) BOOL networkAccessAllowed;
 
 @end
@@ -52,8 +54,18 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(void)configWithResult:(PHFetchResult *)result {
-    _fetchResult = result;
-    _count = result.count;
+    if (![_fetchResult isEqual:result]) {
+        _fetchResult = result;
+        _count = result.count;
+        [self clearCache];
+    }
+}
+
+-(void)clearCache {
+    [_albumImageCache removeAllObjects];
+    [_albumDataCache removeAllObjects];
+    [_albumLivePhotoCache removeAllObjects];
+    [_albumVideoCache removeAllObjects];
 }
 
 #pragma mark --- setter/getter ---
@@ -76,6 +88,13 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         _albumDataCache = [[NSCache alloc] init];
     }
     return _albumDataCache;
+}
+
+-(NSCache *)albumLivePhotoCache {
+    if (!_albumLivePhotoCache) {
+        _albumLivePhotoCache = [[NSCache alloc] init];
+    }
+    return _albumLivePhotoCache;
 }
 
 @end
@@ -164,6 +183,28 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }
     
     return self.targetSize.width >= targetSize.width && self.targetSize.height >= targetSize.height;
+}
+
+@end
+
+@implementation DWLivePhotoAssetModel
+@dynamic media;
+
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
+    [super configWithAsset:asset media:media info:info];
+    _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
+}
+
+-(BOOL)satisfiedSize:(CGSize)targetSize {
+    if (CGSizeEqualToSize(self.media.size, self.originSize)) {
+        return YES;
+    }
+    
+    if (CGSizeEqualToSize(targetSize, PHImageManagerMaximumSize)) {
+        return CGSizeEqualToSize(self.media.size, self.originSize);
+    }
+    
+    return self.media.size.width >= targetSize.width && self.media.size.height >= targetSize.height;
 }
 
 @end
@@ -444,7 +485,9 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             DWImageDataAssetModel * model = [[DWImageDataAssetModel alloc] init];
             [model configWithAsset:asset media:imageData info:info];
             [model configWithTargetSize:targetSize];
-            completion(self,model);
+            if (completion) {
+                completion(self,model);
+            }
         } else {
             if (completion) {
                 completion(self,nil);
@@ -453,20 +496,57 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }];
 }
 
--(PHImageRequestID)fetchOriginImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
-    return [self fetchImageWithAlbum:album index:index targetSize:PHImageManagerMaximumSize shouldCache:YES progress:progress completion:completion];
+-(PHImageRequestID)fetchLivePhotoWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchLivePhotoCompletion)completion {
+    if (!asset) {
+        return PHInvalidImageRequestID;
+    }
+    
+    PHLivePhotoRequestOptions * option = [[PHLivePhotoRequestOptions alloc] init];
+    option.networkAccessAllowed = networkAccessAllowed;
+    if (progress) {
+        option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                progress(progress_num,error,stop,info);
+            });
+        };
+    }
+    
+    return [self.phManager requestLivePhotoForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFit options:option resultHandler:^(PHLivePhoto * _Nullable livePhoto, NSDictionary * _Nullable info) {
+        if (livePhoto) {
+            DWLivePhotoAssetModel * model = [[DWLivePhotoAssetModel alloc] init];
+            [model configWithAsset:asset media:livePhoto info:info];
+            if (completion) {
+                completion(self,model);
+            }
+        } else {
+            if (completion) {
+                completion(self,nil);
+            }
+        }
+    }];
 }
 
--(PHImageRequestID)fetchOriginImageDataWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageDataCompletion)completion {
-    return [self fetchImageDataWithAlbum:album index:index targetSize:PHImageManagerMaximumSize shouldCache:YES progress:progress completion:completion];
-}
-
--(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
-    return [self fetchImageWithAsset:asset targetSize:PHImageManagerMaximumSize networkAccessAllowed:networkAccessAllowed progress:progress completion:completion];
-}
-
--(PHImageRequestID)fetchOriginImageDataWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageDataCompletion)completion {
-    return [self fetchImageDataWithAsset:asset targetSize:PHImageManagerMaximumSize networkAccessAllowed:networkAccessAllowed progress:progress completion:completion];
+-(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
+    
+    if (!asset) {
+        return PHInvalidImageRequestID;
+    }
+    PHVideoRequestOptions *option = [[PHVideoRequestOptions alloc] init];
+    option.networkAccessAllowed = networkAccessAllowed;
+    option.progressHandler = ^(double progress_num, NSError *error, BOOL *stop, NSDictionary *info) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (progress) {
+                progress(progress_num, error, stop, info);
+            }
+        });
+    };
+    return [self.phManager requestPlayerItemForVideo:asset options:option resultHandler:^(AVPlayerItem *playerItem, NSDictionary *info) {
+        if (completion) {
+            DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
+            [model configWithAsset:asset media:playerItem info:info];
+            completion(self,model);
+        }
+    }];
 }
 
 -(PHImageRequestID)fetchImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
@@ -540,25 +620,36 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }];
 }
 
--(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
-    
-    if (!asset) {
+-(PHImageRequestID)fetchLivePhotoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchLivePhotoCompletion)completion {
+    if (index >= album.fetchResult.count) {
+        if (completion) {
+            completion(self,nil);
+        }
         return PHInvalidImageRequestID;
     }
-    PHVideoRequestOptions *option = [[PHVideoRequestOptions alloc] init];
-    option.networkAccessAllowed = networkAccessAllowed;
-    option.progressHandler = ^(double progress_num, NSError *error, BOOL *stop, NSDictionary *info) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (progress) {
-                progress(progress_num, error, stop, info);
-            }
-        });
-    };
-    return [self.phManager requestPlayerItemForVideo:asset options:option resultHandler:^(AVPlayerItem *playerItem, NSDictionary *info) {
+    DWLivePhotoAssetModel * model = [album.albumLivePhotoCache objectForKey:@(index)];
+    if (model) {
         if (completion) {
-            DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
-            [model configWithAsset:asset media:playerItem info:info];
             completion(self,model);
+        }
+        return PHCachedImageRequestID;
+    }
+    
+    PHAsset * asset = [album.fetchResult objectAtIndex:index];
+    
+    if (asset.mediaType != PHAssetMediaTypeImage) {
+        if (completion) {
+            completion(self,nil);
+        }
+        return PHInvalidImageRequestID;
+    }
+    
+    return [self fetchLivePhotoWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
+        if (obj && shouldCache) {
+            [album.albumVideoCache setObject:obj forKey:@(index)];
+        }
+        if (completion) {
+            completion(mgr,obj);
         }
     }];
 }
@@ -596,6 +687,30 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             completion(mgr,obj);
         }
     }];
+}
+
+-(PHImageRequestID)fetchOriginImageWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
+    return [self fetchImageWithAsset:asset targetSize:PHImageManagerMaximumSize networkAccessAllowed:networkAccessAllowed progress:progress completion:completion];
+}
+
+-(PHImageRequestID)fetchOriginImageDataWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageDataCompletion)completion {
+    return [self fetchImageDataWithAsset:asset targetSize:PHImageManagerMaximumSize networkAccessAllowed:networkAccessAllowed progress:progress completion:completion];
+}
+
+-(PHImageRequestID)fetchOriginLivePhotoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchLivePhotoCompletion)completion {
+    return [self fetchLivePhotoWithAsset:asset targetSize:PHImageManagerMaximumSize networkAccessAllowed:networkAccessAllowed progress:progress completion:completion];
+}
+
+-(PHImageRequestID)fetchOriginImageWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageCompletion)completion {
+    return [self fetchImageWithAlbum:album index:index targetSize:PHImageManagerMaximumSize shouldCache:YES progress:progress completion:completion];
+}
+
+-(PHImageRequestID)fetchOriginImageDataWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchImageDataCompletion)completion {
+    return [self fetchImageDataWithAlbum:album index:index targetSize:PHImageManagerMaximumSize shouldCache:YES progress:progress completion:completion];
+}
+
+-(PHImageRequestID)fetchOriginLivePhotoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchLivePhotoCompletion)completion {
+    return [self fetchLivePhotoWithAlbum:album index:index targetSize:PHImageManagerMaximumSize shouldCache:YES progress:progress completion:completion];
 }
 
 -(void)startCachingImagesForAssets:(NSArray <PHAsset *>*)assets targetSize:(CGSize)targetSize {
@@ -655,10 +770,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(void)clearCacheForAlbum:(DWAlbumModel *)album {
-    if (!album) {
-        return;
-    }
-    [album.albumImageCache removeAllObjects];
+    [album clearCache];
 }
 
 -(void)saveImage:(UIImage *)image toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
