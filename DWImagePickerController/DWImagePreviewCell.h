@@ -86,12 +86,4 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 @end
 
-@interface DWTiledImageView : UIView
-
-@property (nonatomic ,strong) UIImage * image;
-
-@property (nonatomic ,assign) CGSize tileSize;
-
-@end
-
 NS_ASSUME_NONNULL_END
