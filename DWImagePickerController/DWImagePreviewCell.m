@@ -136,10 +136,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)closeActionOnSlidingDown {
     if (self.colVC.closeOnSlidingDown) {
-        if (self.colVC.presentingViewController) {
-            [self.colVC dismissViewControllerAnimated:YES completion:nil];
-        } else {
+        if ([self.colVC.navigationController.viewControllers.lastObject isEqual:self.colVC]) {
             [self.colVC.navigationController popViewControllerAnimated:YES];
+        } else {
+            [self.colVC dismissViewControllerAnimated:YES completion:nil];
         }
     }
 }
