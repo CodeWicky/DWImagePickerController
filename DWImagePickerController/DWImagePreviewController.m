@@ -106,7 +106,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- tool method ---
 -(void)showPreview {
-    NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
+    
     if (_indexChanged) {
         ///如果预览位置发生改变则滚动到该位置
         _indexChanged = NO;
@@ -115,6 +115,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
     } else {
         ///disappear时会释放当前cell的资源，故如果不改变位置的话，需要刷新当前cell
+        NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
         [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
     }
 }
@@ -382,7 +383,10 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
-#pragma mark --- tool method ---
+#pragma mark --- screen rotate ---
+-(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    NSLog(@"%@",NSStringFromCGSize(size));
+}
 
 #pragma mark --- override ---
 -(instancetype)init {
