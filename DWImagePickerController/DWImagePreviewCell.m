@@ -47,6 +47,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,assign) DWImagePanDirectionType panDirection;
 
+@property (nonatomic ,assign) CGFloat closeThreshold;
+
 @property (nonatomic ,weak) DWImagePreviewController * colVC;
 
 @end
@@ -327,10 +329,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                 ///纵向可能是关闭动作，还是要看当前的缩放方向是否是横向，如果为非横向，有可能是滑动动作
                 BOOL needClose = NO;
                 if (self.zooming && self.zoomDirection != DWImagePreviewZoomTypeHorizontal) {
-                    if (_zoomContainerView.contentOffset.y <= 0 && currentY > 30) {
+                    if (currentY > _closeThreshold && _zoomContainerView.contentOffset.y <= 0 ) {
                         needClose = YES;
                     }
-                } else if (currentY > 30) {
+                } else if (currentY > _closeThreshold && _zoomContainerView.contentOffset.y < self.fixStartAnchor * _zoomContainerView.zoomScale) {
                     needClose = YES;
                 }
                 
@@ -360,6 +362,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.panGes = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureAction:)];
         self.panGes.delegate = self;
         [self addGestureRecognizer:self.panGes];
+        _closeThreshold = 100;
     }
     return self;
 }
