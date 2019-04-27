@@ -295,7 +295,7 @@ NS_INLINE NSArray * animateExtensions() {
                         [col insertItemsAtIndexPaths:indexPaths];
                     }
                     
-                    if (remove.count * insert.count) {
+                    if (remove.count + insert.count > 0) {
                         [self.previewVC photoCountHasChanged];
                     }
                     
