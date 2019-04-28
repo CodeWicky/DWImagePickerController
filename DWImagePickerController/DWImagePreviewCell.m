@@ -220,10 +220,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     CGFloat fixInset = 0;
     if (scrollView.zoomScale >= self.preferredZoomScale) {
         ///大于偏好缩放比则让inset为负的修正后的fixAnchor，这样则不会显示黑边
-        fixInset = - self.fixStartAnchor * scrollView.zoomScale;
+        fixInset = - ceil(self.fixStartAnchor * scrollView.zoomScale);
     } else {
         ///小于的时候应该由负的修正值g线性过渡为正的修正值，这样可以避免临界处的跳动
-        fixInset = - self.fixStartAnchor * (scrollView.zoomScale - 1) / (self.preferredZoomScale - 1);
+        fixInset = - ceil(self.fixStartAnchor * (scrollView.zoomScale - 1) / (self.preferredZoomScale - 1));
     }
     
     switch (self.zoomDirection) {
@@ -279,8 +279,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                     ///大于缩放比以后为了避免看到黑边还是要监测纵向偏移量的两个临界值
                     if (scrollView.contentOffset.x < self.fixStartAnchor * scrollView.zoomScale) {
                         [scrollView setContentOffset:CGPointMake(self.fixStartAnchor * scrollView.zoomScale, scrollView.contentOffset.y)];
-                    }
-                    else if (scrollView.contentOffset.x > self.fixEndAnchor * scrollView.zoomScale - scrollView.bounds.size.width) {
+                    } else if (scrollView.contentOffset.x > self.fixEndAnchor * scrollView.zoomScale - scrollView.bounds.size.width) {
                         [scrollView setContentOffset:CGPointMake(self.fixEndAnchor * scrollView.zoomScale - scrollView.bounds.size.width, scrollView.contentOffset.y)];
                     }
                 }
@@ -487,8 +486,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [super setMedia:media];
     self.imageView.image = media;
     if ([media isKindOfClass:[YYImage class]]) {
-        [self.imageView startAnimating];
         [self configZoomScaleWithMediaSize:media.size];
+        [self.imageView startAnimating];
     }
 }
 

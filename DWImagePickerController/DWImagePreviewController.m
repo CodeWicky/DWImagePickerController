@@ -66,6 +66,8 @@
 
 @property (nonatomic ,assign) BOOL sourceInteractivePopGestureEnabled;
 
+@property (nonatomic ,assign) BOOL navigationBarShouldHidden;
+
 @property (nonatomic ,strong) NSCache * dataCache;
 
 @end
@@ -118,11 +120,14 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
         [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
     }
+    self.navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
+    [self setToolBarHidden:NO];
 }
 
 -(void)clearPreview {
     DWImagePreviewCell * cell = (DWImagePreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
     [cell clearCell];
+    [self turnToDarkBackground:NO];
 }
 
 -(void)setToolBarHidden:(BOOL)hidden {
@@ -294,8 +299,9 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     ///按需关闭侧滑返回
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
         self.sourceInteractivePopGestureEnabled = self.navigationController.interactivePopGestureRecognizer.enabled;
-        self.navigationController.interactivePopGestureRecognizer.enabled = NO;
+    self.navigationController.interactivePopGestureRecognizer.enabled = NO;
     }
+    
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
@@ -304,6 +310,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
         self.navigationController.interactivePopGestureRecognizer.enabled = self.sourceInteractivePopGestureEnabled;
     }
+    [self.navigationController setNavigationBarHidden:self.navigationBarShouldHidden animated:YES];
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
