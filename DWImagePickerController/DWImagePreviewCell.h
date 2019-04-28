@@ -48,6 +48,8 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 -(void)initializingSubviews;
 
+-(void)setupSubviews;
+
 +(Class)classForPosterImageView;
 
 -(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point;

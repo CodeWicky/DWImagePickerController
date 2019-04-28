@@ -17,12 +17,20 @@
 
 @implementation DWImagePreviewLayout
 
+#pragma mark --- override ---
 - (instancetype)init {
     self = [super init];
     if (self) {
         self.distanceBetweenPages = 20;
     }
     return self;
+}
+
+-(void)prepareLayout {
+    [super prepareLayout];
+    self.minimumLineSpacing = 0;
+    self.minimumInteritemSpacing = 0;
+    self.itemSize = [UIScreen mainScreen].bounds.size;
 }
 
 ///重写attr来在miniLineSpacing为0的情况下cell之间也有间距（如果设置miniLineSpacing不为0的时候，即使在全屏cell的情况下，滚动一次，collectionView也会加载两个cell）
@@ -392,7 +400,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- screen rotate ---
 -(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    NSLog(@"%@",NSStringFromCGSize(size));
+    _previewSize = size;
 }
 
 #pragma mark --- override ---
@@ -407,7 +415,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _index = -1;
         _cacheCount = 10;
         _prefetchCount = 2;
-        _previewSize = layout.itemSize;
+        _previewSize = [UIScreen mainScreen].bounds.size;
         _isToolBarShowing = YES;
         _closeOnSlidingDown = YES;
         self.collectionView.pagingEnabled = YES;

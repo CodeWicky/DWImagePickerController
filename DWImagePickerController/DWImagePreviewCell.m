@@ -33,6 +33,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,strong) UIImageView * imageView;
 
+@property (nonatomic ,assign) CGSize mediaSize;
+
 @property (nonatomic ,assign) DWImagePreviewZoomType zoomDirection;
 
 @property (nonatomic ,assign) BOOL scrollIsZooming;
@@ -104,7 +106,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     _zoomContainerView.maximumZoomScale = 1;
     _zoomContainerView.contentInset = UIEdgeInsetsZero;
     _zoomDirection = DWImagePreviewZoomTypeNone;
-    _panDirection = DWImagePanDirectionTypeNone;
     _scrollIsZooming = NO;
     _preferredZoomScale = 1;
     _fixStartAnchor = 0;
@@ -113,6 +114,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)clearCell {
     [self resetCellZoom];
+    _panDirection = DWImagePanDirectionTypeNone;
+    _mediaSize = CGSizeZero;
     self.imageView.image = nil;
 }
 
@@ -131,9 +134,20 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)initializingSubviews {
-    _zoomContainerView.contentSize = self.bounds.size;
     [self.containerView addSubview:self.imageView];
-    self.imageView.frame = self.bounds;
+}
+
+-(void)setupSubviews {
+    if (!CGRectEqualToRect(self.containerView.frame, self.bounds)) {
+        if (self.zoomable) {
+            _zoomContainerView.zoomScale = 1;
+            _zoomContainerView.contentInset = UIEdgeInsetsZero;
+            self.containerView.frame = self.bounds;
+            _zoomContainerView.contentSize = self.bounds.size;
+            [self configZoomScaleWithMediaSize:_mediaSize];
+        }
+        self.imageView.frame = self.bounds;
+    }
 }
 
 -(void)closeActionOnSlidingDown {
@@ -147,7 +161,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
-    if (self.zoomable) {
+    if (self.zoomable && !CGSizeEqualToSize(mediaSize, CGSizeZero)) {
+        _mediaSize = mediaSize;
         CGFloat mediaScale = mediaSize.width / mediaSize.height;
         CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
         CGFloat zoomScale = mediaSize.width / self.bounds.size.width;
@@ -372,9 +387,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         _finishInitializingLayout = YES;
         [self initializingSubviews];
     }
-    if (self.zoomable) {
-        self.containerView.frame = self.bounds;
-    }
+    [self setupSubviews];
 }
 
 -(void)prepareForReuse {
@@ -408,7 +421,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(UIScrollView *)zoomContainerView {
     if (!_zoomContainerView) {
-        _zoomContainerView = [[UIScrollView alloc] initWithFrame:self.bounds];
+        _zoomContainerView = [[UIScrollView alloc] init];
         _zoomContainerView.showsVerticalScrollIndicator = NO;
         _zoomContainerView.showsHorizontalScrollIndicator = NO;
         _zoomContainerView.delegate = self;
