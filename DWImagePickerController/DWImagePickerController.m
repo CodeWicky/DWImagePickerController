@@ -17,6 +17,26 @@
 
 @end
 
+@interface DWGridFlowLayout : UICollectionViewFlowLayout
+
+@end
+
+@implementation DWGridFlowLayout
+
+-(void)prepareLayout {
+    [super prepareLayout];
+    CGFloat viewWidth = [UIScreen mainScreen].bounds.size.width;
+    CGFloat sizeWidth = self.itemSize.width;
+    NSInteger column = (NSInteger)(viewWidth / sizeWidth);
+    if (column == 1) {
+        self.minimumLineSpacing = self.minimumInteritemSpacing = 1 / MIN(2, [UIScreen mainScreen].scale);
+    } else {
+        self.minimumLineSpacing = self.minimumInteritemSpacing = (viewWidth - sizeWidth * column) / (column - 1) - __FLT_EPSILON__;
+    }
+}
+
+@end
+
 @interface DWGridCell : UICollectionViewCell
 
 @property (nonatomic ,strong) UIImageView * gridImage;
@@ -433,6 +453,11 @@ NS_INLINE NSArray * animateExtensions() {
     [self.albumManager stopCachingImagesForAlbum:self.album indexes:indexes targetSize:self.photoSize];
 }
 
+#pragma mark --- rotate delegate ---
+-(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+
+}
+
 #pragma mark --- override ---
 -(void)dealloc {
     [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
@@ -720,11 +745,9 @@ NS_INLINE NSArray * animateExtensions() {
 
 -(DWAlbumGridViewController *)gridVC {
     if (!_gridVC) {
-        UICollectionViewFlowLayout * flowlayout = [[UICollectionViewFlowLayout alloc] init];
-            flowlayout.minimumLineSpacing = _spacing;
-            flowlayout.minimumInteritemSpacing = _spacing;
-            CGFloat width = ([UIScreen mainScreen].bounds.size.width - (_columnCount - 1) * _spacing) / _columnCount;
-            flowlayout.itemSize = CGSizeMake(width, width);
+        DWGridFlowLayout * flowlayout = [[DWGridFlowLayout alloc] init];
+        CGFloat width = ([UIScreen mainScreen].bounds.size.width - (_columnCount - 1) * _spacing) / _columnCount;
+        flowlayout.itemSize = CGSizeMake(width, width);
         _gridVC = [[DWAlbumGridViewController alloc] initWithCollectionViewLayout:flowlayout];
         [_gridVC configWithPreviewVC:self.previewVC];
         self.previewVC.dataSource = _gridVC;
