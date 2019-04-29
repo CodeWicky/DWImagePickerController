@@ -92,6 +92,7 @@ static NSString * const normalImageID = @"DWNormalImagePreviewCell";
 static NSString * const animateImageID = @"DWAnimateImagePreviewCell";
 static NSString * const livePhotoID = @"DWLivePhotoPreviewCell";
 static NSString * const videoImageID = @"DWVideoPreviewCell";
+static NSString * const bigImageID = @"DWBigImagePreviewCell";
 
 #pragma mark --- interface method ---
 -(void)previewAtIndex:(NSUInteger)index {
@@ -230,7 +231,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)configMedia:(id)media forCellData:(DWImagePreviewData *)cellData asynchronous:(BOOL)asynchronous completion:(dispatch_block_t)completion {
-    if (cellData.previewType == DWImagePreviewTypeAnimateImage) {
+    if (cellData.previewType == DWImagePreviewTypeAnimateImage || cellData.previewType == DWImagePreviewTypeBigImage) {
         dispatch_block_t decodeAction = ^(){
             YYImage * image = nil;
             if (media) {
@@ -295,6 +296,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];
     [self.collectionView registerClass:[DWLivePhotoPreviewCell class] forCellWithReuseIdentifier:livePhotoID];
     [self.collectionView registerClass:[DWVideoPreviewCell class] forCellWithReuseIdentifier:videoImageID];
+    [self.collectionView registerClass:[DWBigImagePreviewCell class] forCellWithReuseIdentifier:bigImageID];
 }
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -356,6 +358,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         case DWImagePreviewTypeVideo:
         {
             cell = [collectionView dequeueReusableCellWithReuseIdentifier:videoImageID forIndexPath:indexPath];
+        }
+            break;
+        case DWImagePreviewTypeBigImage:
+        {
+            cell = [collectionView dequeueReusableCellWithReuseIdentifier:bigImageID forIndexPath:indexPath];
         }
             break;
         default:

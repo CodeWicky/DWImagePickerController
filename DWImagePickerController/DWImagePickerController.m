@@ -188,8 +188,9 @@
         }
             break;
         case DWImagePreviewTypeAnimateImage:
+        case DWImagePreviewTypeBigImage:
         {
-            [self fetchAnimateImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            [self fetchImageDataWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
         }
             break;
         case DWImagePreviewTypeNone:
@@ -230,8 +231,7 @@
     }];
 }
 
--(void)fetchAnimateImageWithAsset:(PHAsset *)asset index:(NSUInteger)index  progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
-    
+-(void)fetchImageDataWithAsset:(PHAsset *)asset index:(NSUInteger)index  progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     
     [self.albumManager fetchOriginImageDataWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
@@ -263,7 +263,12 @@
         } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
             return DWImagePreviewTypeAnimateImage;
         } else {
-            return DWImagePreviewTypeImage;
+            CGFloat min_Length = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) * 1.0;
+            if (asset.pixelWidth / min_Length > 5 || asset.pixelHeight / min_Length > 5) {
+                return DWImagePreviewTypeBigImage;
+            } else {
+                return DWImagePreviewTypeImage;
+            }
         }
     } else if (asset.mediaType == PHAssetMediaTypeVideo) {
         return DWImagePreviewTypeVideo;

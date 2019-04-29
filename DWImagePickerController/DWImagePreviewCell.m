@@ -7,6 +7,7 @@
 //
 
 #import "DWImagePreviewCell.h"
+#import "DWTiledImageView.h"
 
 #define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
 
@@ -473,12 +474,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @implementation DWAnimateImagePreviewCell
 @dynamic media;
 
-#pragma mark --- interface method ---
+#pragma mark --- override ---
 +(Class)classForPosterImageView {
     return [YYAnimatedImageView class];
 }
 
-#pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.zoomable = YES;
@@ -536,11 +536,25 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @dynamic media;
 
 #pragma mark --- override ---
++(Class)classForPosterImageView {
+    return [DWTiledImageView class];
+}
+
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        self.zoomable = YES;
         self.previewType = DWImagePreviewTypeBigImage;
     }
     return self;
+}
+
+#pragma mark --- setter/getter ---
+-(void)setMedia:(YYImage *)media {
+    [super setMedia:media];
+    self.imageView.image = media;
+    if ([media isKindOfClass:[YYImage class]]) {
+        [self configZoomScaleWithMediaSize:media.size];
+    }
 }
 
 @end

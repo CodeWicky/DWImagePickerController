@@ -12,6 +12,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Photos/Photos.h>
 
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class DWImagePreviewCell,DWTiledImageView;
@@ -84,7 +85,7 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 @interface DWBigImagePreviewCell : DWImagePreviewCell
 
-@property (nonatomic ,strong) NSData * media;
+@property (nonatomic ,strong) YYImage * media;
 
 @end
 
