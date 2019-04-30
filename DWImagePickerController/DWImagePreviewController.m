@@ -9,6 +9,12 @@
 #import "DWImagePreviewController.h"
 #import "DWImagePreviewCell.h"
 
+@interface DWImagePreviewCell ()
+
+-(void)configIndex:(NSUInteger)index;
+
+@end
+
 @interface DWImagePreviewLayout : UICollectionViewFlowLayout
 
 @property (nonatomic, assign) CGFloat distanceBetweenPages;
@@ -92,7 +98,6 @@ static NSString * const normalImageID = @"DWNormalImagePreviewCell";
 static NSString * const animateImageID = @"DWAnimateImagePreviewCell";
 static NSString * const livePhotoID = @"DWLivePhotoPreviewCell";
 static NSString * const videoImageID = @"DWVideoPreviewCell";
-static NSString * const bigImageID = @"DWBigImagePreviewCell";
 
 #pragma mark --- interface method ---
 -(void)previewAtIndex:(NSUInteger)index {
@@ -221,7 +226,7 @@ static NSString * const bigImageID = @"DWBigImagePreviewCell";
         NSLog(@"progress = %f",progressNum);
     } fetchCompletion:^(id  _Nullable media, NSUInteger index) {
         [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
-            if (index == originIndex) {
+            if (index == cell.index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     cell.media = cellData.media;
                 });
@@ -231,7 +236,7 @@ static NSString * const bigImageID = @"DWBigImagePreviewCell";
 }
 
 -(void)configMedia:(id)media forCellData:(DWImagePreviewData *)cellData asynchronous:(BOOL)asynchronous completion:(dispatch_block_t)completion {
-    if (cellData.previewType == DWImagePreviewTypeAnimateImage || cellData.previewType == DWImagePreviewTypeBigImage) {
+    if (cellData.previewType == DWImagePreviewTypeAnimateImage) {
         dispatch_block_t decodeAction = ^(){
             YYImage * image = nil;
             if (media) {
@@ -296,7 +301,6 @@ static NSString * const bigImageID = @"DWBigImagePreviewCell";
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];
     [self.collectionView registerClass:[DWLivePhotoPreviewCell class] forCellWithReuseIdentifier:livePhotoID];
     [self.collectionView registerClass:[DWVideoPreviewCell class] forCellWithReuseIdentifier:videoImageID];
-    [self.collectionView registerClass:[DWBigImagePreviewCell class] forCellWithReuseIdentifier:bigImageID];
 }
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -339,7 +343,7 @@ static NSString * const bigImageID = @"DWBigImagePreviewCell";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     
-    NSInteger originIndex = indexPath.row;
+    NSInteger originIndex = indexPath.item;
     NSLog(@"cell for row %ld",originIndex);
     DWImagePreviewData * cellData = [self dataAtIndex:originIndex];
     DWImagePreviewType previewType = cellData.previewType;
@@ -360,11 +364,6 @@ static NSString * const bigImageID = @"DWBigImagePreviewCell";
             cell = [collectionView dequeueReusableCellWithReuseIdentifier:videoImageID forIndexPath:indexPath];
         }
             break;
-        case DWImagePreviewTypeBigImage:
-        {
-            cell = [collectionView dequeueReusableCellWithReuseIdentifier:bigImageID forIndexPath:indexPath];
-        }
-            break;
         default:
         {
             cell = [collectionView dequeueReusableCellWithReuseIdentifier:normalImageID forIndexPath:indexPath];
@@ -372,11 +371,11 @@ static NSString * const bigImageID = @"DWBigImagePreviewCell";
             break;
     }
     
+    [cell configIndex:originIndex];
     if (previewType != DWImagePreviewTypeNone) {
         [self configGestureActionForCell:cell indexPath:indexPath];
         [cell configCollectionViewController:self];
     }
-    
     if (cellData.media) {
         cell.media = cellData.media;
     } else if (cellData.previewImage) {
@@ -384,7 +383,7 @@ static NSString * const bigImageID = @"DWBigImagePreviewCell";
     } else {
         [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
             cellData.previewImage = media;
-            if (index == originIndex) {
+            if (index == cell.index) {
                 [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:satisfiedSize];
             }
         }];

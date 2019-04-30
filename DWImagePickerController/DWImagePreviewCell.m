@@ -59,6 +59,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @implementation DWImagePreviewCell
 
 #pragma mark --- interface method ---
+-(void)configIndex:(NSUInteger)index {
+    _index = index;
+}
+
 +(Class)classForPosterImageView {
     return [UIImageView class];
 }
@@ -528,33 +532,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.previewType = DWImagePreviewTypeVideo;
     }
     return self;
-}
-
-@end
-
-@implementation DWBigImagePreviewCell
-@dynamic media;
-
-#pragma mark --- override ---
-+(Class)classForPosterImageView {
-    return [DWTiledImageView class];
-}
-
--(instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        self.zoomable = YES;
-        self.previewType = DWImagePreviewTypeBigImage;
-    }
-    return self;
-}
-
-#pragma mark --- setter/getter ---
--(void)setMedia:(YYImage *)media {
-    [super setMedia:media];
-    self.imageView.image = media;
-    if ([media isKindOfClass:[YYImage class]]) {
-        [self configZoomScaleWithMediaSize:media.size];
-    }
 }
 
 @end

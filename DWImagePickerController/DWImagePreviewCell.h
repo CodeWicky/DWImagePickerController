@@ -21,6 +21,8 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 @interface DWImagePreviewCell : UICollectionViewCell
 
+@property (nonatomic ,assign ,readonly) NSUInteger index;
+
 @property (nonatomic ,assign) DWImagePreviewType previewType;
 
 @property (nonatomic ,strong) id media;
@@ -80,12 +82,6 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 @interface DWVideoPreviewCell : DWImagePreviewCell
 
 @property (nonatomic ,strong) AVPlayerItem * media;
-
-@end
-
-@interface DWBigImagePreviewCell : DWImagePreviewCell
-
-@property (nonatomic ,strong) YYImage * media;
 
 @end
 

@@ -188,9 +188,8 @@
         }
             break;
         case DWImagePreviewTypeAnimateImage:
-        case DWImagePreviewTypeBigImage:
         {
-            [self fetchImageDataWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            [self fetchAnimateImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
         }
             break;
         case DWImagePreviewTypeNone:
@@ -200,7 +199,13 @@
             break;
         default:
         {
-            [self fetchOriginImageWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            ///如果是超尺寸大图，则降级图片尺寸
+            CGFloat min_Length = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) * 1.0;
+            if (asset.pixelWidth / min_Length > 3 && asset.pixelHeight / min_Length > 3) {
+                [self fetchBigImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            } else {
+                [self fetchOriginImageWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            }
         }
             break;
     }
@@ -231,13 +236,38 @@
     }];
 }
 
--(void)fetchImageDataWithAsset:(PHAsset *)asset index:(NSUInteger)index  progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+-(void)fetchAnimateImageWithAsset:(PHAsset *)asset index:(NSUInteger)index progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     
     [self.albumManager fetchOriginImageDataWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
             progressHandler(progressNum);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageDataAssetModel * _Nullable obj) {
+        if (fetchCompletion) {
+            fetchCompletion(obj.media,index);
+        }
+    }];
+}
+
+-(void)fetchBigImageWithAsset:(PHAsset *)asset index:(NSUInteger)index progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
+    CGFloat mediaScale = asset.pixelWidth * 1.0 / asset.pixelHeight;
+    CGSize targetSize = CGSizeZero;
+    if (mediaScale == 1) {
+        CGFloat width = _previewVC.previewSize.width * 3;
+        targetSize =  CGSizeMake(width, width);
+    } else if (mediaScale > 1) {
+        CGFloat width = _previewVC.previewSize.width * 3;
+        targetSize = CGSizeMake(width, width / mediaScale);
+    } else {
+        CGFloat height = _previewVC.previewSize.height * 3;
+        targetSize = CGSizeMake(height * mediaScale, height);
+    }
+    
+    [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+        if (progressHandler) {
+            progressHandler(progress);
+        }
+    } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if (fetchCompletion) {
             fetchCompletion(obj.media,index);
         }
@@ -263,12 +293,7 @@
         } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
             return DWImagePreviewTypeAnimateImage;
         } else {
-            CGFloat min_Length = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) * 1.0;
-            if (asset.pixelWidth / min_Length > 5 || asset.pixelHeight / min_Length > 5) {
-                return DWImagePreviewTypeBigImage;
-            } else {
-                return DWImagePreviewTypeImage;
-            }
+            return DWImagePreviewTypeImage;
         }
     } else if (asset.mediaType == PHAssetMediaTypeVideo) {
         return DWImagePreviewTypeVideo;

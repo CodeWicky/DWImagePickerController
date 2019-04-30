@@ -16,7 +16,6 @@ typedef NS_ENUM(NSUInteger, DWImagePreviewType) {
     DWImagePreviewTypeAnimateImage,
     DWImagePreviewTypeLivePhoto,
     DWImagePreviewTypeVideo,
-    DWImagePreviewTypeBigImage,
 };
 
 
