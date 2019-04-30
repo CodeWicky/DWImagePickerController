@@ -252,15 +252,19 @@
 -(void)fetchBigImageWithAsset:(PHAsset *)asset index:(NSUInteger)index progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
     CGFloat mediaScale = asset.pixelWidth * 1.0 / asset.pixelHeight;
     CGSize targetSize = CGSizeZero;
+    CGFloat fixScale = [UIScreen mainScreen].scale;
+    if (fixScale > 3) {
+        fixScale = 3;
+    }
     if (mediaScale == 1) {
-        CGFloat width = _previewVC.previewSize.width * 3;
+        CGFloat width = _previewVC.previewSize.width * fixScale;
         targetSize =  CGSizeMake(width, width);
     } else if (mediaScale > 1) {
-        CGFloat width = _previewVC.previewSize.width * 3;
-        targetSize = CGSizeMake(width, width / mediaScale);
-    } else {
-        CGFloat height = _previewVC.previewSize.height * 3;
+        CGFloat height = _previewVC.previewSize.height * fixScale;
         targetSize = CGSizeMake(height * mediaScale, height);
+    } else {
+        CGFloat width = _previewVC.previewSize.width * fixScale;
+        targetSize = CGSizeMake(width, width / mediaScale);
     }
     
     [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
@@ -268,7 +272,8 @@
             progressHandler(progress);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if (fetchCompletion) {
+        ///由于指定尺寸，所有亦可能有缩略图尺寸，如果是缩略图的话，不设置图片，已经有封面了
+        if (fetchCompletion && !obj.isDegraded) {
             fetchCompletion(obj.media,index);
         }
     }];

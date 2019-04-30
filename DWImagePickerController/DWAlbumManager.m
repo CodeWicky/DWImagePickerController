@@ -156,7 +156,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         return CGSizeEqualToSize(self.media.size, self.originSize);
     }
     
-    return self.media.size.width >= targetSize.width && self.media.size.height >= targetSize.height;
+    return targetSize.width - self.media.size.width < 20 && targetSize.height - self.media.size.height < 0;
 }
 
 @end
