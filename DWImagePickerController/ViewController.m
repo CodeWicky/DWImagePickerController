@@ -127,6 +127,9 @@
 //        }];
 //    }];
     
+    
+    
+    
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-variable"
     DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
