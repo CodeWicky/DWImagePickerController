@@ -156,12 +156,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)closeActionOnSlidingDown {
-    if (self.colVC.closeOnSlidingDown) {
-        if ([self.colVC.navigationController.viewControllers.lastObject isEqual:self.colVC]) {
-            [self.colVC.navigationController popViewControllerAnimated:YES];
-        } else {
-            [self.colVC dismissViewControllerAnimated:YES completion:nil];
-        }
+    if ([self.colVC.navigationController.viewControllers.lastObject isEqual:self.colVC]) {
+        [self.colVC.navigationController popViewControllerAnimated:YES];
+    } else {
+        [self.colVC dismissViewControllerAnimated:YES completion:nil];
     }
 }
 
@@ -346,6 +344,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         {
             if (self.panDirection == DWImagePanDirectionTypeVertical) {
                 ///纵向可能是关闭动作，还是要看当前的缩放方向是否是横向，如果为非横向，有可能是滑动动作
+                if (!self.colVC.closeOnSlidingDown) {
+                    return;
+                }
+                
                 BOOL needClose = NO;
                 if (self.zooming && self.zoomDirection != DWImagePreviewZoomTypeHorizontal) {
                     if (currentY > _closeThreshold && _zoomContainerView.contentOffset.y <= 0 ) {

@@ -797,6 +797,7 @@ NS_INLINE NSArray * animateExtensions() {
 -(DWImagePreviewController *)previewVC {
     if (!_previewVC) {
         _previewVC = [[DWImagePreviewController alloc] init];
+        _previewVC.closeOnSlidingDown = NO;
     }
     return _previewVC;
 }
