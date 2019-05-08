@@ -104,6 +104,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
+-(void)setMedia:(id)media isDegraded:(BOOL)isDegraded {
+    _media = media;
+}
+
 #pragma mark --- tool method ---
 
 -(void)resetCellZoom {
@@ -464,11 +468,12 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return self;
 }
 
-#pragma mark --- setter/getter ---
--(void)setMedia:(UIImage *)media {
-    [super setMedia:media];
+-(void)setMedia:(UIImage *)media isDegraded:(BOOL)isDegraded {
+    [super setMedia:media isDegraded:isDegraded];
     self.imageView.image = media;
-    [self configZoomScaleWithMediaSize:media.size];
+    if (!isDegraded) {
+        [self configZoomScaleWithMediaSize:media.size];
+    }
 }
 
 @end
@@ -501,10 +506,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 #pragma mark --- setter/getter ---
--(void)setMedia:(YYImage *)media {
-    [super setMedia:media];
+-(void)setMedia:(YYImage *)media isDegraded:(BOOL)isDegraded {
+    [super setMedia:media isDegraded:isDegraded];
     self.imageView.image = media;
-    if ([media isKindOfClass:[YYImage class]]) {
+    if ([media isKindOfClass:[YYImage class]] && !isDegraded) {
         [self configZoomScaleWithMediaSize:media.size];
         [self.imageView startAnimating];
     }

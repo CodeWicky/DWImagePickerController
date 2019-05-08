@@ -25,7 +25,7 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 @property (nonatomic ,assign) DWImagePreviewType previewType;
 
-@property (nonatomic ,strong) id media;
+@property (nonatomic ,strong ,readonly) id media;
 
 @property (nonatomic ,assign) BOOL zoomable;
 
@@ -59,29 +59,31 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 -(void)configCollectionViewController:(DWImagePreviewController *)colVC;
 
+-(void)setMedia:(id _Nonnull)media isDegraded:(BOOL)isDegraded;
+
 @end
 
 @interface DWNormalImagePreviewCell : DWImagePreviewCell
 
-@property (nonatomic ,strong) UIImage * media;
+@property (nonatomic ,strong ,readonly) UIImage * media;
 
 @end
 
 @interface DWAnimateImagePreviewCell : DWImagePreviewCell
 
-@property (nonatomic ,strong) YYImage * media;
+@property (nonatomic ,strong ,readonly) YYImage * media;
 
 @end
 
 @interface DWLivePhotoPreviewCell : DWImagePreviewCell
 
-@property (nonatomic ,strong) PHLivePhoto * media;
+@property (nonatomic ,strong ,readonly) PHLivePhoto * media;
 
 @end
 
 @interface DWVideoPreviewCell : DWImagePreviewCell
 
-@property (nonatomic ,strong) AVPlayerItem * media;
+@property (nonatomic ,strong ,readonly) AVPlayerItem * media;
 
 @end
 

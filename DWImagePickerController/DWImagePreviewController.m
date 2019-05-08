@@ -217,7 +217,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)configPosterAndFetchMediaWithCellData:(DWImagePreviewData *)cellData cell:(DWImagePreviewCell *)cell previewType:(DWImagePreviewType)previewType index:(NSUInteger)index satisfiedSize:(BOOL)satisfiedSize {
     NSUInteger originIndex = index;
-    cell.media = cellData.previewImage;
+    [cell setMedia:cellData.previewImage isDegraded:YES];
     if (previewType == DWImagePreviewTypeImage && satisfiedSize) {
         cellData.media = cellData.previewImage;
         return;
@@ -228,7 +228,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
             if (index == cell.index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.media = cellData.media;
+                    [cell setMedia:cellData.media isDegraded:NO];
                 });
             }
         }];
@@ -377,7 +377,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [cell configCollectionViewController:self];
     }
     if (cellData.media) {
-        cell.media = cellData.media;
+        [cell setMedia:cellData.media isDegraded:NO];
     } else if (cellData.previewImage) {
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
     } else {
