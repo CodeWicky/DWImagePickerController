@@ -228,7 +228,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
             if (index == cell.index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [cell setMedia:cellData.media isDegraded:NO];
+                    cell.media = cellData.media;
                 });
             }
         }];
@@ -377,7 +377,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [cell configCollectionViewController:self];
     }
     if (cellData.media) {
-        [cell setMedia:cellData.media isDegraded:NO];
+        cell.media = cellData.media;
     } else if (cellData.previewImage) {
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
     } else {

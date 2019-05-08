@@ -426,6 +426,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
+-(void)setMedia:(id)media {
+    [self setMedia:media isDegraded:NO];
+}
+
 -(UIView *)containerView {
     return self.zoomable?self.zoomContainerView:self.contentView;
 }
