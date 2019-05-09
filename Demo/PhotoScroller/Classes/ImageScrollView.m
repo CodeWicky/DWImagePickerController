@@ -50,7 +50,7 @@
 #import "ImageScrollView.h"
 #import "TilingView.h"
 
-#define TILE_IMAGES 1  // turn on to use tiled images, if off, we use whole images
+#define TILE_IMAGES 0  // turn on to use tiled images, if off, we use whole images
 
 // forward declaration of our utility functions
 static NSUInteger _ImageCount(void);
@@ -124,11 +124,22 @@ static NSString *_ImageNameAtIndex(NSUInteger index);
     CGSize boundsSize = self.bounds.size;
     CGRect frameToCenter = _zoomView.frame;
     
+//    NSLog(@"frame = %@",NSStringFromCGRect(_zoomView.frame));
+    NSLog(@"size = %@",NSStringFromCGSize(self.contentSize));
+    
     // center horizontally
-    if (frameToCenter.size.width < boundsSize.width)
+    if (frameToCenter.size.width < boundsSize.width) {
         frameToCenter.origin.x = (boundsSize.width - frameToCenter.size.width) / 2;
-    else
-        frameToCenter.origin.x = 0;
+        NSLog(@"smaller");
+    } else {
+        
+        if (self.zoomScale >= self.minimumZoomScale) {
+            frameToCenter.origin.x = 0;
+        }
+        NSLog(@"bigger");
+    }
+    
+        
     
     // center vertically
     if (frameToCenter.size.height < boundsSize.height)
@@ -199,7 +210,7 @@ static NSString *_ImageNameAtIndex(NSUInteger index);
     
     // reset our zoomScale to 1.0 before doing any further calculations
     self.zoomScale = 1.0;
-
+    NSLog(@"image size = %@",NSStringFromCGSize(image.size));
     // make a new UIImageView for the new image
     _zoomView = [[UIImageView alloc] initWithImage:image];
     [self addSubview:_zoomView];

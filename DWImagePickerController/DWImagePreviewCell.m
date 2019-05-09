@@ -32,7 +32,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,strong) UIScrollView * zoomContainerView;
 
-@property (nonatomic ,strong) UIImageView * imageView;
+@property (nonatomic ,strong) UIImageView * mediaView;
 
 @property (nonatomic ,assign) CGSize mediaSize;
 
@@ -63,14 +63,14 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     _index = index;
 }
 
-+(Class)classForPosterImageView {
++(Class)classForMediaView {
     return [UIImageView class];
 }
 
 -(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point {
     if (self.zoomable) {
         UIScrollView *scrollView = (UIScrollView *)self.containerView;
-        if (!CGRectContainsPoint(self.imageView.bounds, point)) {
+        if (!CGRectContainsPoint(self.mediaView.bounds, point)) {
             return;
         }
         if (!zoomIn) {
@@ -121,7 +121,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self resetCellZoom];
     _panDirection = DWImagePanDirectionTypeNone;
     _mediaSize = CGSizeZero;
-    self.imageView.image = nil;
 }
 
 -(void)configGestureTarget:(UIView *)target {
@@ -135,11 +134,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
     _zoomContainerView.hidden = !zoomable;
-    [self.containerView addSubview:self.imageView];
+    [self.containerView addSubview:self.mediaView];
 }
 
 -(void)initializingSubviews {
-    [self.containerView addSubview:self.imageView];
+    [self.containerView addSubview:self.mediaView];
 }
 
 -(void)setupSubviews {
@@ -151,7 +150,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             _zoomContainerView.contentSize = self.bounds.size;
             [self configZoomScaleWithMediaSize:_mediaSize];
         }
-        self.imageView.frame = self.bounds;
+        self.mediaView.frame = self.bounds;
     }
 }
 
@@ -215,14 +214,14 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)doubleClickAction:(UITapGestureRecognizer *)doubleClick {
     if (self.doubleClickAction) {
-        CGPoint point = [doubleClick locationInView:self.imageView];
+        CGPoint point = [doubleClick locationInView:self.mediaView];
         self.doubleClickAction(self,point);
     }
 }
 
 #pragma mark --- scroll delegate ---
 -(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
-    return self.imageView;
+    return self.mediaView;
 }
 
 -(void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view {
@@ -403,16 +402,16 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 #pragma mark --- setter/getter ---
--(UIImageView *)imageView {
-    if (!_imageView) {
-        Class clazz = [[self class] classForPosterImageView];
-        _imageView = [[clazz alloc] init];
-        _imageView.contentMode = UIViewContentModeScaleAspectFit;
-        _imageView.clipsToBounds = YES;
-        _imageView.userInteractionEnabled = YES;
-        [self configGestureTarget:_imageView];
+-(UIImageView *)mediaView {
+    if (!_mediaView) {
+        Class clazz = [[self class] classForMediaView];
+        _mediaView = [[clazz alloc] init];
+        _mediaView.contentMode = UIViewContentModeScaleAspectFit;
+        _mediaView.clipsToBounds = YES;
+        _mediaView.userInteractionEnabled = YES;
+        [self configGestureTarget:_mediaView];
     }
-    return _imageView;
+    return _mediaView;
 }
 
 -(void)setZoomable:(BOOL)zoomable {
@@ -464,10 +463,15 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return self;
 }
 
+-(void)clearCell {
+    [super clearCell];
+    self.mediaView.image = nil;
+}
+
 #pragma mark --- setter/getter ---
 -(void)setMedia:(UIImage *)media {
     [super setMedia:media];
-    self.imageView.image = media;
+    self.mediaView.image = media;
     [self configZoomScaleWithMediaSize:media.size];
 }
 
@@ -481,7 +485,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @dynamic media;
 
 #pragma mark --- override ---
-+(Class)classForPosterImageView {
++(Class)classForMediaView {
     return [YYAnimatedImageView class];
 }
 
@@ -495,18 +499,19 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)clearCell {
     [super clearCell];
-    if (self.imageView.isAnimating) {
-        [self.imageView stopAnimating];
+    if (self.mediaView.isAnimating) {
+        [self.mediaView stopAnimating];
     }
+    self.mediaView.image = nil;
 }
 
 #pragma mark --- setter/getter ---
 -(void)setMedia:(YYImage *)media {
     [super setMedia:media];
-    self.imageView.image = media;
+    self.mediaView.image = media;
     if ([media isKindOfClass:[YYImage class]]) {
         [self configZoomScaleWithMediaSize:media.size];
-        [self.imageView startAnimating];
+        [self.mediaView startAnimating];
     }
 }
 

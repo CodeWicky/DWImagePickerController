@@ -27,6 +27,8 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 @property (nonatomic ,strong) id media;
 
+@property (nonatomic ,strong) UIImage * poster;
+
 @property (nonatomic ,assign) BOOL zoomable;
 
 @property (nonatomic ,assign ,readonly) BOOL zooming;
@@ -53,7 +55,7 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 
 -(void)setupSubviews;
 
-+(Class)classForPosterImageView;
++(Class)classForMediaView;
 
 -(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point;
 
