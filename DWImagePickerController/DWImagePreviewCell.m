@@ -8,6 +8,7 @@
 
 #import "DWImagePreviewCell.h"
 #import "DWTiledImageView.h"
+#import <PhotosUI/PhotosUI.h>
 
 #define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
 
@@ -150,6 +151,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             _zoomContainerView.contentSize = self.bounds.size;
             [self configZoomScaleWithMediaSize:_mediaSize];
         }
+    }
+    if (!CGRectEqualToRect(self.mediaView.bounds, self.bounds)) {
         self.mediaView.frame = self.bounds;
     }
 }
@@ -475,6 +478,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self configZoomScaleWithMediaSize:media.size];
 }
 
+-(void)setPoster:(UIImage *)poster {
+    [super setPoster:poster];
+    self.mediaView.image = poster;
+}
+
 @end
 
 @interface DWAnimateImagePreviewCell ()
@@ -509,23 +517,85 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)setMedia:(YYImage *)media {
     [super setMedia:media];
     self.mediaView.image = media;
-    if ([media isKindOfClass:[YYImage class]]) {
-        [self configZoomScaleWithMediaSize:media.size];
-        [self.mediaView startAnimating];
-    }
+    [self configZoomScaleWithMediaSize:media.size];
+    [self.mediaView startAnimating];
 }
+
+-(void)setPoster:(UIImage *)poster {
+    [super setPoster:poster];
+    self.mediaView.image = poster;
+}
+
+@end
+
+@interface DWLivePhotoPreviewCell ()
+
+@property (nonatomic ,strong) UIImageView * posterView;
+
+@property (nonatomic ,strong) PHLivePhotoView * mediaView;
 
 @end
 
 @implementation DWLivePhotoPreviewCell
 @dynamic media;
+@dynamic mediaView;
+
++(Class)classForMediaView {
+    return [PHLivePhotoView class];
+}
 
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        self.zoomable = YES;
         self.previewType = DWImagePreviewTypeLivePhoto;
     }
     return self;
+}
+
+-(void)initializingSubviews {
+    [super initializingSubviews];
+    if (self.zoomable) {
+        [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
+    } else {
+        [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
+    }
+}
+
+-(void)setupSubviews {
+    [super setupSubviews];
+    if (!CGRectEqualToRect(self.posterView.bounds, self.bounds)) {
+        self.posterView.frame = self.bounds;
+    }
+}
+
+-(void)clearCell {
+    [super clearCell];
+    self.mediaView.livePhoto = nil;
+    self.posterView.image = nil;
+}
+
+#pragma mark --- setter/getter ---
+-(void)setMedia:(PHLivePhoto *)media {
+    [super setMedia:media];
+    self.mediaView.livePhoto = media;
+    ///清除poster，否则缩放有底图
+    self.posterView.image = nil;
+    [self configZoomScaleWithMediaSize:media.size];
+}
+
+-(void)setPoster:(UIImage *)poster {
+    [super setPoster:poster];
+    self.posterView.image = poster;
+}
+
+-(UIImageView *)posterView {
+    if (!_posterView) {
+        _posterView = [[UIImageView alloc] init];
+        _posterView.contentMode = UIViewContentModeScaleAspectFit;
+        _posterView.clipsToBounds = YES;
+    }
+    return _posterView;
 }
 
 @end

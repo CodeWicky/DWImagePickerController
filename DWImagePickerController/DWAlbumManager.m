@@ -101,7 +101,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 @implementation DWAssetModel
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
     _asset = asset;
     _media = media;
     _info = info;
@@ -142,7 +142,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 @implementation DWImageAssetModel
 @dynamic media;
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
     [super configWithAsset:asset media:media info:info];
     _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
 }
@@ -190,9 +190,15 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 @implementation DWLivePhotoAssetModel
 @dynamic media;
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(id)info{
+-(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
     [super configWithAsset:asset media:media info:info];
-    _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
+    if ([info.allKeys containsObject:PHImageResultIsDegradedKey]) {
+        _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
+    } else if ([info.allKeys containsObject:PHLivePhotoInfoIsDegradedKey]) {
+        _isDegraded = [info[PHLivePhotoInfoIsDegradedKey] boolValue];
+    } else {
+        _isDegraded = NO;
+    }
 }
 
 -(BOOL)satisfiedSize:(CGSize)targetSize {

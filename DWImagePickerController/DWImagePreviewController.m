@@ -217,7 +217,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)configPosterAndFetchMediaWithCellData:(DWImagePreviewData *)cellData cell:(DWImagePreviewCell *)cell previewType:(DWImagePreviewType)previewType index:(NSUInteger)index satisfiedSize:(BOOL)satisfiedSize {
     NSUInteger originIndex = index;
-    cell.media = cellData.previewImage;
+    cell.poster = cellData.previewImage;
     if (previewType == DWImagePreviewTypeImage && satisfiedSize) {
         cellData.media = cellData.previewImage;
         return;
