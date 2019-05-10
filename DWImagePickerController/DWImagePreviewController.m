@@ -122,7 +122,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- tool method ---
 -(void)showPreview {
-    
     if (_indexChanged) {
         ///如果预览位置发生改变则滚动到该位置
         _indexChanged = NO;
@@ -173,7 +172,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
--(void)configGestureActionForCell:(DWImagePreviewCell *)cell indexPath:(NSIndexPath *)indexPath {
+-(void)configActionForCell:(DWImagePreviewCell *)cell indexPath:(NSIndexPath *)indexPath {
     __weak typeof(self)weakSelf = self;
     cell.tapAction = ^(DWImagePreviewCell * _Nonnull cell) {
         __strong typeof(weakSelf)StrongSelf = weakSelf;
@@ -186,6 +185,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             [StrongSelf setToolBarHidden:YES];
         }
         [cell zoomPosterImageView:!cell.zooming point:point];
+    };
+    
+    cell.callNavigationHide = ^(DWImagePreviewCell * _Nonnull cell ,BOOL hide) {
+        __strong typeof(weakSelf)StrongSelf = weakSelf;
+        [StrongSelf setToolBarHidden:hide];
     };
 }
 
@@ -373,7 +377,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     
     [cell configIndex:originIndex];
     if (previewType != DWImagePreviewTypeNone) {
-        [self configGestureActionForCell:cell indexPath:indexPath];
+        [self configActionForCell:cell indexPath:indexPath];
         [cell configCollectionViewController:self];
     }
     if (cellData.media) {

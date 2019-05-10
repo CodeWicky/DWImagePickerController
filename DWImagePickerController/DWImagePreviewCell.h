@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class DWImagePreviewCell,DWTiledImageView;
 typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
 typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell ,CGPoint point);
+typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell * cell ,BOOL hide);
 
 @interface DWImagePreviewCell : UICollectionViewCell
 
@@ -36,6 +37,8 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 @property (nonatomic ,copy) DWImagePreviewActionCallback tapAction;
 
 @property (nonatomic ,copy) DWImagePreviewDoubleClickActionCallback doubleClickAction;
+
+@property (nonatomic ,copy) DWImagePreviewCellCallNavigationHideCallback callNavigationHide;
 
 -(void)resetCellZoom;
 
@@ -56,6 +59,8 @@ typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell
 -(void)setupSubviews;
 
 +(Class)classForMediaView;
+
+-(void)configZoomScaleWithMediaSize:(CGSize)mediaSize;
 
 -(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point;
 

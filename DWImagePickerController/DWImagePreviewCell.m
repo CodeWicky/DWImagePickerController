@@ -236,7 +236,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)scrollViewDidZoom:(UIScrollView *)scrollView {
-    
+    if (self.callNavigationHide) {
+        self.callNavigationHide(self,YES);
+    }
     CGFloat fixInset = 0;
     if (scrollView.zoomScale >= self.preferredZoomScale) {
         ///大于偏好缩放比则让inset为负的修正后的fixAnchor，这样则不会显示黑边
@@ -528,11 +530,15 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @end
 
-@interface DWLivePhotoPreviewCell ()
+@interface DWLivePhotoPreviewCell ()<PHLivePhotoViewDelegate>
 
 @property (nonatomic ,strong) UIImageView * posterView;
 
 @property (nonatomic ,strong) PHLivePhotoView * mediaView;
+
+@property (nonatomic ,assign) BOOL livePhotoIsPlaying;
+
+@property (nonatomic ,strong) UIImageView * livePhotoBadge;
 
 @end
 
@@ -540,11 +546,68 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @dynamic media;
 @dynamic mediaView;
 
+#pragma mark --- tool method ---
+-(void)configBadgeWithAnimated:(BOOL)animated {
+    if (self.colVC.isToolBarShowing && self.mediaView.livePhoto) {
+        
+        if (!self.livePhotoBadge.image) {
+            self.livePhotoBadge.image = [PHLivePhotoView livePhotoBadgeImageWithOptions:(PHLivePhotoBadgeOptionsOverContent)];
+        }
+        
+        CGFloat spacing = 3;
+        CGRect badgeFrame = CGRectMake(spacing, spacing, self.livePhotoBadge.image.size.width, self.livePhotoBadge.image.size.height);
+        CGFloat zoomFactor = 1;
+        if (self.zoomable) {
+            zoomFactor = self.zoomContainerView.zoomScale;
+        }
+        switch (self.zoomDirection) {
+            case DWImagePreviewZoomTypeHorizontal:
+            {
+                CGFloat height = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
+                badgeFrame.origin.y = (self.bounds.size.height - height) / 2;
+            }
+                break;
+            case DWImagePreviewZoomTypeVertical:
+            {
+                CGFloat width = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
+                badgeFrame.origin.x = (self.bounds.size.width - width) / 2;
+            }
+                break;
+            default:
+                break;
+        }
+        CGFloat minY = CGRectGetMaxY(self.colVC.navigationController.navigationBar.frame) + spacing;
+        if (badgeFrame.origin.y < minY) {
+            badgeFrame.origin.y = minY;
+        }
+        if (badgeFrame.origin.x < spacing) {
+            badgeFrame.origin.x = spacing;
+        }
+        self.livePhotoBadge.frame = badgeFrame;
+        
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:^{
+                self.livePhotoBadge.alpha = 1;
+            }];
+        } else {
+            self.livePhotoBadge.alpha = 1;
+        }
+    } else {
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:^{
+                self.livePhotoBadge.alpha = 0;
+            }];
+        } else {
+            self.livePhotoBadge.alpha = 0;
+        }
+    }
+}
+
+#pragma mark --- override ---
 +(Class)classForMediaView {
     return [PHLivePhotoView class];
 }
 
-#pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.zoomable = YES;
@@ -555,11 +618,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)initializingSubviews {
     [super initializingSubviews];
+    self.mediaView.delegate = self;
     if (self.zoomable) {
         [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
     } else {
         [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
     }
+    [self.contentView addSubview:self.livePhotoBadge];
 }
 
 -(void)setupSubviews {
@@ -567,12 +632,60 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (!CGRectEqualToRect(self.posterView.bounds, self.bounds)) {
         self.posterView.frame = self.bounds;
     }
+    [self configBadgeWithAnimated:YES];
 }
 
 -(void)clearCell {
     [super clearCell];
     self.mediaView.livePhoto = nil;
     self.posterView.image = nil;
+    self.livePhotoBadge.alpha = 0;
+}
+
+-(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
+    [super configZoomScaleWithMediaSize:mediaSize];
+    if (!CGSizeEqualToSize(mediaSize, CGSizeZero)) {
+        [super setMediaSize:mediaSize];
+        CGFloat mediaScale = mediaSize.width / mediaSize.height;
+        CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
+        DWImagePreviewZoomType zoomDire = DWImagePreviewZoomTypeNone;
+        CGFloat fixStartAnchor = 0;
+        CGFloat fixEndAnchor = 0;
+        if (CGFLOATEQUAL(mediaScale, previewScale)) {
+            zoomDire = DWImagePreviewZoomTypeNone;
+            fixStartAnchor = 0;
+            fixEndAnchor = 0;
+        } else if (mediaScale / previewScale > 1) {
+            zoomDire = DWImagePreviewZoomTypeHorizontal;
+            fixStartAnchor = (self.bounds.size.height - self.bounds.size.width / mediaScale) * 0.5;
+            fixEndAnchor = (self.bounds.size.height + self.bounds.size.width / mediaScale) * 0.5;
+        } else {
+            zoomDire = DWImagePreviewZoomTypeVertical;
+            fixStartAnchor = (self.bounds.size.width - self.bounds.size.height * mediaScale) * 0.5;
+            fixEndAnchor = (self.bounds.size.width + self.bounds.size.height * mediaScale) * 0.5;
+        }
+        self.zoomDirection = zoomDire;
+        self.fixStartAnchor = fixStartAnchor;
+        self.fixEndAnchor = fixEndAnchor;
+    }
+}
+
+-(void)tapAction:(UITapGestureRecognizer *)sender {
+    if (self.livePhotoIsPlaying) {
+        return;
+    }
+    if (self.tapAction) {
+        self.tapAction(self);
+    }
+}
+
+#pragma mark --- live photo delegate ---
+-(void)livePhotoView:(PHLivePhotoView *)livePhotoView willBeginPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
+    self.livePhotoIsPlaying = YES;
+}
+
+-(void)livePhotoView:(PHLivePhotoView *)livePhotoView didEndPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
+    self.livePhotoIsPlaying = NO;
 }
 
 #pragma mark --- setter/getter ---
@@ -582,6 +695,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     ///清除poster，否则缩放有底图
     self.posterView.image = nil;
     [self configZoomScaleWithMediaSize:media.size];
+    [self configBadgeWithAnimated:NO];
 }
 
 -(void)setPoster:(UIImage *)poster {
@@ -596,6 +710,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         _posterView.clipsToBounds = YES;
     }
     return _posterView;
+}
+
+-(UIImageView *)livePhotoBadge {
+    if (!_livePhotoBadge) {
+        _livePhotoBadge = [[UIImageView alloc] init];
+    }
+    return _livePhotoBadge;
 }
 
 @end
