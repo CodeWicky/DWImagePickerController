@@ -38,6 +38,8 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 -(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion;
 
 @optional
+///返回对应位置的媒体是否为HDR模式资源
+-(BOOL)previewController:(DWImagePreviewController *)previewController isHDRAtIndex:(NSUInteger)index;
 
 ///获取对应角标位置占位图的回调（发生在 -(void)previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion: 回调之前，预先为媒体加载占位图，如果命中缓存则不回调)
 -(void)previewController:(DWImagePreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWImagePreviewFetchPosterCompletion)fetchCompletion;

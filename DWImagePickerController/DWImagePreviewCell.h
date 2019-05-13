@@ -72,6 +72,8 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 @property (nonatomic ,strong) UIImage * media;
 
+@property (nonatomic ,assign) BOOL isHDR;
+
 @end
 
 @interface DWAnimateImagePreviewCell : DWImagePreviewCell
@@ -83,6 +85,8 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 @interface DWLivePhotoPreviewCell : DWImagePreviewCell
 
 @property (nonatomic ,strong) PHLivePhoto * media;
+
+@property (nonatomic ,assign) BOOL isHDR;
 
 @end
 

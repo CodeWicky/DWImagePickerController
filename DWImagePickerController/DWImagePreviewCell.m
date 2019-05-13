@@ -454,10 +454,72 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @interface DWNormalImagePreviewCell ()
 
+@property (nonatomic ,strong) UIImageView * hdrBadge;
+
 @end
 
 @implementation DWNormalImagePreviewCell
 @dynamic media;
+
+#pragma mark --- tool method ---
+-(void)configBadgeWithAnimated:(BOOL)animated {
+    if (self.colVC.isToolBarShowing && self.mediaView.image) {
+        if (!self.isHDR) {
+            return;
+        }
+        if (!self.hdrBadge.image) {
+            self.hdrBadge.image = [UIImage imageNamed:@"DWImagePreviewController.bundle/hdr_badge"];
+        }
+        
+        CGFloat spacing = 3;
+        CGFloat badgeLength = 28;
+        CGRect badgeFrame = CGRectMake(spacing, spacing, badgeLength, badgeLength);
+        CGFloat zoomFactor = 1;
+        if (self.zoomable) {
+            zoomFactor = self.zoomContainerView.zoomScale;
+        }
+        switch (self.zoomDirection) {
+            case DWImagePreviewZoomTypeHorizontal:
+            {
+                CGFloat height = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
+                badgeFrame.origin.y = (self.bounds.size.height - height) / 2;
+            }
+                break;
+            case DWImagePreviewZoomTypeVertical:
+            {
+                CGFloat width = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
+                badgeFrame.origin.x = (self.bounds.size.width - width) / 2;
+            }
+                break;
+            default:
+                break;
+        }
+        CGFloat minY = CGRectGetMaxY(self.colVC.navigationController.navigationBar.frame) + spacing;
+        if (badgeFrame.origin.y < minY) {
+            badgeFrame.origin.y = minY;
+        }
+        if (badgeFrame.origin.x < spacing) {
+            badgeFrame.origin.x = spacing;
+        }
+        self.hdrBadge.frame = badgeFrame;
+        
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:^{
+                self.hdrBadge.alpha = 1;
+            }];
+        } else {
+            self.hdrBadge.alpha = 1;
+        }
+    } else {
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:^{
+                self.hdrBadge.alpha = 0;
+            }];
+        } else {
+            self.hdrBadge.alpha = 0;
+        }
+    }
+}
 
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
@@ -471,6 +533,46 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)clearCell {
     [super clearCell];
     self.mediaView.image = nil;
+    self.isHDR = NO;
+    self.hdrBadge.alpha = 0;
+}
+
+-(void)initializingSubviews {
+    [super initializingSubviews];
+    [self.contentView addSubview:self.hdrBadge];
+}
+
+-(void)setupSubviews {
+    [super setupSubviews];
+    [self configBadgeWithAnimated:YES];
+}
+
+-(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
+    [super configZoomScaleWithMediaSize:mediaSize];
+    if (!CGSizeEqualToSize(mediaSize, CGSizeZero)) {
+        [super setMediaSize:mediaSize];
+        CGFloat mediaScale = mediaSize.width / mediaSize.height;
+        CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
+        DWImagePreviewZoomType zoomDire = DWImagePreviewZoomTypeNone;
+        CGFloat fixStartAnchor = 0;
+        CGFloat fixEndAnchor = 0;
+        if (CGFLOATEQUAL(mediaScale, previewScale)) {
+            zoomDire = DWImagePreviewZoomTypeNone;
+            fixStartAnchor = 0;
+            fixEndAnchor = 0;
+        } else if (mediaScale / previewScale > 1) {
+            zoomDire = DWImagePreviewZoomTypeHorizontal;
+            fixStartAnchor = (self.bounds.size.height - self.bounds.size.width / mediaScale) * 0.5;
+            fixEndAnchor = (self.bounds.size.height + self.bounds.size.width / mediaScale) * 0.5;
+        } else {
+            zoomDire = DWImagePreviewZoomTypeVertical;
+            fixStartAnchor = (self.bounds.size.width - self.bounds.size.height * mediaScale) * 0.5;
+            fixEndAnchor = (self.bounds.size.width + self.bounds.size.height * mediaScale) * 0.5;
+        }
+        self.zoomDirection = zoomDire;
+        self.fixStartAnchor = fixStartAnchor;
+        self.fixEndAnchor = fixEndAnchor;
+    }
 }
 
 #pragma mark --- setter/getter ---
@@ -478,12 +580,21 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [super setMedia:media];
     self.mediaView.image = media;
     [self configZoomScaleWithMediaSize:media.size];
+    [self configBadgeWithAnimated:NO];
 }
 
 -(void)setPoster:(UIImage *)poster {
     [super setPoster:poster];
     self.mediaView.image = poster;
 }
+
+-(UIImageView *)hdrBadge {
+    if (!_hdrBadge) {
+        _hdrBadge = [[UIImageView alloc] init];
+    }
+    return _hdrBadge;
+}
+
 
 @end
 
@@ -540,6 +651,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,strong) UIImageView * livePhotoBadge;
 
+@property (nonatomic ,strong) UIImageView * hdrBadge;
+
 @end
 
 @implementation DWLivePhotoPreviewCell
@@ -585,20 +698,43 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
         self.livePhotoBadge.frame = badgeFrame;
         
+        if (self.isHDR) {
+            
+            if (!self.hdrBadge.image) {
+                self.hdrBadge.image = [UIImage imageNamed:@"DWImagePreviewController.bundle/hdr_badge"];
+            }
+            
+            CGFloat badgeLength = 28;
+            CGRect hdrBadgeFrame = CGRectMake(CGRectGetMaxX(badgeFrame) + spacing, badgeFrame.origin.y, badgeLength, badgeLength);
+            self.hdrBadge.frame = hdrBadgeFrame;
+        }
+        
         if (animated) {
             [UIView animateWithDuration:0.25 animations:^{
                 self.livePhotoBadge.alpha = 1;
+                if (self.isHDR) {
+                    self.hdrBadge.alpha = 1;
+                }
             }];
         } else {
             self.livePhotoBadge.alpha = 1;
+            if (self.isHDR) {
+                self.hdrBadge.alpha = 1;
+            }
         }
     } else {
         if (animated) {
             [UIView animateWithDuration:0.25 animations:^{
                 self.livePhotoBadge.alpha = 0;
+                if (self.isHDR) {
+                    self.hdrBadge.alpha = 0;
+                }
             }];
         } else {
             self.livePhotoBadge.alpha = 0;
+            if (self.isHDR) {
+                self.hdrBadge.alpha = 0;
+            }
         }
     }
 }
@@ -625,6 +761,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
     }
     [self.contentView addSubview:self.livePhotoBadge];
+    [self.contentView addSubview:self.hdrBadge];
 }
 
 -(void)setupSubviews {
@@ -640,6 +777,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     self.mediaView.livePhoto = nil;
     self.posterView.image = nil;
     self.livePhotoBadge.alpha = 0;
+    self.isHDR = NO;
+    self.hdrBadge.alpha = 0;
 }
 
 -(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
@@ -717,6 +856,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         _livePhotoBadge = [[UIImageView alloc] init];
     }
     return _livePhotoBadge;
+}
+
+-(UIImageView *)hdrBadge {
+    if (!_hdrBadge) {
+        _hdrBadge = [[UIImageView alloc] init];
+    }
+    return _hdrBadge;
 }
 
 @end

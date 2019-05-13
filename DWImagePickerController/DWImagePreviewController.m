@@ -375,6 +375,13 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             break;
     }
     
+    if (previewType == DWImagePreviewTypeImage || previewType == DWImagePreviewTypeLivePhoto) {
+        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:isHDRAtIndex:)]) {
+            ((DWNormalImagePreviewCell *)cell).isHDR = [self.dataSource previewController:self isHDRAtIndex:originIndex];
+        }
+    }
+    
+    
     [cell configIndex:originIndex];
     if (previewType != DWImagePreviewTypeNone) {
         [self configActionForCell:cell indexPath:indexPath];
