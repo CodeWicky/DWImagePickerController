@@ -66,6 +66,8 @@
 
 @property (nonatomic ,assign) DWImagePreviewType previewType;
 
+@property (nonatomic ,assign) BOOL isHDR;
+
 @end
 
 @implementation DWImagePreviewData
@@ -159,6 +161,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:previewTypeAtIndex:)]) {
             data.previewType = [self.dataSource previewController:self previewTypeAtIndex:index];
         }
+        
+        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:isHDRAtIndex:)]) {
+            data.isHDR = [self.dataSource previewController:self isHDRAtIndex:index];
+        }
+        
         [self.dataCache setObject:data forKey:@(index)];
     }
     return data;
@@ -184,7 +191,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         if (StrongSelf.isToolBarShowing) {
             [StrongSelf setToolBarHidden:YES];
         }
-        [cell zoomPosterImageView:!cell.zooming point:point];
+        [cell zoomMediaView:!cell.zooming point:point];
     };
     
     cell.callNavigationHide = ^(DWImagePreviewCell * _Nonnull cell ,BOOL hide) {
@@ -375,13 +382,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             break;
     }
     
-    if (previewType == DWImagePreviewTypeImage || previewType == DWImagePreviewTypeLivePhoto) {
-        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:isHDRAtIndex:)]) {
-            ((DWNormalImagePreviewCell *)cell).isHDR = [self.dataSource previewController:self isHDRAtIndex:originIndex];
-        }
-    }
-    
-    
+    cell.isHDR = cellData.isHDR;
     [cell configIndex:originIndex];
     if (previewType != DWImagePreviewTypeNone) {
         [self configActionForCell:cell indexPath:indexPath];

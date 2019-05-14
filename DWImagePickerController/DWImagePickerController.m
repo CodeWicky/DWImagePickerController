@@ -387,11 +387,7 @@ NS_INLINE NSArray * animateExtensions() {
 
 -(BOOL)previewController:(DWImagePreviewController *)previewController isHDRAtIndex:(NSUInteger)index {
     PHAsset * asset = [self.results objectAtIndex:index];
-    if (asset.mediaType != PHAssetMediaTypeImage) {
-        return NO;
-    } else {
-        return asset.mediaSubtypes & PHAssetMediaSubtypePhotoHDR;
-    }
+    return asset.mediaSubtypes & PHAssetMediaSubtypePhotoHDR;
 }
 
 -(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {
