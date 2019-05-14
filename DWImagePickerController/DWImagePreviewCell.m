@@ -149,7 +149,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             _zoomContainerView.contentInset = UIEdgeInsetsZero;
             self.containerView.frame = self.bounds;
             _zoomContainerView.contentSize = self.bounds.size;
-            [self configZoomScaleWithMediaSize:_mediaSize];
+            [self configScaleFactorWithMediaSize:_mediaSize];
         }
     }
     if (!CGRectEqualToRect(self.mediaView.bounds, self.bounds)) {
@@ -165,8 +165,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
--(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
-    if (self.zoomable && !CGSizeEqualToSize(mediaSize, CGSizeZero)) {
+-(void)configScaleFactorWithMediaSize:(CGSize)mediaSize {
+    if (!CGSizeEqualToSize(mediaSize, CGSizeZero)) {
         _mediaSize = mediaSize;
         CGFloat mediaScale = mediaSize.width / mediaSize.height;
         CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
@@ -384,6 +384,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        _zoomable = YES;
         self.panGes = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureAction:)];
         self.panGes.delegate = self;
         [self addGestureRecognizer:self.panGes];
@@ -524,7 +525,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.zoomable = YES;
         self.previewType = DWImagePreviewTypeImage;
     }
     return self;
@@ -547,39 +547,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self configBadgeWithAnimated:YES];
 }
 
--(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
-    [super configZoomScaleWithMediaSize:mediaSize];
-    if (!CGSizeEqualToSize(mediaSize, CGSizeZero)) {
-        [super setMediaSize:mediaSize];
-        CGFloat mediaScale = mediaSize.width / mediaSize.height;
-        CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
-        DWImagePreviewZoomType zoomDire = DWImagePreviewZoomTypeNone;
-        CGFloat fixStartAnchor = 0;
-        CGFloat fixEndAnchor = 0;
-        if (CGFLOATEQUAL(mediaScale, previewScale)) {
-            zoomDire = DWImagePreviewZoomTypeNone;
-            fixStartAnchor = 0;
-            fixEndAnchor = 0;
-        } else if (mediaScale / previewScale > 1) {
-            zoomDire = DWImagePreviewZoomTypeHorizontal;
-            fixStartAnchor = (self.bounds.size.height - self.bounds.size.width / mediaScale) * 0.5;
-            fixEndAnchor = (self.bounds.size.height + self.bounds.size.width / mediaScale) * 0.5;
-        } else {
-            zoomDire = DWImagePreviewZoomTypeVertical;
-            fixStartAnchor = (self.bounds.size.width - self.bounds.size.height * mediaScale) * 0.5;
-            fixEndAnchor = (self.bounds.size.width + self.bounds.size.height * mediaScale) * 0.5;
-        }
-        self.zoomDirection = zoomDire;
-        self.fixStartAnchor = fixStartAnchor;
-        self.fixEndAnchor = fixEndAnchor;
-    }
-}
-
 #pragma mark --- setter/getter ---
 -(void)setMedia:(UIImage *)media {
     [super setMedia:media];
     self.mediaView.image = media;
-    [self configZoomScaleWithMediaSize:media.size];
+    [self configScaleFactorWithMediaSize:media.size];
     [self configBadgeWithAnimated:NO];
 }
 
@@ -612,7 +584,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.zoomable = YES;
         self.previewType = DWImagePreviewTypeAnimateImage;
     }
     return self;
@@ -630,7 +601,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)setMedia:(YYImage *)media {
     [super setMedia:media];
     self.mediaView.image = media;
-    [self configZoomScaleWithMediaSize:media.size];
+    [self configScaleFactorWithMediaSize:media.size];
     [self.mediaView startAnimating];
 }
 
@@ -746,7 +717,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.zoomable = YES;
+        self.zoomable = NO;
         self.previewType = DWImagePreviewTypeLivePhoto;
     }
     return self;
@@ -781,34 +752,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     self.hdrBadge.alpha = 0;
 }
 
--(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
-    [super configZoomScaleWithMediaSize:mediaSize];
-    if (!CGSizeEqualToSize(mediaSize, CGSizeZero)) {
-        [super setMediaSize:mediaSize];
-        CGFloat mediaScale = mediaSize.width / mediaSize.height;
-        CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
-        DWImagePreviewZoomType zoomDire = DWImagePreviewZoomTypeNone;
-        CGFloat fixStartAnchor = 0;
-        CGFloat fixEndAnchor = 0;
-        if (CGFLOATEQUAL(mediaScale, previewScale)) {
-            zoomDire = DWImagePreviewZoomTypeNone;
-            fixStartAnchor = 0;
-            fixEndAnchor = 0;
-        } else if (mediaScale / previewScale > 1) {
-            zoomDire = DWImagePreviewZoomTypeHorizontal;
-            fixStartAnchor = (self.bounds.size.height - self.bounds.size.width / mediaScale) * 0.5;
-            fixEndAnchor = (self.bounds.size.height + self.bounds.size.width / mediaScale) * 0.5;
-        } else {
-            zoomDire = DWImagePreviewZoomTypeVertical;
-            fixStartAnchor = (self.bounds.size.width - self.bounds.size.height * mediaScale) * 0.5;
-            fixEndAnchor = (self.bounds.size.width + self.bounds.size.height * mediaScale) * 0.5;
-        }
-        self.zoomDirection = zoomDire;
-        self.fixStartAnchor = fixStartAnchor;
-        self.fixEndAnchor = fixEndAnchor;
-    }
-}
-
 -(void)tapAction:(UITapGestureRecognizer *)sender {
     if (self.livePhotoIsPlaying) {
         return;
@@ -833,7 +776,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     self.mediaView.livePhoto = media;
     ///清除poster，否则缩放有底图
     self.posterView.image = nil;
-    [self configZoomScaleWithMediaSize:media.size];
+    [self configScaleFactorWithMediaSize:media.size];
     [self configBadgeWithAnimated:NO];
 }
 

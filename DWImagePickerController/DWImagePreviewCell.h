@@ -60,7 +60,7 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 +(Class)classForMediaView;
 
--(void)configZoomScaleWithMediaSize:(CGSize)mediaSize;
+-(void)configScaleFactorWithMediaSize:(CGSize)mediaSize;
 
 -(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point;
 
