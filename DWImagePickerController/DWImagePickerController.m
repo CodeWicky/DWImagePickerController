@@ -293,7 +293,7 @@
 
 -(DWImagePreviewType)previewTypeForAsset:(PHAsset *)asset {
     if (asset.mediaType == PHAssetMediaTypeImage) {
-        if (asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive) {
+        if (asset.mediaSubtypes & PHAssetMediaSubtypePhotoLive) {
             return DWImagePreviewTypeLivePhoto;
         } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
             return DWImagePreviewTypeAnimateImage;
@@ -383,6 +383,11 @@ NS_INLINE NSArray * animateExtensions() {
 -(DWImagePreviewType)previewController:(DWImagePreviewController *)previewController previewTypeAtIndex:(NSUInteger)index {
     PHAsset * asset = [self.results objectAtIndex:index];
     return [self previewTypeForAsset:asset];
+}
+
+-(BOOL)previewController:(DWImagePreviewController *)previewController isHDRAtIndex:(NSUInteger)index {
+    PHAsset * asset = [self.results objectAtIndex:index];
+    return asset.mediaSubtypes & PHAssetMediaSubtypePhotoHDR;
 }
 
 -(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion {

@@ -34,6 +34,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,strong) UIImageView * mediaView;
 
+@property (nonatomic ,strong) UIImageView * hdrBadge;
+
 @property (nonatomic ,assign) CGSize mediaSize;
 
 @property (nonatomic ,assign) DWImagePreviewZoomType zoomDirection;
@@ -59,15 +61,15 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @implementation DWImagePreviewCell
 
 #pragma mark --- interface method ---
--(void)configIndex:(NSUInteger)index {
-    _index = index;
+-(void)clearCell {
+    [self resetCellZoom];
+    _panDirection = DWImagePanDirectionTypeNone;
+    _mediaSize = CGSizeZero;
+    _isHDR = NO;
+    _hdrBadge.alpha = 0;
 }
 
-+(Class)classForMediaView {
-    return [UIImageView class];
-}
-
--(void)zoomPosterImageView:(BOOL)zoomIn point:(CGPoint)point {
+-(void)zoomMediaView:(BOOL)zoomIn point:(CGPoint)point {
     if (self.zoomable) {
         UIScrollView *scrollView = (UIScrollView *)self.containerView;
         if (!CGRectContainsPoint(self.mediaView.bounds, point)) {
@@ -104,41 +106,19 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
-#pragma mark --- tool method ---
-
--(void)resetCellZoom {
-    _zoomContainerView.zoomScale = 1;
-    _zoomContainerView.maximumZoomScale = 1;
-    _zoomContainerView.contentInset = UIEdgeInsetsZero;
-    _zoomDirection = DWImagePreviewZoomTypeNone;
-    _scrollIsZooming = NO;
-    _preferredZoomScale = 1;
-    _fixStartAnchor = 0;
-    _fixEndAnchor = 0;
+#pragma mark --- private method ---
+-(void)configIndex:(NSUInteger)index {
+    _index = index;
 }
 
--(void)clearCell {
-    [self resetCellZoom];
-    _panDirection = DWImagePanDirectionTypeNone;
-    _mediaSize = CGSizeZero;
-}
-
--(void)configGestureTarget:(UIView *)target {
-    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
-    [target addGestureRecognizer:tap];
-    UITapGestureRecognizer * doubleClick = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleClickAction:)];
-    doubleClick.numberOfTapsRequired = 2;
-    [target addGestureRecognizer:doubleClick];
-    [tap requireGestureRecognizerToFail:doubleClick];
-}
-
--(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
-    _zoomContainerView.hidden = !zoomable;
-    [self.containerView addSubview:self.mediaView];
+#pragma mark --- call back method ---
++(Class)classForMediaView {
+    return [UIImageView class];
 }
 
 -(void)initializingSubviews {
     [self.containerView addSubview:self.mediaView];
+    [self.contentView addSubview:self.hdrBadge];
 }
 
 -(void)setupSubviews {
@@ -148,24 +128,21 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             _zoomContainerView.contentInset = UIEdgeInsetsZero;
             self.containerView.frame = self.bounds;
             _zoomContainerView.contentSize = self.bounds.size;
-            [self configZoomScaleWithMediaSize:_mediaSize];
+            [self configScaleFactorWithMediaSize:_mediaSize];
         }
     }
     if (!CGRectEqualToRect(self.mediaView.bounds, self.bounds)) {
         self.mediaView.frame = self.bounds;
     }
+    [self configBadgeWithAnimated:YES];
 }
 
--(void)closeActionOnSlidingDown {
-    if ([self.colVC.navigationController.viewControllers.lastObject isEqual:self.colVC]) {
-        [self.colVC.navigationController popViewControllerAnimated:YES];
-    } else {
-        [self.colVC dismissViewControllerAnimated:YES completion:nil];
-    }
+-(CGSize)sizeForMedia:(id)media {
+    return CGSizeZero;
 }
 
--(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
-    if (self.zoomable && !CGSizeEqualToSize(mediaSize, CGSizeZero)) {
+-(void)configScaleFactorWithMediaSize:(CGSize)mediaSize {
+    if (!CGSizeEqualToSize(mediaSize, CGSizeZero)) {
         _mediaSize = mediaSize;
         CGFloat mediaScale = mediaSize.width / mediaSize.height;
         CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
@@ -207,7 +184,81 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
-#pragma mark --- action ---
+-(void)configBadgeWithAnimated:(BOOL)animated {
+    if (self.colVC.isToolBarShowing) {
+        if (!self.isHDR) {
+            return;
+        }
+        if (!self.hdrBadge.image) {
+            self.hdrBadge.image = [UIImage imageNamed:@"DWImagePreviewController.bundle/hdr_badge"];
+        }
+        
+        CGFloat spacing = 3;
+        CGFloat badgeLength = 28;
+        CGRect badgeFrame = CGRectMake(spacing, spacing, badgeLength, badgeLength);
+        CGFloat zoomFactor = 1;
+        if (self.zoomable) {
+            zoomFactor = self.zoomContainerView.zoomScale;
+        }
+        switch (self.zoomDirection) {
+            case DWImagePreviewZoomTypeHorizontal:
+            {
+                CGFloat height = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
+                badgeFrame.origin.y = (self.bounds.size.height - height) / 2;
+            }
+                break;
+            case DWImagePreviewZoomTypeVertical:
+            {
+                CGFloat width = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
+                badgeFrame.origin.x = (self.bounds.size.width - width) / 2;
+            }
+                break;
+            default:
+                break;
+        }
+        CGFloat minY = CGRectGetMaxY(self.colVC.navigationController.navigationBar.frame) + spacing;
+        if (badgeFrame.origin.y < minY) {
+            badgeFrame.origin.y = minY;
+        }
+        if (badgeFrame.origin.x < spacing) {
+            badgeFrame.origin.x = spacing;
+        }
+        self.hdrBadge.frame = badgeFrame;
+        
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:^{
+                self.hdrBadge.alpha = 1;
+            }];
+        } else {
+            self.hdrBadge.alpha = 1;
+        }
+    } else {
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:^{
+                self.hdrBadge.alpha = 0;
+            }];
+        } else {
+            self.hdrBadge.alpha = 0;
+        }
+    }
+}
+
+-(void)resetCellZoom {
+    _zoomContainerView.zoomScale = 1;
+    _zoomContainerView.maximumZoomScale = 1;
+    _zoomContainerView.contentInset = UIEdgeInsetsZero;
+    _zoomDirection = DWImagePreviewZoomTypeNone;
+    _scrollIsZooming = NO;
+    _preferredZoomScale = 1;
+    _fixStartAnchor = 0;
+    _fixEndAnchor = 0;
+}
+
+-(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
+    _zoomContainerView.hidden = !zoomable;
+    [self.containerView addSubview:self.mediaView];
+}
+
 -(void)tapAction:(UITapGestureRecognizer *)tap {
     if (self.tapAction) {
         self.tapAction(self);
@@ -218,6 +269,25 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (self.doubleClickAction) {
         CGPoint point = [doubleClick locationInView:self.mediaView];
         self.doubleClickAction(self,point);
+    }
+}
+
+
+#pragma mark --- tool method ---
+-(void)configGestureTarget:(UIView *)target {
+    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
+    [target addGestureRecognizer:tap];
+    UITapGestureRecognizer * doubleClick = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleClickAction:)];
+    doubleClick.numberOfTapsRequired = 2;
+    [target addGestureRecognizer:doubleClick];
+    [tap requireGestureRecognizerToFail:doubleClick];
+}
+
+-(void)closeActionOnSlidingDown {
+    if ([self.colVC.navigationController.viewControllers.lastObject isEqual:self.colVC]) {
+        [self.colVC.navigationController popViewControllerAnimated:YES];
+    } else {
+        [self.colVC dismissViewControllerAnimated:YES completion:nil];
     }
 }
 
@@ -312,7 +382,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
-#pragma mark --- gesture ---
+#pragma mark --- gesture action ---
 -(void)panGestureAction:(UIPanGestureRecognizer *)ges {
     if (![ges isEqual:self.panGes]) {
         return;
@@ -383,6 +453,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        _zoomable = YES;
         self.panGes = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureAction:)];
         self.panGes.delegate = self;
         [self addGestureRecognizer:self.panGes];
@@ -406,6 +477,20 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 #pragma mark --- setter/getter ---
+
+-(void)setZoomable:(BOOL)zoomable {
+    if (_zoomable != zoomable) {
+        _zoomable = zoomable;
+        [self zoomableHasBeenChangedTo:zoomable];
+    }
+}
+
+-(void)setMedia:(id)media {
+    _media = media;
+    [self configScaleFactorWithMediaSize:[self sizeForMedia:media]];
+    [self configBadgeWithAnimated:NO];
+}
+
 -(UIImageView *)mediaView {
     if (!_mediaView) {
         Class clazz = [[self class] classForMediaView];
@@ -416,13 +501,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         [self configGestureTarget:_mediaView];
     }
     return _mediaView;
-}
-
--(void)setZoomable:(BOOL)zoomable {
-    if (_zoomable != zoomable) {
-        _zoomable = zoomable;
-        [self zoomableHasBeenChangedTo:zoomable];
-    }
 }
 
 -(UIView *)containerView {
@@ -445,6 +523,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return _zoomContainerView;
 }
 
+-(UIImageView *)hdrBadge {
+    if (!_hdrBadge) {
+        _hdrBadge = [[UIImageView alloc] init];
+    }
+    return _hdrBadge;
+}
+
 -(BOOL)zooming {
     return self.zoomable && !CGFLOATEQUAL(((UIScrollView *)self.containerView).zoomScale, 1);
 }
@@ -461,7 +546,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.zoomable = YES;
         self.previewType = DWImagePreviewTypeImage;
     }
     return self;
@@ -472,17 +556,21 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     self.mediaView.image = nil;
 }
 
+-(CGSize)sizeForMedia:(UIImage *)media {
+    return media.size;
+}
+
 #pragma mark --- setter/getter ---
 -(void)setMedia:(UIImage *)media {
     [super setMedia:media];
     self.mediaView.image = media;
-    [self configZoomScaleWithMediaSize:media.size];
 }
 
 -(void)setPoster:(UIImage *)poster {
     [super setPoster:poster];
     self.mediaView.image = poster;
 }
+
 
 @end
 
@@ -494,13 +582,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @dynamic media;
 
 #pragma mark --- override ---
-+(Class)classForMediaView {
-    return [YYAnimatedImageView class];
-}
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.zoomable = YES;
         self.previewType = DWImagePreviewTypeAnimateImage;
     }
     return self;
@@ -514,11 +598,18 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     self.mediaView.image = nil;
 }
 
++(Class)classForMediaView {
+    return [YYAnimatedImageView class];
+}
+
+-(CGSize)sizeForMedia:(YYImage *)media {
+    return media.size;
+}
+
 #pragma mark --- setter/getter ---
 -(void)setMedia:(YYImage *)media {
     [super setMedia:media];
     self.mediaView.image = media;
-    [self configZoomScaleWithMediaSize:media.size];
     [self.mediaView startAnimating];
 }
 
@@ -545,9 +636,60 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @dynamic media;
 @dynamic mediaView;
 
-#pragma mark --- tool method ---
+#pragma mark --- live photo delegate ---
+-(void)livePhotoView:(PHLivePhotoView *)livePhotoView willBeginPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
+    self.livePhotoIsPlaying = YES;
+}
+
+-(void)livePhotoView:(PHLivePhotoView *)livePhotoView didEndPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
+    self.livePhotoIsPlaying = NO;
+}
+
+#pragma mark --- override ---
+
+-(instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        self.previewType = DWImagePreviewTypeLivePhoto;
+    }
+    return self;
+}
+
+-(void)clearCell {
+    [super clearCell];
+    self.mediaView.livePhoto = nil;
+    self.posterView.image = nil;
+    self.livePhotoBadge.alpha = 0;
+}
+
++(Class)classForMediaView {
+    return [PHLivePhotoView class];
+}
+
+-(void)initializingSubviews {
+    [super initializingSubviews];
+    self.mediaView.delegate = self;
+    if (self.zoomable) {
+        [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
+    } else {
+        [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
+    }
+    [self.contentView bringSubviewToFront:self.hdrBadge];
+    [self.contentView addSubview:self.livePhotoBadge];
+}
+
+-(void)setupSubviews {
+    [super setupSubviews];
+    if (!CGRectEqualToRect(self.posterView.bounds, self.bounds)) {
+        self.posterView.frame = self.bounds;
+    }
+}
+
+-(CGSize)sizeForMedia:(PHLivePhoto *)media {
+    return media.size;
+}
+
 -(void)configBadgeWithAnimated:(BOOL)animated {
-    if (self.colVC.isToolBarShowing && self.mediaView.livePhoto) {
+    if (self.colVC.isToolBarShowing) {
         
         if (!self.livePhotoBadge.image) {
             self.livePhotoBadge.image = [PHLivePhotoView livePhotoBadgeImageWithOptions:(PHLivePhotoBadgeOptionsOverContent)];
@@ -584,88 +726,44 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
         self.livePhotoBadge.frame = badgeFrame;
         
+        if (self.isHDR) {
+            
+            if (!self.hdrBadge.image) {
+                self.hdrBadge.image = [UIImage imageNamed:@"DWImagePreviewController.bundle/hdr_badge"];
+            }
+            
+            CGFloat badgeLength = 28;
+            CGRect hdrBadgeFrame = CGRectMake(CGRectGetMaxX(badgeFrame) + spacing, badgeFrame.origin.y, badgeLength, badgeLength);
+            self.hdrBadge.frame = hdrBadgeFrame;
+        }
+        
         if (animated) {
             [UIView animateWithDuration:0.25 animations:^{
                 self.livePhotoBadge.alpha = 1;
+                if (self.isHDR) {
+                    self.hdrBadge.alpha = 1;
+                }
             }];
         } else {
             self.livePhotoBadge.alpha = 1;
+            if (self.isHDR) {
+                self.hdrBadge.alpha = 1;
+            }
         }
     } else {
         if (animated) {
             [UIView animateWithDuration:0.25 animations:^{
                 self.livePhotoBadge.alpha = 0;
+                if (self.isHDR) {
+                    self.hdrBadge.alpha = 0;
+                }
             }];
         } else {
             self.livePhotoBadge.alpha = 0;
+            if (self.isHDR) {
+                self.hdrBadge.alpha = 0;
+            }
         }
-    }
-}
-
-#pragma mark --- override ---
-+(Class)classForMediaView {
-    return [PHLivePhotoView class];
-}
-
--(instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        self.zoomable = YES;
-        self.previewType = DWImagePreviewTypeLivePhoto;
-    }
-    return self;
-}
-
--(void)initializingSubviews {
-    [super initializingSubviews];
-    self.mediaView.delegate = self;
-    if (self.zoomable) {
-        [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
-    } else {
-        [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
-    }
-    [self.contentView addSubview:self.livePhotoBadge];
-}
-
--(void)setupSubviews {
-    [super setupSubviews];
-    if (!CGRectEqualToRect(self.posterView.bounds, self.bounds)) {
-        self.posterView.frame = self.bounds;
-    }
-    [self configBadgeWithAnimated:YES];
-}
-
--(void)clearCell {
-    [super clearCell];
-    self.mediaView.livePhoto = nil;
-    self.posterView.image = nil;
-    self.livePhotoBadge.alpha = 0;
-}
-
--(void)configZoomScaleWithMediaSize:(CGSize)mediaSize {
-    [super configZoomScaleWithMediaSize:mediaSize];
-    if (!CGSizeEqualToSize(mediaSize, CGSizeZero)) {
-        [super setMediaSize:mediaSize];
-        CGFloat mediaScale = mediaSize.width / mediaSize.height;
-        CGFloat previewScale = self.bounds.size.width / self.bounds.size.height;
-        DWImagePreviewZoomType zoomDire = DWImagePreviewZoomTypeNone;
-        CGFloat fixStartAnchor = 0;
-        CGFloat fixEndAnchor = 0;
-        if (CGFLOATEQUAL(mediaScale, previewScale)) {
-            zoomDire = DWImagePreviewZoomTypeNone;
-            fixStartAnchor = 0;
-            fixEndAnchor = 0;
-        } else if (mediaScale / previewScale > 1) {
-            zoomDire = DWImagePreviewZoomTypeHorizontal;
-            fixStartAnchor = (self.bounds.size.height - self.bounds.size.width / mediaScale) * 0.5;
-            fixEndAnchor = (self.bounds.size.height + self.bounds.size.width / mediaScale) * 0.5;
-        } else {
-            zoomDire = DWImagePreviewZoomTypeVertical;
-            fixStartAnchor = (self.bounds.size.width - self.bounds.size.height * mediaScale) * 0.5;
-            fixEndAnchor = (self.bounds.size.width + self.bounds.size.height * mediaScale) * 0.5;
-        }
-        self.zoomDirection = zoomDire;
-        self.fixStartAnchor = fixStartAnchor;
-        self.fixEndAnchor = fixEndAnchor;
     }
 }
 
@@ -678,23 +776,12 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
-#pragma mark --- live photo delegate ---
--(void)livePhotoView:(PHLivePhotoView *)livePhotoView willBeginPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
-    self.livePhotoIsPlaying = YES;
-}
-
--(void)livePhotoView:(PHLivePhotoView *)livePhotoView didEndPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
-    self.livePhotoIsPlaying = NO;
-}
-
 #pragma mark --- setter/getter ---
 -(void)setMedia:(PHLivePhoto *)media {
     [super setMedia:media];
     self.mediaView.livePhoto = media;
     ///清除poster，否则缩放有底图
     self.posterView.image = nil;
-    [self configZoomScaleWithMediaSize:media.size];
-    [self configBadgeWithAnimated:NO];
 }
 
 -(void)setPoster:(UIImage *)poster {
