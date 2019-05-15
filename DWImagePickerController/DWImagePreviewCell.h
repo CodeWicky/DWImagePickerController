@@ -15,7 +15,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class DWImagePreviewCell,DWTiledImageView;
+@class DWImagePreviewCell;
 typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
 typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell ,CGPoint point);
 typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell * cell ,BOOL hide);

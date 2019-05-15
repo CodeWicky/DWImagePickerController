@@ -7,7 +7,6 @@
 //
 
 #import "DWImagePreviewCell.h"
-#import "DWTiledImageView.h"
 #import <PhotosUI/PhotosUI.h>
 
 #define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
