@@ -29,8 +29,6 @@
     self.step = 0;
     
     
-    
-    
 }
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
