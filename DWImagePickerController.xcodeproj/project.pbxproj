@@ -15,6 +15,7 @@
 		9B24405222365EE2004A6E34 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B24405122365EE2004A6E34 /* main.m */; };
 		9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B244059223666AD004A6E34 /* DWAlbumManager.m */; };
 		9B2EEA2F2289A75800D7B7FF /* DWImagePreviewController.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */; };
+		9B2EEA4A2294697F00D7B7FF /* DWPlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2EEA492294697F00D7B7FF /* DWPlayerView.m */; };
 		9B7594FD22745B8900C0C4AC /* DWTiledImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7594FB22745B8900C0C4AC /* DWTiledImageView.m */; };
 		9B83ED49225CD71A005A9125 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B83ED48225CD71A005A9125 /* icon.png */; };
 		9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */; };
@@ -40,6 +41,8 @@
 		9B244058223666AD004A6E34 /* DWAlbumManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWAlbumManager.h; sourceTree = "<group>"; };
 		9B244059223666AD004A6E34 /* DWAlbumManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWAlbumManager.m; sourceTree = "<group>"; };
 		9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = DWImagePreviewController.bundle; sourceTree = "<group>"; };
+		9B2EEA482294697F00D7B7FF /* DWPlayerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWPlayerView.h; sourceTree = "<group>"; };
+		9B2EEA492294697F00D7B7FF /* DWPlayerView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWPlayerView.m; sourceTree = "<group>"; };
 		9B7594FB22745B8900C0C4AC /* DWTiledImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DWTiledImageView.m; sourceTree = "<group>"; };
 		9B7594FC22745B8900C0C4AC /* DWTiledImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DWTiledImageView.h; sourceTree = "<group>"; };
 		9B83ED48225CD71A005A9125 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
@@ -110,6 +113,8 @@
 				9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */,
 				9BCA5CC622688DED002AA175 /* DWImagePreviewCell.h */,
 				9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */,
+				9B2EEA482294697F00D7B7FF /* DWPlayerView.h */,
+				9B2EEA492294697F00D7B7FF /* DWPlayerView.m */,
 				9BCA5CC322684F2E002AA175 /* DWImagePreviewController.h */,
 				9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */,
 				9B244058223666AD004A6E34 /* DWAlbumManager.h */,
@@ -254,6 +259,7 @@
 				9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */,
 				9BCA5CC822688DED002AA175 /* DWImagePreviewCell.m in Sources */,
 				9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */,
+				9B2EEA4A2294697F00D7B7FF /* DWPlayerView.m in Sources */,
 				9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */,
 				9B24404722365EE1004A6E34 /* ViewController.m in Sources */,
 				9B24405222365EE2004A6E34 /* main.m in Sources */,
