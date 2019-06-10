@@ -9,8 +9,9 @@
 #import "ViewController.h"
 #import "DWAlbumManager.h"
 #import "DWImagePickerController.h"
+#import "DWImageVideoView.h"
 
-@interface ViewController ()
+@interface ViewController ()<DWImageVideoViewProtocol>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
 @property (nonatomic ,strong) DWAlbumManager * imgMgr;
@@ -19,16 +20,22 @@
 
 @property (nonatomic ,assign) int step;
 
+@property (nonatomic ,strong) DWImageVideoView * videoView;
+
 @end
 
 @implementation ViewController
+
+-(void)loadView {
+    self.view = [DWImageVideoView new];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.imgMgr = [[DWAlbumManager alloc] init];
     self.step = 0;
-    
-    
+    self.videoView = (DWImageVideoView *)self.view;
+    self.videoView.delegate = self;
     
     
 }
@@ -127,11 +134,19 @@
 //        }];
 //    }];
     
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
-    DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
-#pragma clang diagnostic pop
+//#pragma clang diagnostic push
+//#pragma clang diagnostic ignored "-Wunused-variable"
+//    DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
+//#pragma clang diagnostic pop
     
+    NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"video" ofType:@"mp4"]];
+    AVPlayerItem * item = [AVPlayerItem playerItemWithURL:file];
+    [self.videoView configVideoWithPlayerItem:item];
+}
+
+-(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {
+    NSLog(@"%f",[videoView convertCMTimeToTimeInterval:[videoView actualTimeForItem:item]]);
+    [videoView play];
 }
 
 

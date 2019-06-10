@@ -15,8 +15,8 @@
 		9B24405222365EE2004A6E34 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B24405122365EE2004A6E34 /* main.m */; };
 		9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B244059223666AD004A6E34 /* DWAlbumManager.m */; };
 		9B2EEA2F2289A75800D7B7FF /* DWImagePreviewController.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */; };
-		9B7594FD22745B8900C0C4AC /* DWTiledImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7594FB22745B8900C0C4AC /* DWTiledImageView.m */; };
 		9B83ED49225CD71A005A9125 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B83ED48225CD71A005A9125 /* icon.png */; };
+		9B92B5FB22AE4D710028298A /* DWImageVideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B92B5FA22AE4D710028298A /* DWImageVideoView.m */; };
 		9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */; };
 		9BCA5CC822688DED002AA175 /* DWImagePreviewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */; };
 		9BFD273E225E3F81009B27D6 /* video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 9BFD273D225E3EE6009B27D6 /* video.mp4 */; };
@@ -40,9 +40,9 @@
 		9B244058223666AD004A6E34 /* DWAlbumManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWAlbumManager.h; sourceTree = "<group>"; };
 		9B244059223666AD004A6E34 /* DWAlbumManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWAlbumManager.m; sourceTree = "<group>"; };
 		9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = DWImagePreviewController.bundle; sourceTree = "<group>"; };
-		9B7594FB22745B8900C0C4AC /* DWTiledImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DWTiledImageView.m; sourceTree = "<group>"; };
-		9B7594FC22745B8900C0C4AC /* DWTiledImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DWTiledImageView.h; sourceTree = "<group>"; };
 		9B83ED48225CD71A005A9125 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		9B92B5F922AE4D710028298A /* DWImageVideoView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImageVideoView.h; sourceTree = "<group>"; };
+		9B92B5FA22AE4D710028298A /* DWImageVideoView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImageVideoView.m; sourceTree = "<group>"; };
 		9BCA5CC322684F2E002AA175 /* DWImagePreviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePreviewController.h; sourceTree = "<group>"; };
 		9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePreviewController.m; sourceTree = "<group>"; };
 		9BCA5CC622688DED002AA175 /* DWImagePreviewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePreviewCell.h; sourceTree = "<group>"; };
@@ -97,8 +97,6 @@
 		9B24404122365EE1004A6E34 /* DWImagePickerController */ = {
 			isa = PBXGroup;
 			children = (
-				9B7594FC22745B8900C0C4AC /* DWTiledImageView.h */,
-				9B7594FB22745B8900C0C4AC /* DWTiledImageView.m */,
 				9BFD273D225E3EE6009B27D6 /* video.mp4 */,
 				9B83ED48225CD71A005A9125 /* icon.png */,
 				9B24404222365EE1004A6E34 /* AppDelegate.h */,
@@ -119,6 +117,8 @@
 				9B24404D22365EE2004A6E34 /* LaunchScreen.storyboard */,
 				9B24405022365EE2004A6E34 /* Info.plist */,
 				9B24405122365EE2004A6E34 /* main.m */,
+				9B92B5F922AE4D710028298A /* DWImageVideoView.h */,
+				9B92B5FA22AE4D710028298A /* DWImageVideoView.m */,
 			);
 			path = DWImagePickerController;
 			sourceTree = "<group>";
@@ -250,12 +250,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B7594FD22745B8900C0C4AC /* DWTiledImageView.m in Sources */,
 				9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */,
 				9BCA5CC822688DED002AA175 /* DWImagePreviewCell.m in Sources */,
 				9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */,
 				9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */,
 				9B24404722365EE1004A6E34 /* ViewController.m in Sources */,
+				9B92B5FB22AE4D710028298A /* DWImageVideoView.m in Sources */,
 				9B24405222365EE2004A6E34 /* main.m in Sources */,
 				9B24404422365EE1004A6E34 /* AppDelegate.m in Sources */,
 			);
