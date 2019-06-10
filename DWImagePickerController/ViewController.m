@@ -36,8 +36,6 @@
     self.step = 0;
     self.videoView = (DWImageVideoView *)self.view;
     self.videoView.delegate = self;
-    
-    
 }
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
