@@ -14,9 +14,11 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 @interface DWImageVideoView ()
 
-@property (nonatomic ,assign) DWImageVideoViewStatus status;
-
 @property (nonatomic ,strong) AVPlayer * player;
+
+@property (nonatomic ,strong) AVPlayerItem * currentPlayerItem;
+
+@property (nonatomic ,assign) DWImageVideoViewStatus status;
 
 @property (nonatomic ,strong) AVPlayerLayer * playerLayer;
 
@@ -31,6 +33,9 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 @end
 
 @implementation DWImageVideoView
+@synthesize currentPlayerItem = _currentPlayerItem;
+@synthesize player = _player;
+@synthesize status = _status;
 
 #pragma mark --- interface method ---
 -(BOOL)configVideoWithPlayerItem:(AVPlayerItem *)item {
@@ -289,6 +294,29 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
         _timeIntervalForPlayerTimeObserver = timeIntervalForPlayerTimeObserver;
         [self removeTimeObserverForPlayer];
         [self addTimeObserverForPlayer];
+    }
+}
+
+-(void)setResizeMode:(DWImageVideoResizeMode)resizeMode {
+    if (_resizeMode != resizeMode) {
+        _resizeMode = resizeMode;
+        switch (resizeMode) {
+            case DWImageVideoResizeModeScaleToFill:
+            {
+                self.playerLayer.videoGravity = AVLayerVideoGravityResize;
+            }
+                break;
+            case DWImageVideoResizeModeScaleAspectFill:
+            {
+                self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+            }
+                break;
+            default:
+            {
+                self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect;
+            }
+                break;
+        }
     }
 }
 

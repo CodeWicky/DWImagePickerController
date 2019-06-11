@@ -19,6 +19,12 @@ typedef NS_ENUM(NSUInteger, DWImageVideoViewStatus) {
     DWImageVideoViewFailed,
 };
 
+typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
+    DWImageVideoResizeModeScaleAspectFit,
+    DWImageVideoResizeModeScaleAspectFill,
+    DWImageVideoResizeModeScaleToFill,
+};
+
 @class DWImageVideoView;
 @protocol DWImageVideoViewProtocol <NSObject>
 
@@ -42,11 +48,15 @@ typedef NS_ENUM(NSUInteger, DWImageVideoViewStatus) {
 
 @property (nonatomic ,weak) id<DWImageVideoViewProtocol> delegate;
 
-@property (nonatomic ,assign) NSTimeInterval timeIntervalForPlayerTimeObserver;
+@property (nonatomic ,strong ,readonly) AVPlayer * player;
 
-@property (nonatomic ,strong) AVPlayerItem * currentPlayerItem;
+@property (nonatomic ,strong ,readonly) AVPlayerItem * currentPlayerItem;
 
 @property (nonatomic ,assign ,readonly) DWImageVideoViewStatus status;
+
+@property (nonatomic ,assign) DWImageVideoResizeMode resizeMode;
+
+@property (nonatomic ,assign) NSTimeInterval timeIntervalForPlayerTimeObserver;
 
 -(BOOL)configVideoWithPlayerItem:(AVPlayerItem *)item;
 
