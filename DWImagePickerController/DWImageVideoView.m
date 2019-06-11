@@ -38,9 +38,30 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 @synthesize status = _status;
 
 #pragma mark --- interface method ---
+
+-(BOOL)configVideoWithURL:(NSURL *)url {
+    AVPlayerItem * item = [[AVPlayerItem alloc] initWithURL:url];
+    return [self configVideoWithPlayerItem:item];
+}
+
+-(BOOL)configVideoWithAsset:(AVAsset *)asset {
+    AVPlayerItem * item = [[AVPlayerItem alloc] initWithAsset:asset];
+    return [self configVideoWithPlayerItem:item];
+}
+
+-(BOOL)configVideoWithAsset:(AVAsset *)asset automaticallyLoadedAssetKeys:(NSArray<NSString *> *)automaticallyLoadedAssetKeys {
+    AVPlayerItem * item = [[AVPlayerItem alloc] initWithAsset:asset automaticallyLoadedAssetKeys:automaticallyLoadedAssetKeys];
+    return [self configVideoWithPlayerItem:item];
+}
+
 -(BOOL)configVideoWithPlayerItem:(AVPlayerItem *)item {
     AVPlayerItem * oriItem = self.currentPlayerItem;
     if (![oriItem isEqual:item]) {
+        ///如果URL相同则不重新播放
+        if ([oriItem.asset isKindOfClass:[AVURLAsset class]] && [item.asset isKindOfClass:[AVURLAsset class]] && [((AVURLAsset *)oriItem.asset).URL isEqual:((AVURLAsset *)item.asset).URL]) {
+            return NO;
+        }
+        
         if (oriItem) {
             [self removeObserverForPlayerItem:oriItem];
         }
@@ -92,6 +113,36 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
         self.status = DWImageVideoViewReadyToPlay;
         [self.player pause];
         [self.player seekToTime:kCMTimeZero];
+    }
+}
+
+-(void)replay {
+    switch (self.status) {
+        ///暂停及完成需要重置时间并开始播放
+        case DWImageVideoViewPaused:
+        case DWImageVideoViewFinished:
+        {
+            ///这里不写break是为了将事件穿透
+            [self.player seekToTime:kCMTimeZero];
+        }
+        ///ready直接开始播放即可
+        case DWImageVideoViewReadyToPlay:
+        {
+            ///更改状态并开始播放
+            self.status = DWImageVideoViewPlaying;
+            [self.player play];
+        }
+            break;
+        ///playing则只需要重置时间
+        case DWImageVideoViewPlaying:
+        {
+            ///重置时间
+            [self.player seekToTime:kCMTimeZero];
+        }
+            break;
+        ///其他状态均为不合法状态，不作处理
+        default:
+            break;
     }
 }
 
@@ -248,7 +299,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 -(void)removeObserverForPlayerItem:(AVPlayerItem *)item {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:item];
-    [item removeObserver:self forKeyPath:@"stauts"];
+    [item removeObserver:self forKeyPath:@"status"];
     [item removeObserver:self forKeyPath:@"playbackBufferEmpty"];
     [item removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
     [item removeObserver:self forKeyPath:@"loadedTimeRanges"];
@@ -317,6 +368,13 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
             }
                 break;
         }
+    }
+}
+
+-(void)setRate:(CGFloat)rate {
+    if (_rate != rate) {
+        _rate = rate;
+        self.player.rate = rate;
     }
 }
 

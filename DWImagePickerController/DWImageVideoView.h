@@ -58,6 +58,14 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 
 @property (nonatomic ,assign) NSTimeInterval timeIntervalForPlayerTimeObserver;
 
+@property (nonatomic ,assign) CGFloat rate;
+
+-(BOOL)configVideoWithURL:(NSURL *)url;
+
+-(BOOL)configVideoWithAsset:(AVAsset *)asset;
+
+-(BOOL)configVideoWithAsset:(AVAsset *)asset automaticallyLoadedAssetKeys:(NSArray<NSString *> *)automaticallyLoadedAssetKeys NS_AVAILABLE(10_9, 7_0);
+
 -(BOOL)configVideoWithPlayerItem:(AVPlayerItem *)item;
 
 -(void)play;
@@ -65,6 +73,8 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 -(void)pause;
 
 -(void)stop;
+
+-(void)replay;
 
 -(void)seekToTime:(CGFloat)time completionHandler:(void (^)(BOOL))completionHandler;
 

@@ -36,12 +36,7 @@
     self.step = 0;
     self.videoView = (DWImageVideoView *)self.view;
     self.videoView.delegate = self;
-    self.videoView.resizeMode = DWImageVideoResizeModeScaleAspectFill;
-    
-    
-    NSString * str = @"(aa(aa(";
-    str = [str stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"("]];
-    NSLog(@"%@",str);
+    self.videoView.resizeMode = DWImageVideoResizeModeScaleAspectFit;
 }
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -143,7 +138,7 @@
 //    DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
 //#pragma clang diagnostic pop
     
-    NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"video" ofType:@"mp4"]];
+    NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"[zhainanba.net]林允儿动态壁纸" ofType:@"mp4"]];
     AVPlayerItem * item = [AVPlayerItem playerItemWithURL:file];
     [self.videoView configVideoWithPlayerItem:item];
 }
