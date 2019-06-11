@@ -27,7 +27,7 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 
 @class DWImageVideoView;
 @protocol DWImageVideoViewProtocol <NSObject>
-
+@optional
 -(void)videoView:(DWImageVideoView *)videoView didChangePlayerItemTo:(AVPlayerItem *)desItem fromItem:(AVPlayerItem *)oriItem;
 
 -(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item;
