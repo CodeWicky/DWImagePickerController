@@ -263,7 +263,9 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 #pragma mark --- Notification ---
 -(void)playerItemDidReachEnd:(NSNotification *)sender {
-    self.status = DWImageVideoViewFinished;
+    if ([sender.object isEqual:self.currentPlayerItem]) {
+        self.status = DWImageVideoViewFinished;
+    }
 }
 
 #pragma mark --- tool method ---
