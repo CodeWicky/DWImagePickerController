@@ -8,6 +8,7 @@
 
 #import "DWImagePreviewCell.h"
 #import <PhotosUI/PhotosUI.h>
+#import "DWImageVideoView.h"
 
 #define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
 
@@ -807,8 +808,17 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @end
 
+@interface DWVideoPreviewCell ()<DWImageVideoViewProtocol>
+
+@property (nonatomic ,strong) UIImageView * posterView;
+
+@property (nonatomic ,strong) DWImageVideoView * mediaView;
+
+@end
+
 @implementation DWVideoPreviewCell
 @dynamic media;
+@dynamic mediaView;
 
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
@@ -818,6 +828,71 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return self;
 }
 
+-(void)clearCell {
+    [super clearCell];
+    [self.mediaView configVideoWithURL:nil];
+    self.posterView.image = nil;
+}
 
++(Class)classForMediaView {
+    return [DWImageVideoView class];
+}
+
+-(void)initializingSubviews {
+    [super initializingSubviews];
+    if (self.zoomable) {
+        [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
+    } else {
+        [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
+    }
+    self.mediaView.delegate = self;
+}
+
+-(void)setupSubviews {
+    [super setupSubviews];
+    if (!CGRectEqualToRect(self.posterView.bounds, self.bounds)) {
+        self.posterView.frame = self.bounds;
+    }
+}
+
+-(CGSize)sizeForMedia:(AVPlayerItem *)media {
+    NSArray *array = media.asset.tracks;
+    CGSize videoSize = CGSizeZero;
+    for (AVAssetTrack *track in array) {
+        if ([track.mediaType isEqualToString:AVMediaTypeVideo]) {
+            videoSize = track.naturalSize;
+        }
+    }
+    return videoSize;
+}
+
+#pragma mark --- videoView delegate ---
+-(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {
+    if (item) {
+        [videoView play];
+    }
+}
+
+#pragma mark --- setter/getter ---
+-(void)setMedia:(AVPlayerItem *)media {
+    [super setMedia:media];
+    [self.mediaView configVideoWithPlayerItem:media];
+    ///清除poster，否则缩放有底图
+    self.posterView.image = nil;
+}
+
+-(void)setPoster:(UIImage *)poster {
+    [super setPoster:poster];
+    self.posterView.image = poster;
+}
+
+-(UIImageView *)posterView {
+    if (!_posterView) {
+        _posterView = [[UIImageView alloc] init];
+        _posterView.contentMode = UIViewContentModeScaleAspectFit;
+        _posterView.clipsToBounds = YES;
+    }
+    return _posterView;
+}
 
 @end
