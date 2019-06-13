@@ -30,6 +30,8 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 @property (nonatomic ,strong) id timeObserver;
 
+@property (nonatomic ,assign) BOOL waitingPlayOnProcessing;
+
 @end
 
 @implementation DWImageVideoView
@@ -63,11 +65,15 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
         }
         
         if (oriItem) {
+            [self stop];
             [self removeObserverForPlayerItem:oriItem];
         }
+        
         _currentPlayerItem = item;
         [self.player replaceCurrentItemWithPlayerItem:item];
         [self addObserverForPlayerItem:item];
+        self.status = DWImageVideoViewProcessing;
+        _waitingPlayOnProcessing = NO;
         
         if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:didChangePlayerItemTo:fromItem:)]) {
             [self.delegate videoView:self didChangePlayerItemTo:item fromItem:oriItem];
@@ -84,6 +90,12 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
         case DWImageVideoViewPlaying:
         case DWImageVideoViewSeekingProgress:
         {
+            return;
+        }
+            break;
+        case DWImageVideoViewProcessing:
+        {
+            self.waitingPlayOnProcessing = YES;
             return;
         }
             break;
@@ -230,6 +242,10 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
                         if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:readyToPlayForItem:)]) {
                             [self.delegate videoView:self readyToPlayForItem:object];
                         }
+                    }
+                    if (self.waitingPlayOnProcessing) {
+                        self.waitingPlayOnProcessing = NO;
+                        [self play];
                     }
                 }
                     break;

@@ -62,6 +62,14 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @implementation DWImagePreviewCell
 
 #pragma mark --- interface method ---
+-(void)resignFocus {
+    ///Nothing to do with normal cell.
+}
+
+-(void)getFocus {
+    ///Nothing to do with normal cell.
+}
+
 -(void)clearCell {
     [self resetCellZoom];
     _panDirection = DWImagePanDirectionTypeNone;
@@ -591,11 +599,16 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return self;
 }
 
--(void)clearCell {
-    [super clearCell];
+-(void)resignFocus {
+    [super resignFocus];
+    ///结束展示时结束动画播放，但此时不必在getFocus时再开始播放，因为希望在同时看到两个cell时两个cell都可以进行播放
     if (self.mediaView.isAnimating) {
         [self.mediaView stopAnimating];
     }
+}
+
+-(void)clearCell {
+    [super clearCell];
     self.mediaView.image = nil;
 }
 
@@ -830,8 +843,19 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)clearCell {
     [super clearCell];
-    [self.mediaView configVideoWithURL:nil];
+    [self.mediaView configVideoWithPlayerItem:nil];
     self.posterView.image = nil;
+}
+
+-(void)resignFocus {
+    [super resignFocus];
+    ///释放焦点时停止播放同时在获取焦点时再开始播放而不是setMedia，因为此处不希望同时看到两个视频播放
+    [self.mediaView stop];
+}
+
+-(void)getFocus {
+    [super getFocus];
+    [self.mediaView play];
 }
 
 +(Class)classForMediaView {
@@ -868,17 +892,14 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 #pragma mark --- videoView delegate ---
 -(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {
-    if (item) {
-        [videoView play];
-    }
+    ///清除poster，否则缩放有底图。更改时机为ready以后，防止 -setMedia: 时移除导致的视频尚未ready导致无法展示首帧，中间的等待时间为空白
+    self.posterView.image = nil;
 }
 
 #pragma mark --- setter/getter ---
 -(void)setMedia:(AVPlayerItem *)media {
     [super setMedia:media];
     [self.mediaView configVideoWithPlayerItem:media];
-    ///清除poster，否则缩放有底图
-    self.posterView.image = nil;
 }
 
 -(void)setPoster:(UIImage *)poster {

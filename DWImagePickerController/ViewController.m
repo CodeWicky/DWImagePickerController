@@ -26,17 +26,17 @@
 
 @implementation ViewController
 
--(void)loadView {
-    self.view = [DWImageVideoView new];
-}
+//-(void)loadView {
+//    self.view = [DWImageVideoView new];
+//}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.imgMgr = [[DWAlbumManager alloc] init];
     self.step = 0;
-    self.videoView = (DWImageVideoView *)self.view;
-    self.videoView.delegate = self;
-    self.videoView.resizeMode = DWImageVideoResizeModeScaleAspectFit;
+//    self.videoView = (DWImageVideoView *)self.view;
+//    self.videoView.delegate = self;
+//    self.videoView.resizeMode = DWImageVideoResizeModeScaleAspectFit;
 }
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -133,14 +133,18 @@
 //        }];
 //    }];
     
-//#pragma clang diagnostic push
-//#pragma clang diagnostic ignored "-Wunused-variable"
-//    DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
-//#pragma clang diagnostic pop
-    
-    NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"[zhainanba.net]林允儿动态壁纸" ofType:@"mp4"]];
-    AVPlayerItem * item = [AVPlayerItem playerItemWithURL:file];
-    [self.videoView configVideoWithPlayerItem:item];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
+    DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
+#pragma clang diagnostic pop
+//    if (self.step % 2 == 0) {
+//        NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"[zhainanba.net]林允儿动态壁纸" ofType:@"mp4"]];
+//        AVPlayerItem * item = [AVPlayerItem playerItemWithURL:file];
+//        [self.videoView configVideoWithPlayerItem:item];
+//    } else {
+//        [self.videoView configVideoWithPlayerItem:nil];
+//    }
+//    self.step ++;
 }
 
 -(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {

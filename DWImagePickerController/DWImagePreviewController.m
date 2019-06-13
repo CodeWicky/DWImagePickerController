@@ -86,11 +86,9 @@
 
 @property (nonatomic ,strong) NSCache * dataCache;
 
-@end
-
-@interface DWImagePreviewController ()
-
 @property (nonatomic ,strong) dispatch_queue_t asyncDecodeQueue;
+
+@property (nonatomic ,assign) BOOL firsrCellGotFocus;
 
 @end
 
@@ -240,6 +238,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             if (index == cell.index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     cell.media = cellData.media;
+                    ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
+                    if (!self.firsrCellGotFocus) {
+                        self.firsrCellGotFocus = YES;
+                        [cell getFocus];
+                    }
                 });
             }
         }];
@@ -389,6 +392,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [cell configCollectionViewController:self];
     }
     if (cellData.media) {
+        ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
+        if (previewType == DWImagePreviewTypeVideo) {
+            cell.poster = cellData.previewImage;
+        }
+        
         cell.media = cellData.media;
     } else if (cellData.previewImage) {
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
@@ -414,6 +422,12 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (!decelerate) {
         [self previewDidChangedToIndex:scrollView];
     }
+}
+
+-(void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(DWImagePreviewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    [cell resignFocus];
+    DWImagePreviewCell * focusCell = collectionView.visibleCells.lastObject;
+    [focusCell getFocus];
 }
 
 #pragma mark --- screen rotate ---

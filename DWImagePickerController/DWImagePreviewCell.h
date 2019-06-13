@@ -43,6 +43,10 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 @property (nonatomic ,copy) DWImagePreviewCellCallNavigationHideCallback callNavigationHide;
 
 #pragma mark --- interface method ---
+
+///For now the cell has the same size as collectionView,so you could only see one cell at most at a time.It consider to resign the focus when the cell leave the viewport,then the other cell which is being shown getFocus.Then with these two follow method you can do something you want when the focus changed.They will be called automatically on -collectionView:didEndDisplayingCell:forItemAtIndexPath: .
+-(void)resignFocus;
+-(void)getFocus;
 ///Clear the preview cell all status to origin status.You may call it when you want to do so,and it will be called automatically on -prepareForReuse .
 -(void)clearCell;
 ///Zoom the preview view for media at specific point.

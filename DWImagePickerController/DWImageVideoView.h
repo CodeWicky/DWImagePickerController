@@ -11,6 +11,7 @@
 
 typedef NS_ENUM(NSUInteger, DWImageVideoViewStatus) {
     DWImageVideoViewUnknown,
+    DWImageVideoViewProcessing,
     DWImageVideoViewReadyToPlay,
     DWImageVideoViewPlaying,
     DWImageVideoViewSeekingProgress,
