@@ -891,7 +891,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 #pragma mark --- videoView delegate ---
--(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {
+-(void)videoView:(DWImageVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
     ///清除poster，否则缩放有底图。更改时机为ready以后，防止 -setMedia: 时移除导致的视频尚未ready导致无法展示首帧，中间的等待时间为空白
     self.posterView.image = nil;
 }
