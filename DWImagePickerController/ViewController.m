@@ -145,6 +145,8 @@
 //        [self.videoView configVideoWithPlayerItem:nil];
 //    }
 //    self.step ++;
+    
+    
 }
 
 -(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {

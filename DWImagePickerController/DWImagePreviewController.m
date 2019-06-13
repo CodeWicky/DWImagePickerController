@@ -237,12 +237,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
             if (index == cell.index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.media = cellData.media;
-                    ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
-                    if (!self.firsrCellGotFocus) {
-                        self.firsrCellGotFocus = YES;
-                        [cell getFocus];
-                    }
+                    [self configMediaForCell:cell withMedia:cellData.media];
                 });
             }
         }];
@@ -271,6 +266,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         if (completion) {
             completion();
         }
+    }
+}
+
+-(void)configMediaForCell:(DWImagePreviewCell *)cell withMedia:(id)media {
+    cell.media = media;
+    ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
+    if (!self.firsrCellGotFocus) {
+        self.firsrCellGotFocus = YES;
+        [cell getFocus];
     }
 }
 
@@ -397,7 +401,8 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             cell.poster = cellData.previewImage;
         }
         
-        cell.media = cellData.media;
+        [self configMediaForCell:cell withMedia:cellData.media];
+        
     } else if (cellData.previewImage) {
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
     } else {
@@ -427,7 +432,12 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(DWImagePreviewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
     [cell resignFocus];
     DWImagePreviewCell * focusCell = collectionView.visibleCells.lastObject;
-    [focusCell getFocus];
+    if (focusCell) {
+        [focusCell getFocus];
+    } else {
+        ///这里由于防止不在屏幕内滚动时导致无法获取visibleCells而无法获取焦点，所以在获取不到时置为NO，强制在cellForItem中获取焦点
+        self.firsrCellGotFocus = NO;
+    }
 }
 
 #pragma mark --- screen rotate ---

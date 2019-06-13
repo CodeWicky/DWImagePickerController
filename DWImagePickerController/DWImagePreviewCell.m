@@ -843,7 +843,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)clearCell {
     [super clearCell];
-    [self.mediaView configVideoWithPlayerItem:nil];
+    [self.mediaView configVideoWithAsset:nil];
     self.posterView.image = nil;
 }
 
@@ -899,7 +899,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- setter/getter ---
 -(void)setMedia:(AVPlayerItem *)media {
     [super setMedia:media];
-    [self.mediaView configVideoWithPlayerItem:media];
+    ///这里由于同一个AVPlayerItem不能赋给不同的AVPlayer对象，而当给 -[AVPlayer replaceCurrentItemWithPlayerItem:] 时，虽然解除了AVPlayer对AVPlayerItem的绑定关系，但是并不能接触AVPlayerItem对AVPlayer的绑定关系。导致下一次相同AVPlayerItem绑定至不同AVPlayer时崩溃的现象。这里防止此崩溃，采取绑定asset的或者直接-[media copy] 的形式避免崩溃
+    [self.mediaView configVideoWithAsset:media.asset];
 }
 
 -(void)setPoster:(UIImage *)poster {
