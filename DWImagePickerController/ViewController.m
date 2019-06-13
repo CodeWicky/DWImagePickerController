@@ -138,19 +138,19 @@
     DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
 #pragma clang diagnostic pop
 //    if (self.step % 2 == 0) {
-//        NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"[zhainanba.net]林允儿动态壁纸" ofType:@"mp4"]];
-//        AVPlayerItem * item = [AVPlayerItem playerItemWithURL:file];
-//        [self.videoView configVideoWithPlayerItem:item];
+//        NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"video" ofType:@"mp4"]];
+//        AVAsset * asset = [AVAsset assetWithURL:file];
+//        [self.videoView configVideoWithAsset:asset];
 //    } else {
-//        [self.videoView configVideoWithPlayerItem:nil];
+//        [self.videoView configVideoWithAsset:nil];
 //    }
 //    self.step ++;
     
     
 }
 
--(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {
-    NSLog(@"%f",[videoView convertCMTimeToTimeInterval:[videoView actualTimeForItem:item]]);
+-(void)videoView:(DWImageVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
+    NSLog(@"%f",[videoView convertCMTimeToTimeInterval:[videoView actualTimeForAsset:asset]]);
     [videoView play];
 }
 

@@ -16,6 +16,8 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 @property (nonatomic ,strong) AVPlayer * player;
 
+@property (nonatomic ,strong) AVAsset * currentAsset;
+
 @property (nonatomic ,strong) AVPlayerItem * currentPlayerItem;
 
 @property (nonatomic ,assign) DWImageVideoViewStatus status;
@@ -35,7 +37,6 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 @end
 
 @implementation DWImageVideoView
-@synthesize currentPlayerItem = _currentPlayerItem;
 @synthesize player = _player;
 @synthesize status = _status;
 
@@ -57,26 +58,30 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(BOOL)configVideoWithPlayerItem:(AVPlayerItem *)item {
-    AVPlayerItem * oriItem = self.currentPlayerItem;
-    if (![oriItem isEqual:item]) {
+    ///这里由于同一个AVPlayerItem不能赋给不同的AVPlayer对象，而当给 -[AVPlayer replaceCurrentItemWithPlayerItem:] 时，虽然解除了AVPlayer对AVPlayerItem的绑定关系，但是并不能接触AVPlayerItem对AVPlayer的绑定关系。导致下一次相同AVPlayerItem绑定至不同AVPlayer时崩溃的现象。所以在应确保外界替换视频源时，务必替换AVPlayerItem。这里框架内部采用每次生成一个新的item来保证item不会重新使用。
+    if (![self.currentPlayerItem isEqual:item]) {
         ///如果URL相同则不重新播放
-        if ([oriItem.asset isKindOfClass:[AVURLAsset class]] && [item.asset isKindOfClass:[AVURLAsset class]] && [((AVURLAsset *)oriItem.asset).URL isEqual:((AVURLAsset *)item.asset).URL]) {
+        if ([self.currentAsset isKindOfClass:[AVURLAsset class]] && [item.asset isKindOfClass:[AVURLAsset class]] && [((AVURLAsset *)self.currentAsset).URL isEqual:((AVURLAsset *)item.asset).URL]) {
             return NO;
         }
         
-        if (oriItem) {
+        if (self.currentPlayerItem) {
             [self stop];
-            [self removeObserverForPlayerItem:oriItem];
+            [self removeObserverForPlayerItem:self.currentPlayerItem];
+        }
+        AVAsset * oriAsset = self.currentAsset;
+        _currentAsset = item.asset;
+        self.status = DWImageVideoViewUnknown;
+        [self.player replaceCurrentItemWithPlayerItem:item];
+        if (item) {
+            [self addObserverForPlayerItem:item];
+            self.status = DWImageVideoViewProcessing;
         }
         
-        _currentPlayerItem = item;
-        [self.player replaceCurrentItemWithPlayerItem:item];
-        [self addObserverForPlayerItem:item];
-        self.status = DWImageVideoViewProcessing;
         _waitingPlayOnProcessing = NO;
         
-        if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:didChangePlayerItemTo:fromItem:)]) {
-            [self.delegate videoView:self didChangePlayerItemTo:item fromItem:oriItem];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:didChangeAssetTo:fromAsset:)]) {
+            [self.delegate videoView:self didChangeAssetTo:oriAsset fromAsset:self.currentAsset];
         }
         return YES;
     }
@@ -168,12 +173,13 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
     _rateBeforeSeeking = self.player.rate;
     self.player.rate = 0;
     __weak typeof(self)weakSelf = self;
-    [self.player seekToTime:CMTimeMakeWithSeconds(time, NSEC_PER_SEC) completionHandler:^(BOOL finished) {
+    CMTime cmTime = CMTimeMakeWithSeconds(time, NSEC_PER_SEC);
+    [self.player seekToTime:cmTime completionHandler:^(BOOL finished) {
         [weakSelf addTimeObserverForPlayer];
         weakSelf.status = status;
         weakSelf.player.rate = weakSelf.rateBeforeSeeking;
         weakSelf.rateBeforeSeeking = 1;
-        [weakSelf seekToTimeCallback];
+        [weakSelf seekToTimeCallback:cmTime];
         if (completionHandler) {
             completionHandler(finished);
         }
@@ -194,8 +200,9 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 -(void)seekToTimeContinuously:(CGFloat)time completionHandler:(void (^)(BOOL))completionHandler {
     if (self.status == DWImageVideoViewSeekingProgress) {
-        [self.player seekToTime:CMTimeMakeWithSeconds(time, NSEC_PER_SEC) completionHandler:completionHandler];
-        [self seekToTimeCallback];
+        CMTime cmTime = CMTimeMakeWithSeconds(time, NSEC_PER_SEC);
+        [self.player seekToTime:cmTime completionHandler:completionHandler];
+        [self seekToTimeCallback:cmTime];
     }
 }
 
@@ -213,14 +220,14 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
     return CMTimeGetSeconds(time);
 }
 
--(CMTime)actualTimeForItem:(AVPlayerItem *)item {
-    if ([item.asset isKindOfClass:[AVURLAsset class]]) {
-        NSURL * url = ((AVURLAsset *)item.asset).URL;
+-(CMTime)actualTimeForAsset:(AVAsset *)asset {
+    if ([asset isKindOfClass:[AVURLAsset class]]) {
+        NSURL * url = ((AVURLAsset *)asset).URL;
         NSDictionary *opts = [NSDictionary dictionaryWithObject:@(NO) forKey:AVURLAssetPreferPreciseDurationAndTimingKey];
         AVURLAsset *urlAsset = [AVURLAsset URLAssetWithURL:url options:opts]; // 初始化视频媒体文件
         return urlAsset.duration;
     } else {
-        return item.duration;
+        return asset.duration;
     }
 }
 
@@ -239,8 +246,8 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
                 {
                     self.status = DWImageVideoViewReadyToPlay;
                     if ([object isKindOfClass:[AVPlayerItem class]]) {
-                        if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:readyToPlayForItem:)]) {
-                            [self.delegate videoView:self readyToPlayForItem:object];
+                        if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:readyToPlayForAsset:)]) {
+                            [self.delegate videoView:self readyToPlayForAsset:((AVPlayerItem *)object).asset];
                         }
                     }
                     if (self.waitingPlayOnProcessing) {
@@ -257,20 +264,20 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
             }
         } else if ([keyPath isEqualToString:@"playbackBufferEmpty"]) {
             if ([object isKindOfClass:[AVPlayerItem class]] && ((AVPlayerItem *)object).playbackBufferEmpty) {
-                if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:playbackBufferStatusChanged:forItem:)]) {
-                    [self.delegate videoView:self playbackBufferStatusChanged:YES forItem:object];
+                if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:playbackBufferStatusChanged:forAsset:)]) {
+                    [self.delegate videoView:self playbackBufferStatusChanged:YES forAsset:((AVPlayerItem *)object).asset];
                 }
             }
         } else if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"]) {
             if ([object isKindOfClass:[AVPlayerItem class]] && ((AVPlayerItem *)object).playbackLikelyToKeepUp) {
-                if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:playbackBufferStatusChanged:forItem:)]) {
-                    [self.delegate videoView:self playbackBufferStatusChanged:NO forItem:object];
+                if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:playbackBufferStatusChanged:forAsset:)]) {
+                    [self.delegate videoView:self playbackBufferStatusChanged:NO forAsset:((AVPlayerItem *)object).asset];
                 }
             }
         } else if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
             if ([object isKindOfClass:[AVPlayerItem class]] && ((AVPlayerItem *)object).loadedTimeRanges) {
-                if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:loadedTimeRangesChangedTo:forItem:)]) {
-                    [self.delegate videoView:self loadedTimeRangesChangedTo:((AVPlayerItem *)object).loadedTimeRanges forItem:(AVPlayerItem *)object];
+                if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:loadedTimeRangesChangedTo:forAsset:)]) {
+                    [self.delegate videoView:self loadedTimeRangesChangedTo:((AVPlayerItem *)object).loadedTimeRanges forAsset:((AVPlayerItem *)object).asset];
                 }
             }
         }
@@ -279,7 +286,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 #pragma mark --- Notification ---
 -(void)playerItemDidReachEnd:(NSNotification *)sender {
-    if ([sender.object isEqual:self.currentPlayerItem]) {
+    if ([sender.object isKindOfClass:[AVPlayerItem class]] && [((AVPlayerItem *)sender.object).asset isEqual:self.currentAsset]) {
         self.status = DWImageVideoViewFinished;
     }
 }
@@ -302,8 +309,8 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(void)playerTimeChangerCallback:(CMTime)time {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:playerTimeChangeTo:forItem:)]) {
-        [self.delegate videoView:self playerTimeChangeTo:time forItem:self.currentPlayerItem];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:playerTimeChangeTo:forAsset:)]) {
+        [self.delegate videoView:self playerTimeChangeTo:time forAsset:self.currentAsset];
     }
 }
 
@@ -321,11 +328,12 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
     [item removeObserver:self forKeyPath:@"playbackBufferEmpty"];
     [item removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
     [item removeObserver:self forKeyPath:@"loadedTimeRanges"];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:item];
 }
 
--(void)seekToTimeCallback {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:seekToTime:forItem:)]) {
-        [self.delegate videoView:self seekToTime:self.currentPlayerItem.currentTime forItem:self.currentPlayerItem];
+-(void)seekToTimeCallback:(CMTime)time {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:seekToTime:forAsset:)]) {
+        [self.delegate videoView:self seekToTime:time forAsset:self.currentAsset];
     }
 }
 
@@ -351,8 +359,8 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
         [self willChangeValueForKey:@"status"];
         DWImageVideoViewStatus oriStatus = _status;
         _status = status;
-        if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:didChangeStatusTo:fromStatus:forItem:)]) {
-            [self.delegate videoView:self didChangeStatusTo:status fromStatus:oriStatus forItem:self.currentPlayerItem];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:didChangeStatusTo:fromStatus:forAsset:)]) {
+            [self.delegate videoView:self didChangeStatusTo:status fromStatus:oriStatus forAsset:self.currentAsset];
         }
         [self didChangeValueForKey:@"status"];
     }

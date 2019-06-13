@@ -29,19 +29,19 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 @class DWImageVideoView;
 @protocol DWImageVideoViewProtocol <NSObject>
 @optional
--(void)videoView:(DWImageVideoView *)videoView didChangePlayerItemTo:(AVPlayerItem *)desItem fromItem:(AVPlayerItem *)oriItem;
+-(void)videoView:(DWImageVideoView *)videoView didChangeAssetTo:(AVAsset *)desAsset fromAsset:(AVAsset *)oriAsset;
 
--(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item;
+-(void)videoView:(DWImageVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView seekToTime:(CMTime)time forItem:(AVPlayerItem *)item;
+-(void)videoView:(DWImageVideoView *)videoView seekToTime:(CMTime)time forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView playbackBufferStatusChanged:(BOOL)empty forItem:(AVPlayerItem *)item;
+-(void)videoView:(DWImageVideoView *)videoView playbackBufferStatusChanged:(BOOL)empty forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView loadedTimeRangesChangedTo:(NSArray <NSValue *>*)timeRanges forItem:(AVPlayerItem *)item;
+-(void)videoView:(DWImageVideoView *)videoView loadedTimeRangesChangedTo:(NSArray <NSValue *>*)timeRanges forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView didChangeStatusTo:(DWImageVideoViewStatus)desStatus fromStatus:(DWImageVideoViewStatus)oriStatus forItem:(AVPlayerItem *)item;
+-(void)videoView:(DWImageVideoView *)videoView didChangeStatusTo:(DWImageVideoViewStatus)desStatus fromStatus:(DWImageVideoViewStatus)oriStatus forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView playerTimeChangeTo:(CMTime)time forItem:(AVPlayerItem *)item;
+-(void)videoView:(DWImageVideoView *)videoView playerTimeChangeTo:(CMTime)time forAsset:(AVAsset *)asset;
 
 @end
 
@@ -51,7 +51,7 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 
 @property (nonatomic ,strong ,readonly) AVPlayer * player;
 
-@property (nonatomic ,strong ,readonly) AVPlayerItem * currentPlayerItem;
+@property (nonatomic ,strong ,readonly) AVAsset * currentAsset;
 
 @property (nonatomic ,assign ,readonly) DWImageVideoViewStatus status;
 
@@ -66,8 +66,6 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 -(BOOL)configVideoWithAsset:(AVAsset *)asset;
 
 -(BOOL)configVideoWithAsset:(AVAsset *)asset automaticallyLoadedAssetKeys:(NSArray<NSString *> *)automaticallyLoadedAssetKeys NS_AVAILABLE(10_9, 7_0);
-
--(BOOL)configVideoWithPlayerItem:(AVPlayerItem *)item;
 
 -(void)play;
 
@@ -85,6 +83,6 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 
 -(NSTimeInterval)convertCMTimeToTimeInterval:(CMTime)time;
 
--(CMTime)actualTimeForItem:(AVPlayerItem *)item;
+-(CMTime)actualTimeForAsset:(AVAsset *)asset;
 
 @end
