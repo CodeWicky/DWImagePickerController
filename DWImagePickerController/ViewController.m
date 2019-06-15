@@ -34,6 +34,7 @@
     [super viewDidLoad];
     self.imgMgr = [[DWAlbumManager alloc] init];
     self.step = 0;
+    
 //    self.videoView = (DWImageVideoView *)self.view;
 //    self.videoView.delegate = self;
 //    self.videoView.resizeMode = DWImageVideoResizeModeScaleAspectFit;
