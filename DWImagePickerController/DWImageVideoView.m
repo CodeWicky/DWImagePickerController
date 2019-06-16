@@ -288,6 +288,9 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 -(void)playerItemDidReachEnd:(NSNotification *)sender {
     if ([sender.object isKindOfClass:[AVPlayerItem class]] && [((AVPlayerItem *)sender.object).asset isEqual:self.currentAsset]) {
         self.status = DWImageVideoViewFinished;
+        if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:finishPlayingAsset:)]) {
+            [self.delegate videoView:self finishPlayingAsset:((AVPlayerItem *)sender.object).asset];
+        }
     }
 }
 

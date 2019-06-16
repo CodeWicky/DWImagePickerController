@@ -827,6 +827,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,strong) DWImageVideoView * mediaView;
 
+@property (nonatomic ,strong) UIButton * playBtn;
+
 @end
 
 @implementation DWVideoPreviewCell
@@ -850,12 +852,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)resignFocus {
     [super resignFocus];
     ///释放焦点时停止播放同时在获取焦点时再开始播放而不是setMedia，因为此处不希望同时看到两个视频播放
-    [self.mediaView stop];
+    [self stop];
 }
 
 -(void)getFocus {
     [super getFocus];
-    [self.mediaView play];
 }
 
 +(Class)classForMediaView {
@@ -869,6 +870,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     } else {
         [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
     }
+    [self.contentView bringSubviewToFront:self.hdrBadge];
+    [self.contentView addSubview:self.playBtn];
     self.mediaView.delegate = self;
 }
 
@@ -876,6 +879,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [super setupSubviews];
     if (!CGRectEqualToRect(self.posterView.bounds, self.bounds)) {
         self.posterView.frame = self.bounds;
+    }
+    if (!CGPointEqualToPoint(self.playBtn.center, CGPointMake(self.bounds.size.width * 0.5, self.bounds.size.height * 0.5))) {
+        self.playBtn.center = CGPointMake(self.bounds.size.width * 0.5, self.bounds.size.height * 0.5);
     }
 }
 
@@ -890,10 +896,45 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return videoSize;
 }
 
+-(void)tapAction:(UITapGestureRecognizer *)tap {
+    [super tapAction:tap];
+    if (self.mediaView.status == DWImageVideoViewPlaying) {
+        [self pause];
+    }
+}
+
+#pragma mark --- tool method ---
+-(void)play {
+    [self.mediaView play];
+    self.playBtn.hidden = YES;
+    if (self.callNavigationHide) {
+        self.callNavigationHide(self,YES);
+    }
+}
+
+-(void)pause {
+    [self.mediaView pause];
+    self.playBtn.hidden = NO;
+}
+
+-(void)stop {
+    [self.mediaView stop];
+    self.playBtn.hidden = NO;
+}
+
+#pragma mark --- btn action ---
+-(void)playBtnAction:(UIButton *)sender {
+    [self play];
+}
+
 #pragma mark --- videoView delegate ---
 -(void)videoView:(DWImageVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
     ///清除poster，否则缩放有底图。更改时机为ready以后，防止 -setMedia: 时移除导致的视频尚未ready导致无法展示首帧，中间的等待时间为空白
     self.posterView.image = nil;
+}
+
+-(void)videoView:(DWImageVideoView *)videoView finishPlayingAsset:(AVAsset *)asset {
+    [self stop];
 }
 
 #pragma mark --- setter/getter ---
@@ -915,6 +956,19 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         _posterView.clipsToBounds = YES;
     }
     return _posterView;
+}
+
+-(UIButton *)playBtn {
+    if (!_playBtn) {
+        _playBtn = [UIButton buttonWithType:(UIButtonTypeCustom)];
+        [_playBtn setFrame:CGRectMake(0, 0, 80, 80)];
+        [_playBtn setImage:[UIImage imageNamed:@"DWImagePreviewController.bundle/play_btn"] forState:(UIControlStateNormal)];
+        [_playBtn addTarget:self action:@selector(playBtnAction:) forControlEvents:(UIControlEventTouchUpInside)];
+        _playBtn.backgroundColor = [UIColor blackColor];
+        _playBtn.layer.cornerRadius = 40;
+        _playBtn.alpha = 0.7;
+    }
+    return _playBtn;
 }
 
 @end

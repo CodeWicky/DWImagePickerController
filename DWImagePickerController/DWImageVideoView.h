@@ -43,6 +43,8 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 
 -(void)videoView:(DWImageVideoView *)videoView playerTimeChangeTo:(CMTime)time forAsset:(AVAsset *)asset;
 
+-(void)videoView:(DWImageVideoView *)videoView finishPlayingAsset:(AVAsset *)asset;
+
 @end
 
 @interface DWImageVideoView : UIView
