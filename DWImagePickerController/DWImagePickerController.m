@@ -41,11 +41,22 @@
 
 @property (nonatomic ,strong) UIImageView * gridImage;
 
+@property (nonatomic ,strong) UILabel * durationLabel;
+
 @property (nonatomic ,copy) NSString * requestLocalID;
 
 @end
 
 @implementation DWGridCell
+
+-(void)setupDuration:(NSTimeInterval)duration {
+    self.durationLabel.hidden = NO;
+    NSInteger floorDuration = floor(duration + 0.5);
+    NSInteger sec = floorDuration % 60;
+    NSInteger min = floorDuration / 60;
+    self.durationLabel.text = [NSString stringWithFormat:@"%ld:%02ld",min,sec];
+    [self setNeedsLayout];
+}
 
 #pragma mark --- override ---
 -(void)layoutSubviews {
@@ -53,11 +64,22 @@
     if (!CGRectEqualToRect(self.gridImage.frame, self.bounds)) {
         self.gridImage.frame = self.bounds;
     }
+    if (_durationLabel && !_durationLabel.hidden) {
+        [self.durationLabel sizeToFit];
+        CGPoint origin = CGPointMake(5, self.bounds.size.height - 5 - self.durationLabel.bounds.size.height);
+        CGRect frame = self.durationLabel.frame;
+        frame.origin = origin;
+        if (!CGRectEqualToRect(self.durationLabel.frame, frame)) {
+            self.durationLabel.frame = frame;
+        }
+    }
 }
 
 -(void)prepareForReuse {
     [super prepareForReuse];
     self.gridImage.image = nil;
+    _durationLabel.text = nil;
+    _durationLabel.hidden = YES;
 }
 
 #pragma mark --- setter/getter ---
@@ -70,6 +92,17 @@
     }
     return _gridImage;
 }
+
+-(UILabel *)durationLabel {
+    if (!_durationLabel) {
+        _durationLabel = [[UILabel alloc] init];
+        _durationLabel.font = [UIFont systemFontOfSize:12];
+        _durationLabel.textColor = [UIColor whiteColor];
+        [self.contentView addSubview:_durationLabel];
+    }
+    return _durationLabel;
+}
+
 @end
 
 @interface DWAlbumGridViewController : UICollectionViewController<UICollectionViewDataSourcePrefetching,PHPhotoLibraryChangeObserver,DWImagePreviewDataSource>
@@ -449,6 +482,9 @@ NS_INLINE NSArray * animateExtensions() {
         if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 cell.gridImage.image = obj.media;
+                if (obj.mediaType == PHAssetMediaTypeVideo) {
+                    [cell setupDuration:obj.asset.duration];
+                }
             });
         }
     }];

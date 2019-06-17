@@ -237,7 +237,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
             if (index == cell.index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self configMediaForCell:cell withMedia:cellData.media];
+                    [self configMediaForCell:cell withMedia:cellData.media index:index];
                 });
             }
         }];
@@ -269,12 +269,13 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
--(void)configMediaForCell:(DWImagePreviewCell *)cell withMedia:(id)media {
+-(void)configMediaForCell:(DWImagePreviewCell *)cell withMedia:(id)media index:(NSUInteger)index {
     cell.media = media;
     ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
     if (!self.firsrCellGotFocus) {
         self.firsrCellGotFocus = YES;
         [cell getFocus];
+        _currentIndex = index;
     }
 }
 
@@ -401,7 +402,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             cell.poster = cellData.previewImage;
         }
         
-        [self configMediaForCell:cell withMedia:cellData.media];
+        [self configMediaForCell:cell withMedia:cellData.media index:originIndex];
         
     } else if (cellData.previewImage) {
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
@@ -434,6 +435,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     DWImagePreviewCell * focusCell = collectionView.visibleCells.lastObject;
     if (focusCell) {
         [focusCell getFocus];
+        _currentIndex = [collectionView indexPathForCell:focusCell].item;
     } else {
         ///这里由于防止不在屏幕内滚动时导致无法获取visibleCells而无法获取焦点，所以在获取不到时置为NO，强制在cellForItem中获取焦点
         self.firsrCellGotFocus = NO;

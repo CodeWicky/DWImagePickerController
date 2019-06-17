@@ -57,6 +57,9 @@ typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///预览数据源
 @property (nonatomic ,weak) id<DWImagePreviewDataSource> dataSource;
 
+///当前正在展示的角标
+@property (nonatomic ,assign ,readonly) NSUInteger currentIndex;
+
 ///预览尺寸
 @property (nonatomic ,assign ,readonly) CGSize previewSize;
 
