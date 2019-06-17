@@ -102,8 +102,6 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 @property (nonatomic ,strong) AVPlayerItem * media;
 
-@property (nonatomic ,assign) BOOL autoPlayOnGettingFocus;
-
 @end
 
 NS_ASSUME_NONNULL_END

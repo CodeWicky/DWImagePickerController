@@ -855,10 +855,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self stop];
 }
 
--(void)getFocus {
-    [super getFocus];
-}
-
 +(Class)classForMediaView {
     return [DWImageVideoView class];
 }
