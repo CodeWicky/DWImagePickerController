@@ -88,7 +88,7 @@
 
 @property (nonatomic ,strong) dispatch_queue_t asyncDecodeQueue;
 
-@property (nonatomic ,assign) BOOL firsrCellGotFocus;
+@property (nonatomic ,assign) BOOL firstCellGotFocus;
 
 @end
 
@@ -231,13 +231,14 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         cellData.media = cellData.previewImage;
         return;
     }
+    ///这里应根据进度来在cell上展示loading.而且Loading展示应该延时一小段时间，以防止loading闪烁的问题
     [self fetchMediaAtIndex:originIndex previewType:previewType progressHandler:^(CGFloat progressNum) {
         NSLog(@"progress = %f",progressNum);
     } fetchCompletion:^(id  _Nullable media, NSUInteger index) {
         [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
             if (index == cell.index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self configMediaForCell:cell withMedia:cellData.media index:index];
+                    [self configMediaForCell:cell withMedia:cellData.media];
                 });
             }
         }];
@@ -269,13 +270,12 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
--(void)configMediaForCell:(DWImagePreviewCell *)cell withMedia:(id)media index:(NSUInteger)index {
+-(void)configMediaForCell:(DWImagePreviewCell *)cell withMedia:(id)media {
     cell.media = media;
     ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
-    if (!self.firsrCellGotFocus) {
-        self.firsrCellGotFocus = YES;
+    if (!self.firstCellGotFocus) {
+        self.firstCellGotFocus = YES;
         [cell getFocus];
-        _currentIndex = index;
     }
 }
 
@@ -361,9 +361,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    
     NSInteger originIndex = indexPath.item;
-    NSLog(@"cell for row %ld",originIndex);
     DWImagePreviewData * cellData = [self dataAtIndex:originIndex];
     DWImagePreviewType previewType = cellData.previewType;
     __kindof DWImagePreviewCell * cell;
@@ -402,7 +400,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             cell.poster = cellData.previewImage;
         }
         
-        [self configMediaForCell:cell withMedia:cellData.media index:originIndex];
+        [self configMediaForCell:cell withMedia:cellData.media];
         
     } else if (cellData.previewImage) {
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
@@ -435,10 +433,9 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     DWImagePreviewCell * focusCell = collectionView.visibleCells.lastObject;
     if (focusCell) {
         [focusCell getFocus];
-        _currentIndex = [collectionView indexPathForCell:focusCell].item;
     } else {
         ///这里由于防止不在屏幕内滚动时导致无法获取visibleCells而无法获取焦点，所以在获取不到时置为NO，强制在cellForItem中获取焦点
-        self.firsrCellGotFocus = NO;
+        self.firstCellGotFocus = NO;
     }
 }
 
@@ -492,6 +489,10 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _asyncDecodeQueue = dispatch_queue_create("com.wicky.dwimagepreviewcontroller", DISPATCH_QUEUE_CONCURRENT);
     }
     return _asyncDecodeQueue;
+}
+
+-(NSUInteger)currentIndex {
+    return _index;
 }
 
 @end

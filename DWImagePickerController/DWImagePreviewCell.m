@@ -861,6 +861,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)initializingSubviews {
     [super initializingSubviews];
+    self.mediaView.delegate = self;
     if (self.zoomable) {
         [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
     } else {
@@ -868,7 +869,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
     [self.contentView bringSubviewToFront:self.hdrBadge];
     [self.contentView addSubview:self.playBtn];
-    self.mediaView.delegate = self;
 }
 
 -(void)setupSubviews {
