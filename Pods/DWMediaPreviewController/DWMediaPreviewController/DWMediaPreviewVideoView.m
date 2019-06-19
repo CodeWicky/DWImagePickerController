@@ -1,18 +1,18 @@
 //
-//  DWImageVideoView.m
+//  DWMediaPreviewVideoView.m
 //  DWImagePickerController
 //
 //  Created by Wicky on 2019/6/10.
 //  Copyright © 2019 Wicky. All rights reserved.
 //
 
-#import "DWImageVideoView.h"
+#import "DWMediaPreviewVideoView.h"
 #import <AVFoundation/AVFoundation.h>
 
-static void *DWImageVideoViewPlayerItemObservationContext = &DWImageVideoViewPlayerItemObservationContext;
-static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerObservationContext;
+static void *DWMediaPreviewVideoViewPlayerItemObservationContext = &DWMediaPreviewVideoViewPlayerItemObservationContext;
+static void *DWMediaPreviewVideoViewPlayerObservationContext = &DWMediaPreviewVideoViewPlayerObservationContext;
 
-@interface DWImageVideoView ()
+@interface DWMediaPreviewVideoView ()
 
 @property (nonatomic ,strong) AVPlayer * player;
 
@@ -20,7 +20,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 @property (nonatomic ,strong) AVPlayerItem * currentPlayerItem;
 
-@property (nonatomic ,assign) DWImageVideoViewStatus status;
+@property (nonatomic ,assign) DWMediaPreviewVideoViewStatus status;
 
 @property (nonatomic ,strong) AVPlayerLayer * playerLayer;
 
@@ -28,7 +28,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 @property (nonatomic ,assign) CGFloat rateBeforeSeeking;
 
-@property (nonatomic ,assign) DWImageVideoViewStatus statusBeforeSeeking;
+@property (nonatomic ,assign) DWMediaPreviewVideoViewStatus statusBeforeSeeking;
 
 @property (nonatomic ,strong) id timeObserver;
 
@@ -36,7 +36,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 @end
 
-@implementation DWImageVideoView
+@implementation DWMediaPreviewVideoView
 @synthesize player = _player;
 @synthesize status = _status;
 
@@ -71,11 +71,11 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
         }
         AVAsset * oriAsset = self.currentAsset;
         _currentAsset = item.asset;
-        self.status = DWImageVideoViewUnknown;
+        self.status = DWMediaPreviewVideoViewUnknown;
         [self.player replaceCurrentItemWithPlayerItem:item];
         if (item) {
             [self addObserverForPlayerItem:item];
-            self.status = DWImageVideoViewProcessing;
+            self.status = DWMediaPreviewVideoViewProcessing;
         }
         
         _waitingPlayOnProcessing = NO;
@@ -90,28 +90,28 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 -(void)play {
     switch (self.status) {
-        case DWImageVideoViewUnknown:
-        case DWImageVideoViewFailed:
-        case DWImageVideoViewPlaying:
-        case DWImageVideoViewSeekingProgress:
+        case DWMediaPreviewVideoViewUnknown:
+        case DWMediaPreviewVideoViewFailed:
+        case DWMediaPreviewVideoViewPlaying:
+        case DWMediaPreviewVideoViewSeekingProgress:
         {
             return;
         }
             break;
-        case DWImageVideoViewProcessing:
+        case DWMediaPreviewVideoViewProcessing:
         {
             self.waitingPlayOnProcessing = YES;
             return;
         }
             break;
-        case DWImageVideoViewFinished:
+        case DWMediaPreviewVideoViewFinished:
         {
             ///此处不写break是为了把事件透过去
             [self.player seekToTime:kCMTimeZero];
         }
         default:
         {
-            self.status = DWImageVideoViewPlaying;
+            self.status = DWMediaPreviewVideoViewPlaying;
             [self.player play];
         }
             break;
@@ -119,15 +119,15 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(void)pause {
-    if (self.status == DWImageVideoViewPlaying) {
-        self.status = DWImageVideoViewPaused;
+    if (self.status == DWMediaPreviewVideoViewPlaying) {
+        self.status = DWMediaPreviewVideoViewPaused;
         [self.player pause];
     }
 }
 
 -(void)stop {
-    if (self.status == DWImageVideoViewPlaying || self.status == DWImageVideoViewPaused) {
-        self.status = DWImageVideoViewReadyToPlay;
+    if (self.status == DWMediaPreviewVideoViewPlaying || self.status == DWMediaPreviewVideoViewPaused) {
+        self.status = DWMediaPreviewVideoViewReadyToPlay;
         [self.player pause];
         [self.player seekToTime:kCMTimeZero];
     }
@@ -136,22 +136,22 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 -(void)replay {
     switch (self.status) {
         ///暂停及完成需要重置时间并开始播放
-        case DWImageVideoViewPaused:
-        case DWImageVideoViewFinished:
+        case DWMediaPreviewVideoViewPaused:
+        case DWMediaPreviewVideoViewFinished:
         {
             ///这里不写break是为了将事件穿透
             [self.player seekToTime:kCMTimeZero];
         }
         ///ready直接开始播放即可
-        case DWImageVideoViewReadyToPlay:
+        case DWMediaPreviewVideoViewReadyToPlay:
         {
             ///更改状态并开始播放
-            self.status = DWImageVideoViewPlaying;
+            self.status = DWMediaPreviewVideoViewPlaying;
             [self.player play];
         }
             break;
         ///playing则只需要重置时间
-        case DWImageVideoViewPlaying:
+        case DWMediaPreviewVideoViewPlaying:
         {
             ///重置时间
             [self.player seekToTime:kCMTimeZero];
@@ -164,11 +164,11 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(void)seekToTime:(CGFloat)time completionHandler:(void (^)(BOOL))completionHandler {
-    DWImageVideoViewStatus status = self.status;
-    if (status == DWImageVideoViewUnknown || status == DWImageVideoViewFailed || status == DWImageVideoViewSeekingProgress) {
+    DWMediaPreviewVideoViewStatus status = self.status;
+    if (status == DWMediaPreviewVideoViewUnknown || status == DWMediaPreviewVideoViewFailed || status == DWMediaPreviewVideoViewSeekingProgress) {
         return;
     }
-    self.status = DWImageVideoViewSeekingProgress;
+    self.status = DWMediaPreviewVideoViewSeekingProgress;
     [self removeTimeObserverForPlayer];
     _rateBeforeSeeking = self.player.rate;
     self.player.rate = 0;
@@ -187,11 +187,11 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(void)beginSeekingTime {
-    DWImageVideoViewStatus status = self.status;
-    if (status == DWImageVideoViewUnknown || status == DWImageVideoViewFailed || status == DWImageVideoViewSeekingProgress) {
+    DWMediaPreviewVideoViewStatus status = self.status;
+    if (status == DWMediaPreviewVideoViewUnknown || status == DWMediaPreviewVideoViewFailed || status == DWMediaPreviewVideoViewSeekingProgress) {
         return;
     }
-    self.status = DWImageVideoViewSeekingProgress;
+    self.status = DWMediaPreviewVideoViewSeekingProgress;
     [self removeTimeObserverForPlayer];
     _rateBeforeSeeking = self.player.rate;
     _statusBeforeSeeking = status;
@@ -199,7 +199,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(void)seekToTimeContinuously:(CGFloat)time completionHandler:(void (^)(BOOL))completionHandler {
-    if (self.status == DWImageVideoViewSeekingProgress) {
+    if (self.status == DWMediaPreviewVideoViewSeekingProgress) {
         CMTime cmTime = CMTimeMakeWithSeconds(time, NSEC_PER_SEC);
         [self.player seekToTime:cmTime completionHandler:completionHandler];
         [self seekToTimeCallback:cmTime];
@@ -207,10 +207,10 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(void)endSeekingTime {
-    if (self.status == DWImageVideoViewSeekingProgress) {
+    if (self.status == DWMediaPreviewVideoViewSeekingProgress) {
         [self addTimeObserverForPlayer];
         self.status = self.statusBeforeSeeking;
-        self.statusBeforeSeeking = DWImageVideoViewUnknown;
+        self.statusBeforeSeeking = DWMediaPreviewVideoViewUnknown;
         self.player.rate = self.rateBeforeSeeking;
         self.rateBeforeSeeking = 1;
     }
@@ -233,18 +233,18 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 #pragma mark --- KVO ---
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
-    if (context == DWImageVideoViewPlayerItemObservationContext) {
+    if (context == DWMediaPreviewVideoViewPlayerItemObservationContext) {
         if ([keyPath isEqualToString:@"status"]) {
             AVPlayerItemStatus status = [[change objectForKey:NSKeyValueChangeNewKey] integerValue];
             switch (status) {
                 case AVPlayerItemStatusFailed:
                 {
-                    self.status = DWImageVideoViewFailed;
+                    self.status = DWMediaPreviewVideoViewFailed;
                 }
                     break;
                 case AVPlayerItemStatusReadyToPlay:
                 {
-                    self.status = DWImageVideoViewReadyToPlay;
+                    self.status = DWMediaPreviewVideoViewReadyToPlay;
                     if ([object isKindOfClass:[AVPlayerItem class]]) {
                         if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:readyToPlayForAsset:)]) {
                             [self.delegate videoView:self readyToPlayForAsset:((AVPlayerItem *)object).asset];
@@ -258,7 +258,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
                     break;
                 default:
                 {
-                    self.status = DWImageVideoViewUnknown;
+                    self.status = DWMediaPreviewVideoViewUnknown;
                 }
                     break;
             }
@@ -287,7 +287,7 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 #pragma mark --- Notification ---
 -(void)playerItemDidReachEnd:(NSNotification *)sender {
     if ([sender.object isKindOfClass:[AVPlayerItem class]] && [((AVPlayerItem *)sender.object).asset isEqual:self.currentAsset]) {
-        self.status = DWImageVideoViewFinished;
+        self.status = DWMediaPreviewVideoViewFinished;
         if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:finishPlayingAsset:)]) {
             [self.delegate videoView:self finishPlayingAsset:((AVPlayerItem *)sender.object).asset];
         }
@@ -318,10 +318,10 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 }
 
 -(void)addObserverForPlayerItem:(AVPlayerItem *)item {
-    [item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWImageVideoViewPlayerItemObservationContext];
-    [item addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWImageVideoViewPlayerItemObservationContext];
-    [item addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWImageVideoViewPlayerItemObservationContext];
-    [item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWImageVideoViewPlayerItemObservationContext];
+    [item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWMediaPreviewVideoViewPlayerItemObservationContext];
+    [item addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWMediaPreviewVideoViewPlayerItemObservationContext];
+    [item addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWMediaPreviewVideoViewPlayerItemObservationContext];
+    [item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:DWMediaPreviewVideoViewPlayerItemObservationContext];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidReachEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:item];
 }
 
@@ -347,20 +347,20 @@ static void *DWImageVideoViewPlayerObservationContext = &DWImageVideoViewPlayerO
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        _status = DWImageVideoViewUnknown;
+        _status = DWMediaPreviewVideoViewUnknown;
         _timeIntervalForPlayerTimeObserver = 0.5;
         _autoPlayAfterReady = NO;
         _rateBeforeSeeking = 0;
-        _statusBeforeSeeking = DWImageVideoViewUnknown;
+        _statusBeforeSeeking = DWMediaPreviewVideoViewUnknown;
     }
     return self;
 }
 
 #pragma mark --- setter/getter ---
--(void)setStatus:(DWImageVideoViewStatus)status {
+-(void)setStatus:(DWMediaPreviewVideoViewStatus)status {
     if (_status != status) {
         [self willChangeValueForKey:@"status"];
-        DWImageVideoViewStatus oriStatus = _status;
+        DWMediaPreviewVideoViewStatus oriStatus = _status;
         _status = status;
         if (self.delegate && [self.delegate respondsToSelector:@selector(videoView:didChangeStatusTo:fromStatus:forAsset:)]) {
             [self.delegate videoView:self didChangeStatusTo:status fromStatus:oriStatus forAsset:self.currentAsset];

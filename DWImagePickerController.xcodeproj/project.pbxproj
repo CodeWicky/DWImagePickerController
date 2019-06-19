@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,12 +14,8 @@
 		9B24404F22365EE2004A6E34 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B24404D22365EE2004A6E34 /* LaunchScreen.storyboard */; };
 		9B24405222365EE2004A6E34 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B24405122365EE2004A6E34 /* main.m */; };
 		9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B244059223666AD004A6E34 /* DWAlbumManager.m */; };
-		9B2EEA2F2289A75800D7B7FF /* DWImagePreviewController.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */; };
 		9B83ED49225CD71A005A9125 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B83ED48225CD71A005A9125 /* icon.png */; };
-		9B92B5FB22AE4D710028298A /* DWImageVideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B92B5FA22AE4D710028298A /* DWImageVideoView.m */; };
 		9B92B5FD22AFA8E90028298A /* [zhainanba.net]林允儿动态壁纸.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 9B92B5FC22AFA8E90028298A /* [zhainanba.net]林允儿动态壁纸.mp4 */; };
-		9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */; };
-		9BCA5CC822688DED002AA175 /* DWImagePreviewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */; };
 		9BFD273E225E3F81009B27D6 /* video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 9BFD273D225E3EE6009B27D6 /* video.mp4 */; };
 		9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BFD274922603089009B27D6 /* DWImagePickerController.m */; };
 		AB99CF40775617CF102F6736 /* libPods-DWImagePickerController.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B566239D1EDEE581E1FB6D38 /* libPods-DWImagePickerController.a */; };
@@ -40,15 +36,8 @@
 		9B24405122365EE2004A6E34 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9B244058223666AD004A6E34 /* DWAlbumManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWAlbumManager.h; sourceTree = "<group>"; };
 		9B244059223666AD004A6E34 /* DWAlbumManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWAlbumManager.m; sourceTree = "<group>"; };
-		9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = DWImagePreviewController.bundle; sourceTree = "<group>"; };
 		9B83ED48225CD71A005A9125 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
-		9B92B5F922AE4D710028298A /* DWImageVideoView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImageVideoView.h; sourceTree = "<group>"; };
-		9B92B5FA22AE4D710028298A /* DWImageVideoView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImageVideoView.m; sourceTree = "<group>"; };
 		9B92B5FC22AFA8E90028298A /* [zhainanba.net]林允儿动态壁纸.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "[zhainanba.net]林允儿动态壁纸.mp4"; sourceTree = "<group>"; };
-		9BCA5CC322684F2E002AA175 /* DWImagePreviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePreviewController.h; sourceTree = "<group>"; };
-		9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePreviewController.m; sourceTree = "<group>"; };
-		9BCA5CC622688DED002AA175 /* DWImagePreviewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePreviewCell.h; sourceTree = "<group>"; };
-		9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePreviewCell.m; sourceTree = "<group>"; };
 		9BFD273D225E3EE6009B27D6 /* video.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = video.mp4; sourceTree = "<group>"; };
 		9BFD274822603089009B27D6 /* DWImagePickerController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWImagePickerController.h; sourceTree = "<group>"; };
 		9BFD274922603089009B27D6 /* DWImagePickerController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWImagePickerController.m; sourceTree = "<group>"; };
@@ -108,11 +97,6 @@
 				9B24404622365EE1004A6E34 /* ViewController.m */,
 				9BFD274822603089009B27D6 /* DWImagePickerController.h */,
 				9BFD274922603089009B27D6 /* DWImagePickerController.m */,
-				9B2EEA2E2289A75700D7B7FF /* DWImagePreviewController.bundle */,
-				9BCA5CC622688DED002AA175 /* DWImagePreviewCell.h */,
-				9BCA5CC722688DED002AA175 /* DWImagePreviewCell.m */,
-				9BCA5CC322684F2E002AA175 /* DWImagePreviewController.h */,
-				9BCA5CC422684F2E002AA175 /* DWImagePreviewController.m */,
 				9B244058223666AD004A6E34 /* DWAlbumManager.h */,
 				9B244059223666AD004A6E34 /* DWAlbumManager.m */,
 				9B24404822365EE1004A6E34 /* Main.storyboard */,
@@ -120,8 +104,6 @@
 				9B24404D22365EE2004A6E34 /* LaunchScreen.storyboard */,
 				9B24405022365EE2004A6E34 /* Info.plist */,
 				9B24405122365EE2004A6E34 /* main.m */,
-				9B92B5F922AE4D710028298A /* DWImageVideoView.h */,
-				9B92B5FA22AE4D710028298A /* DWImageVideoView.m */,
 			);
 			path = DWImagePickerController;
 			sourceTree = "<group>";
@@ -200,7 +182,6 @@
 				9B24404F22365EE2004A6E34 /* LaunchScreen.storyboard in Resources */,
 				9B24404C22365EE2004A6E34 /* Assets.xcassets in Resources */,
 				9B24404A22365EE1004A6E34 /* Main.storyboard in Resources */,
-				9B2EEA2F2289A75800D7B7FF /* DWImagePreviewController.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,21 +193,16 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources.sh",
-				"${PODS_ROOT}/DWCheckBox/DWCheckBox/DWCheckBoxBundle.bundle",
-				"${PODS_ROOT}/DWLogger/DWLogger/DWLoggerBundle.bundle",
-				"${PODS_ROOT}/DWTableViewHelper/DWTableViewHelper/DWTableViewHelperResource.bundle",
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DWCheckBoxBundle.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DWLoggerBundle.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DWTableViewHelperResource.bundle",
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		A20FE52BE42D7F51D56B50FF /* [CP] Check Pods Manifest.lock */ = {
@@ -255,11 +231,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B24405A223666AD004A6E34 /* DWAlbumManager.m in Sources */,
-				9BCA5CC822688DED002AA175 /* DWImagePreviewCell.m in Sources */,
-				9BCA5CC522684F2E002AA175 /* DWImagePreviewController.m in Sources */,
 				9BFD274A22603089009B27D6 /* DWImagePickerController.m in Sources */,
 				9B24404722365EE1004A6E34 /* ViewController.m in Sources */,
-				9B92B5FB22AE4D710028298A /* DWImageVideoView.m in Sources */,
 				9B24405222365EE2004A6E34 /* main.m in Sources */,
 				9B24404422365EE1004A6E34 /* AppDelegate.m in Sources */,
 			);

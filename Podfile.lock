@@ -19,6 +19,8 @@ PODS:
   - DWLogger/Dependence/DWFileManager (1.0.8.2):
     - DWCheckBox (~> 1.0.3)
     - DWTableViewHelper (~> 1.1.7.1)
+  - DWMediaPreviewController (0.0.0.1):
+    - YYImage (~> 1.0.4)
   - DWTableViewHelper (1.1.7.5)
   - YYImage (1.0.4):
     - YYImage/Core (= 1.0.4)
@@ -26,21 +28,23 @@ PODS:
 
 DEPENDENCIES:
   - DWLogger (~> 1.0.8.2)
-  - YYImage (~> 1.0.4)
+  - DWMediaPreviewController (~> 0.0.0.1)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - DWCheckBox
     - DWLogger
+    - DWMediaPreviewController
     - DWTableViewHelper
     - YYImage
 
 SPEC CHECKSUMS:
   DWCheckBox: 566e20f6097a1013dc159ed0b619b3d2fff07468
   DWLogger: c4d465fc7c726aa75772edd94cb84e97d00eb93b
+  DWMediaPreviewController: 1b933e1391e832023aab855412808b60726654ca
   DWTableViewHelper: 23278d965dc25d6fe6e56686378ee09b411cbe0e
   YYImage: 1e1b62a9997399593e4b9c4ecfbbabbf1d3f3b54
 
-PODFILE CHECKSUM: 69abae50cc6011b851ecfdcbf9ab1329cd7f4b36
+PODFILE CHECKSUM: bd108b815875475de9c1fa0d9bf4d3d969d199c4
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.7.2

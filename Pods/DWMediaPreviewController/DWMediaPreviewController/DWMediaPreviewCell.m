@@ -1,21 +1,21 @@
 //
-//  DWImagePreviewCell.m
+//  DWMediaPreviewCell.m
 //  DWImagePickerController
 //
 //  Created by Wicky on 2019/4/18.
 //  Copyright © 2019 Wicky. All rights reserved.
 //
 
-#import "DWImagePreviewCell.h"
+#import "DWMediaPreviewCell.h"
 #import <PhotosUI/PhotosUI.h>
-#import "DWImageVideoView.h"
+#import "DWMediaPreviewVideoView.h"
 
 #define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
 
-typedef NS_ENUM(NSUInteger, DWImagePreviewZoomType) {
-    DWImagePreviewZoomTypeNone,
-    DWImagePreviewZoomTypeHorizontal,
-    DWImagePreviewZoomTypeVertical,
+typedef NS_ENUM(NSUInteger, DWMediaPreviewZoomType) {
+    DWMediaPreviewZoomTypeNone,
+    DWMediaPreviewZoomTypeHorizontal,
+    DWMediaPreviewZoomTypeVertical,
 };
 
 typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
@@ -24,7 +24,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     DWImagePanDirectionTypeVertical,
 };
 
-@interface DWImagePreviewCell ()<UIScrollViewDelegate,UIGestureRecognizerDelegate>
+@interface DWMediaPreviewCell ()<UIScrollViewDelegate,UIGestureRecognizerDelegate>
 {
     BOOL _finishInitializingLayout;
 }
@@ -39,7 +39,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,assign) CGSize mediaSize;
 
-@property (nonatomic ,assign) DWImagePreviewZoomType zoomDirection;
+@property (nonatomic ,assign) DWMediaPreviewZoomType zoomDirection;
 
 @property (nonatomic ,assign) BOOL scrollIsZooming;
 
@@ -55,11 +55,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,assign) CGFloat closeThreshold;
 
-@property (nonatomic ,weak) DWImagePreviewController * colVC;
+@property (nonatomic ,weak) DWMediaPreviewController * colVC;
 
 @end
 
-@implementation DWImagePreviewCell
+@implementation DWMediaPreviewCell
 
 #pragma mark --- interface method ---
 -(void)resignFocus {
@@ -88,13 +88,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             [scrollView setZoomScale:1 animated:YES];
         } else {
             switch (self.zoomDirection) {
-                case DWImagePreviewZoomTypeHorizontal:
+                case DWMediaPreviewZoomTypeHorizontal:
                 {
                     ///缩放至指定位置（origin 指定的是期待缩放以后屏幕中心的位置，size展示在屏幕上全屏尺寸对应的原始尺寸，会取较小的值作为缩放比）
                     [scrollView zoomToRect:CGRectMake(point.x, scrollView.bounds.size.height / 2, 1, scrollView.bounds.size.height / self.preferredZoomScale) animated:YES];
                 }
                     break;
-                case DWImagePreviewZoomTypeVertical:
+                case DWMediaPreviewZoomTypeVertical:
                 {
                     [scrollView zoomToRect:CGRectMake(scrollView.bounds.size.width / 2, point.y, scrollView.bounds.size.width / self.preferredZoomScale, 1) animated:YES];
                 }
@@ -109,7 +109,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
--(void)configCollectionViewController:(DWImagePreviewController *)colVC {
+-(void)configCollectionViewController:(DWMediaPreviewController *)colVC {
     if (![_colVC isEqual:colVC]) {
         _colVC = colVC;
     }
@@ -159,17 +159,17 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         if (zoomScale < 2) {
             zoomScale = 2;
         }
-        DWImagePreviewZoomType zoomDire = DWImagePreviewZoomTypeNone;
+        DWMediaPreviewZoomType zoomDire = DWMediaPreviewZoomTypeNone;
         CGFloat preferrdScale = 1;
         CGFloat fixStartAnchor = 0;
         CGFloat fixEndAnchor = 0;
         if (CGFLOATEQUAL(mediaScale, previewScale)) {
-            zoomDire = DWImagePreviewZoomTypeNone;
+            zoomDire = DWMediaPreviewZoomTypeNone;
             preferrdScale = 1;
             fixStartAnchor = 0;
             fixEndAnchor = 0;
         } else if (mediaScale / previewScale > 1) {
-            zoomDire = DWImagePreviewZoomTypeHorizontal;
+            zoomDire = DWMediaPreviewZoomTypeHorizontal;
             preferrdScale = mediaScale / previewScale;
             if (zoomScale < preferrdScale) {
                 zoomScale = preferrdScale;
@@ -177,7 +177,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             fixStartAnchor = (self.bounds.size.height - self.bounds.size.width / mediaScale) * 0.5;
             fixEndAnchor = (self.bounds.size.height + self.bounds.size.width / mediaScale) * 0.5;
         } else {
-            zoomDire = DWImagePreviewZoomTypeVertical;
+            zoomDire = DWMediaPreviewZoomTypeVertical;
             preferrdScale = previewScale / mediaScale;
             if (zoomScale < preferrdScale) {
                 zoomScale = preferrdScale;
@@ -199,7 +199,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             return;
         }
         if (!self.hdrBadge.image) {
-            self.hdrBadge.image = [UIImage imageNamed:@"DWImagePreviewController.bundle/hdr_badge"];
+            self.hdrBadge.image = [UIImage imageNamed:@"DWMediaPreviewController.bundle/hdr_badge"];
         }
         
         CGFloat spacing = 3;
@@ -210,13 +210,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             zoomFactor = self.zoomContainerView.zoomScale;
         }
         switch (self.zoomDirection) {
-            case DWImagePreviewZoomTypeHorizontal:
+            case DWMediaPreviewZoomTypeHorizontal:
             {
                 CGFloat height = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
                 badgeFrame.origin.y = (self.bounds.size.height - height) / 2;
             }
                 break;
-            case DWImagePreviewZoomTypeVertical:
+            case DWMediaPreviewZoomTypeVertical:
             {
                 CGFloat width = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
                 badgeFrame.origin.x = (self.bounds.size.width - width) / 2;
@@ -256,7 +256,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     _zoomContainerView.zoomScale = 1;
     _zoomContainerView.maximumZoomScale = 1;
     _zoomContainerView.contentInset = UIEdgeInsetsZero;
-    _zoomDirection = DWImagePreviewZoomTypeNone;
+    _zoomDirection = DWMediaPreviewZoomTypeNone;
     _scrollIsZooming = NO;
     _preferredZoomScale = 1;
     _fixStartAnchor = 0;
@@ -327,13 +327,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
     
     switch (self.zoomDirection) {
-        case DWImagePreviewZoomTypeHorizontal:
+        case DWMediaPreviewZoomTypeHorizontal:
         {
             ///横向缩放的黑边在上下
             scrollView.contentInset = UIEdgeInsetsMake(fixInset, 0, fixInset, 0);
         }
             break;
-        case DWImagePreviewZoomTypeVertical:
+        case DWMediaPreviewZoomTypeVertical:
         {
             ///纵向缩放的黑边在左右
             scrollView.contentInset = UIEdgeInsetsMake(0, fixInset, 0, fixInset);
@@ -348,7 +348,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     ///避免缩放的时候看到黑边
     if (self.zooming) {
         switch (self.zoomDirection) {
-            case DWImagePreviewZoomTypeHorizontal:
+            case DWMediaPreviewZoomTypeHorizontal:
             {
                 ///小于偏好缩放比时屏幕纵向方向上仍能显示完成，所以将图片锁定在纵向居中
                 if (scrollView.zoomScale < self.preferredZoomScale) {
@@ -367,7 +367,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                 
             }
                 break;
-            case DWImagePreviewZoomTypeVertical:
+            case DWMediaPreviewZoomTypeVertical:
             {
                 ///小于偏好缩放比时屏幕纵向方向上仍能显示完成，所以将图片锁定在纵向居中
                 if (scrollView.zoomScale < self.preferredZoomScale) {
@@ -431,7 +431,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                 }
                 
                 BOOL needClose = NO;
-                if (self.zooming && self.zoomDirection != DWImagePreviewZoomTypeHorizontal) {
+                if (self.zooming && self.zoomDirection != DWMediaPreviewZoomTypeHorizontal) {
                     if (currentY > _closeThreshold && _zoomContainerView.contentOffset.y <= 0 ) {
                         needClose = YES;
                     }
@@ -555,7 +555,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.previewType = DWImagePreviewTypeImage;
+        self.previewType = DWMediaPreviewTypeImage;
     }
     return self;
 }
@@ -594,7 +594,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.previewType = DWImagePreviewTypeAnimateImage;
+        self.previewType = DWMediaPreviewTypeAnimateImage;
     }
     return self;
 }
@@ -663,7 +663,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.previewType = DWImagePreviewTypeLivePhoto;
+        self.previewType = DWMediaPreviewTypeLivePhoto;
     }
     return self;
 }
@@ -716,13 +716,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             zoomFactor = self.zoomContainerView.zoomScale;
         }
         switch (self.zoomDirection) {
-            case DWImagePreviewZoomTypeHorizontal:
+            case DWMediaPreviewZoomTypeHorizontal:
             {
                 CGFloat height = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
                 badgeFrame.origin.y = (self.bounds.size.height - height) / 2;
             }
                 break;
-            case DWImagePreviewZoomTypeVertical:
+            case DWMediaPreviewZoomTypeVertical:
             {
                 CGFloat width = (self.fixEndAnchor - self.fixStartAnchor) * zoomFactor;
                 badgeFrame.origin.x = (self.bounds.size.width - width) / 2;
@@ -743,7 +743,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         if (self.isHDR) {
             
             if (!self.hdrBadge.image) {
-                self.hdrBadge.image = [UIImage imageNamed:@"DWImagePreviewController.bundle/hdr_badge"];
+                self.hdrBadge.image = [UIImage imageNamed:@"DWMediaPreviewController.bundle/hdr_badge"];
             }
             
             CGFloat badgeLength = 28;
@@ -821,11 +821,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @end
 
-@interface DWVideoPreviewCell ()<DWImageVideoViewProtocol>
+@interface DWVideoPreviewCell ()<DWMediaPreviewVideoViewProtocol>
 
 @property (nonatomic ,strong) UIImageView * posterView;
 
-@property (nonatomic ,strong) DWImageVideoView * mediaView;
+@property (nonatomic ,strong) DWMediaPreviewVideoView * mediaView;
 
 @property (nonatomic ,strong) UIButton * playBtn;
 
@@ -838,7 +838,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        self.previewType = DWImagePreviewTypeVideo;
+        self.previewType = DWMediaPreviewTypeVideo;
     }
     return self;
 }
@@ -856,7 +856,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 +(Class)classForMediaView {
-    return [DWImageVideoView class];
+    return [DWMediaPreviewVideoView class];
 }
 
 -(void)initializingSubviews {
@@ -894,7 +894,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)tapAction:(UITapGestureRecognizer *)tap {
     [super tapAction:tap];
-    if (self.mediaView.status == DWImageVideoViewPlaying) {
+    if (self.mediaView.status == DWMediaPreviewVideoViewPlaying) {
         [self pause];
     }
 }
@@ -924,12 +924,12 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 #pragma mark --- videoView delegate ---
--(void)videoView:(DWImageVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
+-(void)videoView:(DWMediaPreviewVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
     ///清除poster，否则缩放有底图。更改时机为ready以后，防止 -setMedia: 时移除导致的视频尚未ready导致无法展示首帧，中间的等待时间为空白
     self.posterView.image = nil;
 }
 
--(void)videoView:(DWImageVideoView *)videoView finishPlayingAsset:(AVAsset *)asset {
+-(void)videoView:(DWMediaPreviewVideoView *)videoView finishPlayingAsset:(AVAsset *)asset {
     [self stop];
 }
 
@@ -958,7 +958,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (!_playBtn) {
         _playBtn = [UIButton buttonWithType:(UIButtonTypeCustom)];
         [_playBtn setFrame:CGRectMake(0, 0, 80, 80)];
-        [_playBtn setImage:[UIImage imageNamed:@"DWImagePreviewController.bundle/play_btn"] forState:(UIControlStateNormal)];
+        [_playBtn setImage:[UIImage imageNamed:@"DWMediaPreviewController.bundle/play_btn"] forState:(UIControlStateNormal)];
         [_playBtn addTarget:self action:@selector(playBtnAction:) forControlEvents:(UIControlEventTouchUpInside)];
         _playBtn.backgroundColor = [UIColor blackColor];
         _playBtn.layer.cornerRadius = 40;

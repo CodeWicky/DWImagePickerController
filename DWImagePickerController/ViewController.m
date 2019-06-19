@@ -9,9 +9,9 @@
 #import "ViewController.h"
 #import "DWAlbumManager.h"
 #import "DWImagePickerController.h"
-#import "DWImageVideoView.h"
+#import "DWMediaPreviewVideoView.h"
 
-@interface ViewController ()<DWImageVideoViewProtocol>
+@interface ViewController ()<DWMediaPreviewVideoViewProtocol>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
 @property (nonatomic ,strong) DWAlbumManager * imgMgr;
@@ -20,14 +20,14 @@
 
 @property (nonatomic ,assign) int step;
 
-@property (nonatomic ,strong) DWImageVideoView * videoView;
+@property (nonatomic ,strong) DWMediaPreviewVideoView * videoView;
 
 @end
 
 @implementation ViewController
 
 //-(void)loadView {
-//    self.view = [DWImageVideoView new];
+//    self.view = [DWMediaPreviewVideoView new];
 //}
 
 - (void)viewDidLoad {
@@ -35,7 +35,7 @@
     self.imgMgr = [[DWAlbumManager alloc] init];
     self.step = 0;
     
-//    self.videoView = (DWImageVideoView *)self.view;
+//    self.videoView = (DWMediaPreviewVideoView *)self.view;
 //    self.videoView.delegate = self;
 //    self.videoView.resizeMode = DWImageVideoResizeModeScaleAspectFit;
 }
@@ -150,7 +150,7 @@
     
 }
 
--(void)videoView:(DWImageVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
+-(void)videoView:(DWMediaPreviewVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
     NSLog(@"%f",[videoView convertCMTimeToTimeInterval:[videoView actualTimeForAsset:asset]]);
     [videoView play];
 }

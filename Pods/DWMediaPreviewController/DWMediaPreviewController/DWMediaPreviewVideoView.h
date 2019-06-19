@@ -1,5 +1,5 @@
 //
-//  DWImageVideoView.h
+//  DWMediaPreviewVideoView.h
 //  DWImagePickerController
 //
 //  Created by Wicky on 2019/6/10.
@@ -9,19 +9,19 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-typedef NS_ENUM(NSUInteger, DWImageVideoViewStatus) {
+typedef NS_ENUM(NSUInteger, DWMediaPreviewVideoViewStatus) {
     //Initial status that there's no meida.
     ///初始状态
-    DWImageVideoViewUnknown,
+    DWMediaPreviewVideoViewUnknown,
     //Status between config video and ready to play which indicates the video view is processing data.
     ///表明当前video view正在处理数据，这个状态位于configVideo后，readyToPlay之前。
-    DWImageVideoViewProcessing,
-    DWImageVideoViewReadyToPlay,
-    DWImageVideoViewPlaying,
-    DWImageVideoViewSeekingProgress,
-    DWImageVideoViewPaused,
-    DWImageVideoViewFinished,
-    DWImageVideoViewFailed,
+    DWMediaPreviewVideoViewProcessing,
+    DWMediaPreviewVideoViewReadyToPlay,
+    DWMediaPreviewVideoViewPlaying,
+    DWMediaPreviewVideoViewSeekingProgress,
+    DWMediaPreviewVideoViewPaused,
+    DWMediaPreviewVideoViewFinished,
+    DWMediaPreviewVideoViewFailed,
 };
 
 typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
@@ -30,34 +30,34 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
     DWImageVideoResizeModeScaleToFill,
 };
 
-@class DWImageVideoView;
-@protocol DWImageVideoViewProtocol <NSObject>
+@class DWMediaPreviewVideoView;
+@protocol DWMediaPreviewVideoViewProtocol <NSObject>
 @optional
--(void)videoView:(DWImageVideoView *)videoView didChangeAssetTo:(AVAsset *)desAsset fromAsset:(AVAsset *)oriAsset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView didChangeAssetTo:(AVAsset *)desAsset fromAsset:(AVAsset *)oriAsset;
 
--(void)videoView:(DWImageVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView seekToTime:(CMTime)time forAsset:(AVAsset *)asset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView seekToTime:(CMTime)time forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView playbackBufferStatusChanged:(BOOL)empty forAsset:(AVAsset *)asset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView playbackBufferStatusChanged:(BOOL)empty forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView loadedTimeRangesChangedTo:(NSArray <NSValue *>*)timeRanges forAsset:(AVAsset *)asset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView loadedTimeRangesChangedTo:(NSArray <NSValue *>*)timeRanges forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView didChangeStatusTo:(DWImageVideoViewStatus)desStatus fromStatus:(DWImageVideoViewStatus)oriStatus forAsset:(AVAsset *)asset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView didChangeStatusTo:(DWMediaPreviewVideoViewStatus)desStatus fromStatus:(DWMediaPreviewVideoViewStatus)oriStatus forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView playerTimeChangeTo:(CMTime)time forAsset:(AVAsset *)asset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView playerTimeChangeTo:(CMTime)time forAsset:(AVAsset *)asset;
 
--(void)videoView:(DWImageVideoView *)videoView finishPlayingAsset:(AVAsset *)asset;
+-(void)videoView:(DWMediaPreviewVideoView *)videoView finishPlayingAsset:(AVAsset *)asset;
 
 @end
 
-//DWImageVideoView is a subclass of UIView to display video design for DWImagePreviewController.
-///DWImageVideoView是给DWImagePreviewController使用的一个用来展示视频的视图，他是UIView的一个子类。
-@interface DWImageVideoView : UIView
+//DWMediaPreviewVideoView is a subclass of UIView to display video design for DWMediaPreviewController.
+///DWMediaPreviewVideoView是给DWMediaPreviewController使用的一个用来展示视频的视图，他是UIView的一个子类。
+@interface DWMediaPreviewVideoView : UIView
 
 //Delegate of video view.
 ///代理
-@property (nonatomic ,weak) id<DWImageVideoViewProtocol> delegate;
+@property (nonatomic ,weak) id<DWMediaPreviewVideoViewProtocol> delegate;
 
 //The player core of video view.
 ///播放核心
@@ -69,7 +69,7 @@ typedef NS_ENUM(NSUInteger, DWImageVideoResizeMode) {
 
 //Current status of video view.KVO supported.
 ///当前的状态，支持KVO
-@property (nonatomic ,assign ,readonly) DWImageVideoViewStatus status;
+@property (nonatomic ,assign ,readonly) DWMediaPreviewVideoViewStatus status;
 
 //The resize mode of media.
 ///当前媒体资源的缩放模式

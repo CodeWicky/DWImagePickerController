@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0930"
+   LastUpgradeVersion = "1100"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "724ED10C299CB72C0835519446E10E31"
+               BlueprintIdentifier = "020068430AE947522F108DFBD1640686"
+               BuildableName = "libPods-DWImagePickerController.a"
                BlueprintName = "Pods-DWImagePickerController"
-               ReferencedContainer = "container:Pods.xcodeproj"
-               BuildableName = "libPods-DWImagePickerController.a">
+               ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

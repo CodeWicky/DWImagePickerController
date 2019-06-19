@@ -1,5 +1,5 @@
 //
-//  DWImagePreviewCell.h
+//  DWMediaPreviewCell.h
 //  DWImagePickerController
 //
 //  Created by Wicky on 2019/4/18.
@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DWImagePreviewController.h"
+#import "DWMediaPreviewController.h"
 #import <YYImage/YYImage.h>
 #import <AVFoundation/AVFoundation.h>
 #import <Photos/Photos.h>
@@ -15,14 +15,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class DWImagePreviewCell;
-typedef void(^DWImagePreviewActionCallback)(DWImagePreviewCell * cell);
-typedef void(^DWImagePreviewDoubleClickActionCallback)(DWImagePreviewCell * cell ,CGPoint point);
-typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell * cell ,BOOL hide);
+@class DWMediaPreviewCell;
+typedef void(^DWMediaPreviewActionCallback)(DWMediaPreviewCell * cell);
+typedef void(^DWMediaPreviewDoubleClickActionCallback)(DWMediaPreviewCell * cell ,CGPoint point);
+typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell * cell ,BOOL hide);
 
-//DWImagePreviewCell is a abstract class of DWImagePreviewController displaying unit.It provide some basic method to help you customize your preview cell by them or override them.
-///DWImagePreviewCell是DWImagePreviewController展示单元的一个抽象类。提供了一些基础方法，通过他们，你可以在你定制的cell中直接调用这些基础方法，或者重写他们来满足你的需求。
-@interface DWImagePreviewCell : UICollectionViewCell
+//DWMediaPreviewCell is a abstract class of DWMediaPreviewController displaying unit.It provide some basic method to help you customize your preview cell by them or override them.
+///DWMediaPreviewCell是DWMediaPreviewController展示单元的一个抽象类。提供了一些基础方法，通过他们，你可以在你定制的cell中直接调用这些基础方法，或者重写他们来满足你的需求。
+@interface DWMediaPreviewCell : UICollectionViewCell
 
 //The current index for what the cell is displaying.For is an asynchous process when fetching media,callback may be called after the current diplaying has changed.Use index to determine whether to set media.
 ///当前cell正在展示对应的角标。获取媒体的过程是异步的，可能会发生当前要展示的资源已经改变了资源才获取完成的情况。此时可以通过index来决定是否要设置媒体。
@@ -30,7 +30,7 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 //Indicates the preview type of current media.
 ///当前正在展示的媒体的预览类型
-@property (nonatomic ,assign) DWImagePreviewType previewType;
+@property (nonatomic ,assign) DWMediaPreviewType previewType;
 
 //The media current displaying.
 ///当前正在展示的媒体。
@@ -54,15 +54,15 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 //Callback for tapAction on previewCell.
 ///在单点cell时会触发的回调。
-@property (nonatomic ,copy) DWImagePreviewActionCallback tapAction;
+@property (nonatomic ,copy) DWMediaPreviewActionCallback tapAction;
 
 //Callback for doubleClickAction on previewCell.
 ///在cell上双击时会触发的回调。
-@property (nonatomic ,copy) DWImagePreviewDoubleClickActionCallback doubleClickAction;
+@property (nonatomic ,copy) DWMediaPreviewDoubleClickActionCallback doubleClickAction;
 
-//Callback for previewCell to call DWImagePreviewController to hide navigationBar.It will be call on cell zooming.And you can call it where you want in you subclass to hide navigationBar and do something else at the same time.
-///当cell通知DWImagePreviewController隐藏导航栏时触发的回调。当缩放媒体的时候回触发此回调。你也可以在子类中按照你的需求在合适的实际调用他去隐藏导航栏，同时你也可以做一些其他的事情。
-@property (nonatomic ,copy) DWImagePreviewCellCallNavigationHideCallback callNavigationHide;
+//Callback for previewCell to call DWMediaPreviewController to hide navigationBar.It will be call on cell zooming.And you can call it where you want in you subclass to hide navigationBar and do something else at the same time.
+///当cell通知DWMediaPreviewController隐藏导航栏时触发的回调。当缩放媒体的时候回触发此回调。你也可以在子类中按照你的需求在合适的实际调用他去隐藏导航栏，同时你也可以做一些其他的事情。
+@property (nonatomic ,copy) DWMediaPreviewCellCallNavigationHideCallback callNavigationHide;
 
 #pragma mark --- interface method ---
 
@@ -80,8 +80,8 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 -(void)zoomMediaView:(BOOL)zoomIn point:(CGPoint)point;
 
 //Config the preview cell with previewController so that preview cell can handle something itself via previewController.You should always call it when you config the preview cell.
-///给cell配置他对应的预览控制器，这样cell才可以根据他来处理相关布局问题。如果你重写了DWImagePreviewController，在cellForItem代理中必须调用此方法。
--(void)configCollectionViewController:(DWImagePreviewController *)colVC NS_REQUIRES_SUPER;
+///给cell配置他对应的预览控制器，这样cell才可以根据他来处理相关布局问题。如果你重写了DWMediaPreviewController，在cellForItem代理中必须调用此方法。
+-(void)configCollectionViewController:(DWMediaPreviewController *)colVC NS_REQUIRES_SUPER;
 #pragma mark --- call back method ---
 //These methods below are call back for different event.They maybe called on specific event automatically.Override it if you have other things to do on it.
 ///以下方法都是一些预制的钩子方法，在特定的事件中会自动调用一下方法。你可以重写这些方法来定制化你的cell。
@@ -133,7 +133,7 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 //Cell to display normal image.
 ///展示普通UIImage的cell
-@interface DWNormalImagePreviewCell : DWImagePreviewCell
+@interface DWNormalImagePreviewCell : DWMediaPreviewCell
 
 @property (nonatomic ,strong) UIImage * media;
 
@@ -141,7 +141,7 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 //Cell to display animate image.
 ///展示动态图片的cell
-@interface DWAnimateImagePreviewCell : DWImagePreviewCell
+@interface DWAnimateImagePreviewCell : DWMediaPreviewCell
 
 @property (nonatomic ,strong) YYImage * media;
 
@@ -149,7 +149,7 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 //Cell to display livephoto.
 ///展示LivePhoto的cell
-@interface DWLivePhotoPreviewCell : DWImagePreviewCell
+@interface DWLivePhotoPreviewCell : DWMediaPreviewCell
 
 @property (nonatomic ,strong) PHLivePhoto * media;
 
@@ -157,7 +157,7 @@ typedef void(^DWImagePreviewCellCallNavigationHideCallback)(DWImagePreviewCell *
 
 //Cell to display video.
 ///展示视频的cell
-@interface DWVideoPreviewCell : DWImagePreviewCell
+@interface DWVideoPreviewCell : DWMediaPreviewCell
 
 @property (nonatomic ,strong) AVPlayerItem * media;
 

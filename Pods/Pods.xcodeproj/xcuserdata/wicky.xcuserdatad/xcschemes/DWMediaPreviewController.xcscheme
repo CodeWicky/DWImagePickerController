@@ -14,9 +14,9 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "822E44240F2922DAB12018A6B649BD19"
-               BuildableName = "libYYImage.a"
-               BlueprintName = "YYImage"
+               BlueprintIdentifier = "CBAC1A28FE028734D86328EF5E99287D"
+               BuildableName = "libDWMediaPreviewController.a"
+               BlueprintName = "DWMediaPreviewController"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

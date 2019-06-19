@@ -1,5 +1,5 @@
 //
-//  DWImagePreviewController.h
+//  DWMediaPreviewController.h
 //  DWImagePickerController
 //
 //  Created by Wicky on 2019/4/18.
@@ -10,63 +10,63 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSUInteger, DWImagePreviewType) {
-    DWImagePreviewTypeNone,
-    DWImagePreviewTypeImage,
-    DWImagePreviewTypeAnimateImage,
-    DWImagePreviewTypeLivePhoto,
-    DWImagePreviewTypeVideo,
+typedef NS_ENUM(NSUInteger, DWMediaPreviewType) {
+    DWMediaPreviewTypeNone,
+    DWMediaPreviewTypeImage,
+    DWMediaPreviewTypeAnimateImage,
+    DWMediaPreviewTypeLivePhoto,
+    DWMediaPreviewTypeVideo,
 };
 
 
-typedef void(^DWImagePreviewFetchMediaProgress)(CGFloat progressNum);
-typedef void(^DWImagePreviewFetchPosterCompletion)(_Nullable id media, NSUInteger index, BOOL satisfiedSize);
-typedef void(^DWImagePreviewFetchMediaCompletion)(_Nullable id media, NSUInteger index);
+typedef void(^DWMediaPreviewFetchMediaProgress)(CGFloat progressNum);
+typedef void(^DWMediaPreviewFetchPosterCompletion)(_Nullable id media, NSUInteger index, BOOL satisfiedSize);
+typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger index);
 
-//DWImagePreviewController is a controller to preiview different type of media,support to preview UIImage/Aniamte Image/Live Photo/Video.
-///DWImagePreviewController是一个用来预览媒体资源的控制器，当前支持UIImage/Animate Image/Live Photo/Video.
-@class DWImagePreviewController;
+//DWMediaPreviewController is a controller to preiview different type of media,support to preview UIImage/Aniamte Image/Live Photo/Video.
+///DWMediaPreviewController是一个用来预览媒体资源的控制器，当前支持UIImage/Animate Image/Live Photo/Video.
+@class DWMediaPreviewController;
 
-@protocol DWImagePreviewDataSource <NSObject>
+@protocol DWMediaPreviewDataSource <NSObject>
 
 @required
 //Return the total count of media to preview.
 ///返回预览的媒体的总数。
--(NSUInteger)countOfMediaForPreviewController:(DWImagePreviewController *)previewController;
+-(NSUInteger)countOfMediaForPreviewController:(DWMediaPreviewController *)previewController;
 
 //Return the preview type for media at specific index.
 ///返回对应角标的媒体类型。
--(DWImagePreviewType)previewController:(DWImagePreviewController *)previewController previewTypeAtIndex:(NSUInteger)index;
+-(DWMediaPreviewType)previewController:(DWMediaPreviewController *)previewController previewTypeAtIndex:(NSUInteger)index;
 
 //Callback for fetching media(If there's a cache of media,this method won't be called.).
 ///获取对应角标的媒体的回调（如果命中缓存则不回调）。
--(void)previewController:(DWImagePreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWImagePreviewType)previewType progressHandler:(DWImagePreviewFetchMediaProgress)progressHandler fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion;
+-(void)previewController:(DWMediaPreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion;
 
 @optional
 
 //Return whether the media at specific index is hdr type.
 ///返回对应位置的媒体是否为HDR模式资源。
--(BOOL)previewController:(DWImagePreviewController *)previewController isHDRAtIndex:(NSUInteger)index;
+-(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index;
 
 //Callback for fetching poster at specific index(It will be called before -previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion: to fetch an placeholder for media.If there's a cache of media,this method won't be called.).
 ///获取对应角标位置占位图的回调（发生在 -previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion: 回调之前，预先为媒体加载占位图，如果命中缓存则不回调)。
--(void)previewController:(DWImagePreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWImagePreviewFetchPosterCompletion)fetchCompletion;
+-(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion;
 
 //Callback on the index of media is showing has been changed.
 ///当前预览的媒体角标发生改变时回调。
--(void)previewController:(DWImagePreviewController *)previewController hasChangedToIndex:(NSUInteger)index;
+-(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index;
 
 //Callback on preload media around current media.
 ///预加载附近媒体的回调
--(void)previewController:(DWImagePreviewController *)previewController prefetchMediaAtIndexes:(NSArray *)indexes fetchCompletion:(DWImagePreviewFetchMediaCompletion)fetchCompletion;
+-(void)previewController:(DWMediaPreviewController *)previewController prefetchMediaAtIndexes:(NSArray *)indexes fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion;
 
 @end
 
-@interface DWImagePreviewController : UICollectionViewController
+@interface DWMediaPreviewController : UICollectionViewController
 
 //The datasource for previewController.
 ///预览数据源。
-@property (nonatomic ,weak) id<DWImagePreviewDataSource> dataSource;
+@property (nonatomic ,weak) id<DWMediaPreviewDataSource> dataSource;
 
 //Indicates the index of media is showing.
 ///当前正在展示的角标。
