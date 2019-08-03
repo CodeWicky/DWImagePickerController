@@ -1,0 +1,28 @@
+{
+  "name": "DWImagePickerController",
+  "version": "0.0.0.1",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "summary": "一个相册选择库。ImagePicker frameworks.",
+  "homepage": "https://github.com/CodeWicky/DWImagePickerController",
+  "authors": {
+    "codeWicky": "codewicky@163.com"
+  },
+  "source": {
+    "git": "https://github.com/CodeWicky/DWImagePickerController.git",
+    "tag": "0.0.0.1"
+  },
+  "requires_arc": true,
+  "platforms": {
+    "ios": "9.1"
+  },
+  "source_files": "DWImagePickerController/**/*.{h,m}",
+  "frameworks": "UIKit",
+  "dependencies": {
+    "DWMediaPreviewController": [
+      "~> 0.0.0.2"
+    ]
+  }
+}
