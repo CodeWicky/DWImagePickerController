@@ -8,8 +8,12 @@
 
 #import "DWMediaPreviewCell.h"
 #import <PhotosUI/PhotosUI.h>
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 #import <DWPlayer/DWPlayerView.h>
 #import "DWMediaPreviewVideoControl.h"
+=======
+#import "DWMediaPreviewVideoView.h"
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 
 #define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
 
@@ -57,8 +61,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @property (nonatomic ,assign) CGFloat closeThreshold;
 
 @property (nonatomic ,weak) DWMediaPreviewController * colVC;
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 
 @property (nonatomic ,strong) NSBundle * imageBundle;
+=======
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 
 @end
 
@@ -202,8 +209,12 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             return;
         }
         if (!self.hdrBadge.image) {
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
             UIImage * hdr = [UIImage imageWithContentsOfFile:[self.imageBundle pathForResource:@"hdr_badge@3x" ofType:@"png"]];
             self.hdrBadge.image = hdr;
+=======
+            self.hdrBadge.image = [UIImage imageNamed:@"DWMediaPreviewController.bundle/hdr_badge"];
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
         }
         
         CGFloat spacing = 3;
@@ -755,8 +766,12 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         if (self.isHDR) {
             
             if (!self.hdrBadge.image) {
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
                 UIImage * hdr = [UIImage imageWithContentsOfFile:[self.imageBundle pathForResource:@"hdr_badge@3x" ofType:@"png"]];
                 self.hdrBadge.image = hdr;
+=======
+                self.hdrBadge.image = [UIImage imageNamed:@"DWMediaPreviewController.bundle/hdr_badge"];
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
             }
             
             CGFloat badgeLength = 28;
@@ -832,11 +847,19 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @end
 
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 @interface DWVideoPreviewCell ()<DWPlayerManagerProtocol>
 
 @property (nonatomic ,strong) UIImageView * posterView;
 
 @property (nonatomic ,strong) DWPlayerView * mediaView;
+=======
+@interface DWVideoPreviewCell ()<DWMediaPreviewVideoViewProtocol>
+
+@property (nonatomic ,strong) UIImageView * posterView;
+
+@property (nonatomic ,strong) DWMediaPreviewVideoView * mediaView;
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 
 @property (nonatomic ,strong) UIButton * playBtn;
 
@@ -867,12 +890,20 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 +(Class)classForMediaView {
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
     return [DWPlayerView class];
+=======
+    return [DWMediaPreviewVideoView class];
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 }
 
 -(void)initializingSubviews {
     [super initializingSubviews];
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
     self.mediaView.playerManager.delegate = self;
+=======
+    self.mediaView.delegate = self;
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
     if (self.zoomable) {
         [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
     } else {
@@ -905,7 +936,11 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)tapAction:(UITapGestureRecognizer *)tap {
     [super tapAction:tap];
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
     if (self.mediaView.playerManager.status == DWPlayerPlaying) {
+=======
+    if (self.mediaView.status == DWMediaPreviewVideoViewPlaying) {
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
         [self pause];
     }
 }
@@ -935,12 +970,20 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 #pragma mark --- videoView delegate ---
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 -(void)playerManager:(DWPlayerManager *)manager readyToPlayForAsset:(AVAsset *)asset {
+=======
+-(void)videoView:(DWMediaPreviewVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
     ///清除poster，否则缩放有底图。更改时机为ready以后，防止 -setMedia: 时移除导致的视频尚未ready导致无法展示首帧，中间的等待时间为空白
     self.posterView.image = nil;
 }
 
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 -(void)playerManager:(DWPlayerManager *)manager finishPlayingAsset:(AVAsset *)asset {
+=======
+-(void)videoView:(DWMediaPreviewVideoView *)videoView finishPlayingAsset:(AVAsset *)asset {
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
     [self stop];
 }
 
@@ -969,9 +1012,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (!_playBtn) {
         _playBtn = [UIButton buttonWithType:(UIButtonTypeCustom)];
         [_playBtn setFrame:CGRectMake(0, 0, 80, 80)];
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
         ///使用这种方法加载bundle中的图片，提升图片加载速度，降低卡帧率。直接使用+[UIImage imageNamed:]会延迟图片解码时机，导致展示卡顿。
         UIImage * play = [UIImage imageWithContentsOfFile:[self.imageBundle pathForResource:@"play_btn@3x" ofType:@"png"]];
         [_playBtn setImage:play forState:(UIControlStateNormal)];
+=======
+        [_playBtn setImage:[UIImage imageNamed:@"DWMediaPreviewController.bundle/play_btn"] forState:(UIControlStateNormal)];
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
         [_playBtn addTarget:self action:@selector(playBtnAction:) forControlEvents:(UIControlEventTouchUpInside)];
         _playBtn.backgroundColor = [UIColor blackColor];
         _playBtn.layer.cornerRadius = 40;
@@ -980,6 +1027,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return _playBtn;
 }
 
+<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 @end
 
 @interface DWVideoControlPreviewCell ()
@@ -1103,4 +1151,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     return _control;
 }
 
+=======
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewCell.m
 @end

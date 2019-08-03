@@ -101,6 +101,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
+<<<<<<< HEAD:DEMO/Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-acknowledgements.markdown
 ## DWPlayer
 
 MIT License
@@ -126,6 +127,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
+=======
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-acknowledgements.markdown
 ## DWTableViewHelper
 
 MIT License

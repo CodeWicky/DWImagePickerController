@@ -10,14 +10,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class DWMediaPreviewCell;
 typedef NS_ENUM(NSUInteger, DWMediaPreviewType) {
     DWMediaPreviewTypeNone,
     DWMediaPreviewTypeImage,
     DWMediaPreviewTypeAnimateImage,
     DWMediaPreviewTypeLivePhoto,
     DWMediaPreviewTypeVideo,
-    DWMediaPreviewTypeCustomize,
 };
 
 
@@ -62,17 +60,9 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///预加载附近媒体的回调
 -(void)previewController:(DWMediaPreviewController *)previewController prefetchMediaAtIndexes:(NSArray *)indexes fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion;
 
-//Customize cell to preview
-///返回自定制预览类型的cell
--(__kindof DWMediaPreviewCell *)previewController:(DWMediaPreviewController *)previewController cellForItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
-
-//Indicates whether use poster as placeholder for customize cell.
-///表明自定制预览类型的cell是否优先展示封面作为占位图
--(BOOL)previewController:(DWMediaPreviewController *)previewController usePosterAsPlaceholderForCellAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
-
 @end
 
-@interface DWMediaPreviewController : UIViewController
+@interface DWMediaPreviewController : UICollectionViewController
 
 //The datasource for previewController.
 ///预览数据源。
@@ -131,26 +121,6 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
  注：内部会自动调用 -clearCache 和 -photoCountHasChanged。
  */
 -(void)resetOnChangeDatasource;
-
-/**
- Regist cell class for customize type.
- 为自定制的预览类型注册重用cell
-
- @param clazz 重用类
- @param reuseIndentifier 重用标识
- */
--(void)registerClass:(Class)clazz forCustomizePreviewCellWithReuseIdentifier:(NSString *)reuseIndentifier;
-
-
-/**
- Return reuse cell for id at index.
- 根据重用标识返回指定角标的cell
-
- @param reuseIndentifier 重用标识
- @param index 指定角标
- @return 重用cell
- */
--(__kindof DWMediaPreviewCell *)dequeueReusablePreviewCellWithReuseIdentifier:(NSString *)reuseIndentifier forIndex:(NSUInteger)index;
 
 @end
 

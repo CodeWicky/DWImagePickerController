@@ -12,7 +12,11 @@
 		<key>DWImagePickerController.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+<<<<<<< HEAD:DEMO/DWImagePickerController.xcodeproj/xcuserdata/wicky.xcuserdatad/xcschemes/xcschememanagement.plist
 			<integer>8</integer>
+=======
+			<integer>6</integer>
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DWImagePickerController.xcodeproj/xcuserdata/wicky.xcuserdatad/xcschemes/xcschememanagement.plist
 		</dict>
 	</dict>
 </dict>

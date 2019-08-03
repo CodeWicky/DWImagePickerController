@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1020"
+   LastUpgradeVersion = "1100"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7F1A339944E9EC87E7D4236F91F6E1DA"
+               BlueprintIdentifier = "CBAC1A28FE028734D86328EF5E99287D"
                BuildableName = "libDWMediaPreviewController.a"
                BlueprintName = "DWMediaPreviewController"
                ReferencedContainer = "container:Pods.xcodeproj">

@@ -9,9 +9,9 @@
 #import "ViewController.h"
 #import "DWAlbumManager.h"
 #import "DWImagePickerController.h"
-#import "DWImageVideoView.h"
+#import "DWMediaPreviewVideoView.h"
 
-@interface ViewController ()<DWImageVideoViewProtocol>
+@interface ViewController ()<DWMediaPreviewVideoViewProtocol>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
 @property (nonatomic ,strong) DWAlbumManager * imgMgr;
@@ -20,21 +20,22 @@
 
 @property (nonatomic ,assign) int step;
 
-@property (nonatomic ,strong) DWImageVideoView * videoView;
+@property (nonatomic ,strong) DWMediaPreviewVideoView * videoView;
 
 @end
 
 @implementation ViewController
 
 //-(void)loadView {
-//    self.view = [DWImageVideoView new];
+//    self.view = [DWMediaPreviewVideoView new];
 //}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.imgMgr = [[DWAlbumManager alloc] init];
     self.step = 0;
-//    self.videoView = (DWImageVideoView *)self.view;
+    
+//    self.videoView = (DWMediaPreviewVideoView *)self.view;
 //    self.videoView.delegate = self;
 //    self.videoView.resizeMode = DWImageVideoResizeModeScaleAspectFit;
 }
@@ -138,19 +139,19 @@
     DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
 #pragma clang diagnostic pop
 //    if (self.step % 2 == 0) {
-//        NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"[zhainanba.net]林允儿动态壁纸" ofType:@"mp4"]];
-//        AVPlayerItem * item = [AVPlayerItem playerItemWithURL:file];
-//        [self.videoView configVideoWithPlayerItem:item];
+//        NSURL * file = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"video" ofType:@"mp4"]];
+//        AVAsset * asset = [AVAsset assetWithURL:file];
+//        [self.videoView configVideoWithAsset:asset];
 //    } else {
-//        [self.videoView configVideoWithPlayerItem:nil];
+//        [self.videoView configVideoWithAsset:nil];
 //    }
 //    self.step ++;
     
     
 }
 
--(void)videoView:(DWImageVideoView *)videoView readyToPlayForItem:(AVPlayerItem *)item {
-    NSLog(@"%f",[videoView convertCMTimeToTimeInterval:[videoView actualTimeForItem:item]]);
+-(void)videoView:(DWMediaPreviewVideoView *)videoView readyToPlayForAsset:(AVAsset *)asset {
+    NSLog(@"%f",[videoView convertCMTimeToTimeInterval:[videoView actualTimeForAsset:asset]]);
     [videoView play];
 }
 

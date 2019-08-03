@@ -1,4 +1,8 @@
 target 'DWImagePickerController' do
+<<<<<<< HEAD:DEMO/Podfile
+=======
+pod 'DWMediaPreviewController', '~> 0.0.0.1'
+>>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:Podfile
 pod 'DWLogger', '~> 1.0.8.2'
 pod 'DWImagePickerController', :path => '../'
 end 
