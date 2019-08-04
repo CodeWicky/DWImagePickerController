@@ -43,8 +43,8 @@
 		9076264019C8C5DC357BBE2D8F27C1C8 /* DWPlayerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 79095E701345242B47C2DBC73F9FE15E /* DWPlayerManager.m */; };
 		9932000C49464AC1FF3BA42EAF0606DE /* DWPlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61EC8D061E489326A30905FF5CC6F22F /* DWPlayerView.m */; };
 		9964F8E19D6BA6CB346B2EB0C6720686 /* UIWindow+DWLoggerShake.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D65AB4882D5641D76D2068D315383F /* UIWindow+DWLoggerShake.m */; };
-		9B6AF76822F704A3003BF73C /* DWAlbumListViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B6AF76622F704A3003BF73C /* DWAlbumListViewController.h */; };
-		9B6AF76922F704A3003BF73C /* DWAlbumListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B6AF76722F704A3003BF73C /* DWAlbumListViewController.m */; };
+		9B6AF76C22F70990003BF73C /* DWAlbumListViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B6AF76A22F70990003BF73C /* DWAlbumListViewController.h */; };
+		9B6AF76D22F70990003BF73C /* DWAlbumListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B6AF76B22F70990003BF73C /* DWAlbumListViewController.m */; };
 		A04F6633DC249EA7E3F2A51D5E93D367 /* YYFrameImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 0ED59B6CABD61DBFC21EE187F547169E /* YYFrameImage.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		A0B546DC23D3118F9F188D6A6DFD2C06 /* DWMediaPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7C0114F542F5568AD1D611B1C2D10 /* DWMediaPreviewController.m */; };
 		A35867FC87894E248149B16683CB4927 /* DWMediaPreviewHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = F368CDB9F86629E9EBBC20F45546E12E /* DWMediaPreviewHeader.h */; settings = {ATTRIBUTES = (Project, ); }; };
@@ -228,8 +228,8 @@
 		97211A430FE4201EC2942742491DE6BB /* DWCheckBox-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWCheckBox-dummy.m"; sourceTree = "<group>"; };
 		98EE7B3F70D02F75214C50D448C01FD6 /* DWCheckBox-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWCheckBox-prefix.pch"; sourceTree = "<group>"; };
 		9B316F2065AD6E3C68E774A7BBA36478 /* DWMediaPreviewController.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = DWMediaPreviewController.bundle; path = DWMediaPreviewController/DWMediaPreviewController.bundle; sourceTree = "<group>"; };
-		9B6AF76622F704A3003BF73C /* DWAlbumListViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWAlbumListViewController.h; sourceTree = "<group>"; };
-		9B6AF76722F704A3003BF73C /* DWAlbumListViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWAlbumListViewController.m; sourceTree = "<group>"; };
+		9B6AF76A22F70990003BF73C /* DWAlbumListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DWAlbumListViewController.h; path = DWImagePickerController/DWAlbumListViewController.h; sourceTree = "<group>"; };
+		9B6AF76B22F70990003BF73C /* DWAlbumListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DWAlbumListViewController.m; path = DWImagePickerController/DWAlbumListViewController.m; sourceTree = "<group>"; };
 		9BB7C0114F542F5568AD1D611B1C2D10 /* DWMediaPreviewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWMediaPreviewController.m; path = DWMediaPreviewController/DWMediaPreviewController.m; sourceTree = "<group>"; };
 		9D09CCDBF02BB00DD0EC8A7ACCD041F0 /* libDWTableViewHelper.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libDWTableViewHelper.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D491E83C0D0CDD27C00998145294D6F /* DWFileManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWFileManager.m; path = DWLogger/Dependence/DWFileManager/DWFileManager.m; sourceTree = "<group>"; };
@@ -546,10 +546,10 @@
 		B8E9005CDC9F2DB82B043ABBE1F6AEBD /* DWImagePickerController */ = {
 			isa = PBXGroup;
 			children = (
+				9B6AF76A22F70990003BF73C /* DWAlbumListViewController.h */,
+				9B6AF76B22F70990003BF73C /* DWAlbumListViewController.m */,
 				F6307407089BEA1BE46CE01CCB7364C2 /* DWAlbumGridViewController.h */,
 				3BE165EC4226D20C176D41A002ED3852 /* DWAlbumGridViewController.m */,
-				9B6AF76622F704A3003BF73C /* DWAlbumListViewController.h */,
-				9B6AF76722F704A3003BF73C /* DWAlbumListViewController.m */,
 				4FF2ED6CCD769FCAB8CC9888A7A78121 /* DWAlbumManager.h */,
 				F53FE43166931125B020F7559C9171DC /* DWAlbumManager.m */,
 				B3C59567C4D34EB36270D1DBC8E4C693 /* DWImagePickerController.h */,
@@ -763,7 +763,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B6AF76822F704A3003BF73C /* DWAlbumListViewController.h in Headers */,
+				9B6AF76C22F70990003BF73C /* DWAlbumListViewController.h in Headers */,
 				E651CC972CE4D13C6E9D7952B1128951 /* DWCheckBox.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1010,7 +1010,7 @@
 			files = (
 				BFC75FC68C22809C5A756DC2DD005FC4 /* DWCheckBox-dummy.m in Sources */,
 				A5AF3D60DC7921370D9023AE2C5EE9B7 /* DWCheckBox.m in Sources */,
-				9B6AF76922F704A3003BF73C /* DWAlbumListViewController.m in Sources */,
+				9B6AF76D22F70990003BF73C /* DWAlbumListViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

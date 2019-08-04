@@ -6,11 +6,17 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DWAlbumManager.h"
+#import <DWMediaPreviewController/DWMediaPreviewController.h>
 
-NS_ASSUME_NONNULL_BEGIN
+@interface DWAlbumGridViewController : UIViewController<DWMediaPreviewDataSource>
 
-@interface DWAlbumGridViewController : UIViewController
+@property (nonatomic ,assign) CGFloat itemWidth;
+
+-(instancetype)initWithItemWidth:(CGFloat)width;
+
+-(void)configWithPreviewVC:(DWMediaPreviewController *)previewVC;
+
+-(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager;
 
 @end
-
-NS_ASSUME_NONNULL_END
