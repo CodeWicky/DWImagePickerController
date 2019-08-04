@@ -8,6 +8,7 @@
 
 #import "DWMediaPreviewController.h"
 #import "DWMediaPreviewCell.h"
+#import "DWFixAdjustCollectionView.h"
 
 @interface DWMediaPreviewCell ()
 
@@ -56,34 +57,6 @@
 
 @end
 
-<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
-@interface UICollectionView (DWMediaPreviewControllerFixAdjust)
-
--(void)_adjustContentOffsetIfNecessary;
-
-@end
-
-@interface DWMediaPreviewCollectionView : UICollectionView
-
-@property (nonatomic ,assign) BOOL dw_ignoreAdjustContentOffset;
-
-@end
-
-@implementation  DWMediaPreviewCollectionView
-
--(void)_adjustContentOffsetIfNecessary {
-    ///重写这里是因为，在旋转屏幕的时候，由于contentSize改变了，系统会默认调用此内部方法，然而当当前展示的cell时collectionView的最后一个cell时，若此时旋屏，在默认调整一次contentOffset后系统又自动触发此方法，连续两次有动画的调整位置且时间上具有重叠，导致位置错误。故此处重写此方法来避免此问题。
-    if (self.dw_ignoreAdjustContentOffset) {
-        self.dw_ignoreAdjustContentOffset = NO;
-    } else {
-        [super _adjustContentOffsetIfNecessary];
-    }
-}
-
-@end
-
-=======
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
 @interface DWMediaPreviewData : NSObject
 
 @property (nonatomic ,strong) UIImage * previewImage;
@@ -102,15 +75,11 @@
 
 @end
 
-<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
 @interface DWMediaPreviewController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>
 
-@property (nonatomic ,strong) DWMediaPreviewCollectionView * collectionView;
+@property (nonatomic ,strong) DWFixAdjustCollectionView * collectionView;
 
 @property (nonatomic ,strong) DWMediaPreviewLayout * collectionViewLayout;
-=======
-@interface DWMediaPreviewController ()
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
 
 @property (nonatomic ,assign) NSInteger index;
 
@@ -125,11 +94,8 @@
 @property (nonatomic ,strong) dispatch_queue_t asyncDecodeQueue;
 
 @property (nonatomic ,assign) BOOL firstCellGotFocus;
-<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
 
 @property (nonatomic ,assign) BOOL finishFirstShowPreview;
-=======
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
 
 @end
 
@@ -422,7 +388,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     DWMediaPreviewData * cellData = [self dataAtIndex:originIndex];
     DWMediaPreviewType previewType = cellData.previewType;
     __kindof DWMediaPreviewCell * cell;
-<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
     
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:cellForItemAtIndex:previewType:)]) {
         cell = [self.dataSource previewController:self cellForItemAtIndex:originIndex previewType:previewType];
@@ -455,27 +420,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
                 cell = [collectionView dequeueReusableCellWithReuseIdentifier:normalImageID forIndexPath:indexPath];
             }
                 break;
-=======
-    switch (previewType) {
-        case DWMediaPreviewTypeAnimateImage:
-        {
-            cell = [collectionView dequeueReusableCellWithReuseIdentifier:animateImageID forIndexPath:indexPath];
-        }
-            break;
-        case DWMediaPreviewTypeLivePhoto:
-        {
-            cell = [collectionView dequeueReusableCellWithReuseIdentifier:livePhotoID forIndexPath:indexPath];
-        }
-            break;
-        case DWMediaPreviewTypeVideo:
-        {
-            cell = [collectionView dequeueReusableCellWithReuseIdentifier:videoImageID forIndexPath:indexPath];
-        }
-            break;
-        default:
-        {
-            cell = [collectionView dequeueReusableCellWithReuseIdentifier:normalImageID forIndexPath:indexPath];
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
         }
     }
     
@@ -487,7 +431,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
     if (cellData.media) {
         ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
-<<<<<<< HEAD:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
         
         
         if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:usePosterAsPlaceholderForCellAtIndex:previewType:)]) {
@@ -498,10 +441,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             if (previewType == DWMediaPreviewTypeVideo) {
                 cell.poster = cellData.previewImage;
             }
-=======
-        if (previewType == DWMediaPreviewTypeVideo) {
-            cell.poster = cellData.previewImage;
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:DEMO/Pods/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.m
         }
         
         [self configMediaForCell:cell withMedia:cellData.media];
@@ -582,9 +521,9 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 #pragma mark --- setter/getter ---
--(DWMediaPreviewCollectionView *)collectionView {
+-(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
-        _collectionView = [[DWMediaPreviewCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
+        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
         _collectionView.delegate = self;
         _collectionView.dataSource = self;
         _collectionView.pagingEnabled = YES;

@@ -163,4 +163,10 @@ typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell *
 
 @end
 
+//Cell to display video with an media control.
+///带有控制器的展示视频的cell
+@interface DWVideoControlPreviewCell : DWVideoPreviewCell
+
+@end
+
 NS_ASSUME_NONNULL_END

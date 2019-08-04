@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-<<<<<<< HEAD:DEMO/Pods/Pods.xcodeproj/xcuserdata/wicky.xcuserdatad/xcschemes/YYImage.xcscheme
-   LastUpgradeVersion = "1020"
-=======
    LastUpgradeVersion = "1100"
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:Pods/Pods.xcodeproj/xcuserdata/wicky.xcuserdatad/xcschemes/YYImage.xcscheme
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -18,11 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-<<<<<<< HEAD:DEMO/Pods/Pods.xcodeproj/xcuserdata/wicky.xcuserdatad/xcschemes/YYImage.xcscheme
-               BlueprintIdentifier = "4240B285882338473C7B08D09865F5E7"
-=======
                BlueprintIdentifier = "822E44240F2922DAB12018A6B649BD19"
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:Pods/Pods.xcodeproj/xcuserdata/wicky.xcuserdatad/xcschemes/YYImage.xcscheme
                BuildableName = "libYYImage.a"
                BlueprintName = "YYImage"
                ReferencedContainer = "container:Pods.xcodeproj">

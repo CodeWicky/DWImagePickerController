@@ -1,13 +1,12 @@
 //
 //  AppDelegate.m
-//  DWAlbumPickerController
+//  DWImagePickerController
 //
-//  Created by Wicky on 2019/3/11.
+//  Created by Wicky on 2019/8/4.
 //  Copyright © 2019 Wicky. All rights reserved.
 //
 
 #import "AppDelegate.h"
-#import <DWLogger.h>
 
 @interface AppDelegate ()
 
@@ -17,7 +16,7 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [DWLogManager configToCollectCrash];
+    // Override point for customization after application launch.
     return YES;
 }
 

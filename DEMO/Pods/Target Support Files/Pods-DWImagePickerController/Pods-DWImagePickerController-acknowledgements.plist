@@ -163,7 +163,6 @@ SOFTWARE.
 			<key>License</key>
 			<string>MIT</string>
 			<key>Title</key>
-<<<<<<< HEAD:DEMO/Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-acknowledgements.plist
 			<string>DWPlayer</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
@@ -195,8 +194,6 @@ SOFTWARE.
 			<key>License</key>
 			<string>MIT</string>
 			<key>Title</key>
-=======
->>>>>>> 0bbc894e667b56af8f6941754b5c97503e0c97b3:Pods/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-acknowledgements.plist
 			<string>DWTableViewHelper</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
