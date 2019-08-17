@@ -490,7 +490,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     _previewSize = size;
-    self.collectionView.dw_ignoreAdjustContentOffset = YES;
+    self.collectionView.dw_autoFixContentOffset = YES;
 }
 
 #pragma mark --- override ---

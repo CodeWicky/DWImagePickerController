@@ -541,7 +541,7 @@ NS_INLINE NSArray * animateExtensions() {
 #pragma mark --- rotate delegate ---
 -(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-    self.collectionView.dw_ignoreAdjustContentOffset = YES;
+    self.collectionView.dw_autoFixContentOffset = YES;
 }
 
 #pragma mark --- override ---

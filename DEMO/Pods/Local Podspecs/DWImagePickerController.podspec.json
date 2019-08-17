@@ -22,7 +22,7 @@
   "frameworks": "UIKit",
   "dependencies": {
     "DWMediaPreviewController": [
-      "~> 0.0.0.3"
+      "~> 0.0.0.5"
     ]
   }
 }

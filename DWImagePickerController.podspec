@@ -10,6 +10,6 @@ s.requires_arc = true
 s.ios.deployment_target = '9.1'
 s.source_files = 'DWImagePickerController/**/*.{h,m}'
 s.frameworks = 'UIKit'
-s.dependency 'DWMediaPreviewController', '~> 0.0.0.3'
+s.dependency 'DWMediaPreviewController', '~> 0.0.0.5'
 
 end
