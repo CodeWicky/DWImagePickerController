@@ -427,7 +427,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [cell configIndex:originIndex];
     if (previewType != DWMediaPreviewTypeNone) {
         [self configActionForCell:cell indexPath:indexPath];
-        [cell configCollectionViewController:self];
+        [cell configPreviewController:self];
     }
     if (cellData.media) {
         ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
@@ -461,10 +461,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     return cell;
 }
 
--(void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    
-}
-
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     [self previewDidChangedToIndex:scrollView];
 }
@@ -495,12 +491,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- override ---
 -(instancetype)init {
-    DWMediaPreviewLayout * layout = [[DWMediaPreviewLayout alloc] init];
-    layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-    layout.distanceBetweenPages = 40;
-    layout.minimumLineSpacing = 0;
-    layout.minimumInteritemSpacing = 0;
-    layout.itemSize = [UIScreen mainScreen].bounds.size;
     if (self = [super init]) {
         _index = -1;
         _cacheCount = 10;
@@ -508,6 +498,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _previewSize = [UIScreen mainScreen].bounds.size;
         _isToolBarShowing = YES;
         _closeOnSlidingDown = YES;
+        _closeThreshold = 100;
         if (@available(iOS 11.0,*)) {
             self.collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
         } else {

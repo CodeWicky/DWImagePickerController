@@ -54,9 +54,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,assign) DWImagePanDirectionType panDirection;
 
-@property (nonatomic ,assign) CGFloat closeThreshold;
-
-@property (nonatomic ,weak) DWMediaPreviewController * colVC;
+@property (nonatomic ,weak) DWMediaPreviewController * previewController;
 
 @property (nonatomic ,strong) NSBundle * imageBundle;
 
@@ -112,9 +110,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
--(void)configCollectionViewController:(DWMediaPreviewController *)colVC {
-    if (![_colVC isEqual:colVC]) {
-        _colVC = colVC;
+-(void)configPreviewController:(DWMediaPreviewController *)previewController {
+    if (![_previewController isEqual:previewController]) {
+        _previewController = previewController;
     }
 }
 
@@ -197,7 +195,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)configBadgeWithAnimated:(BOOL)animated {
-    if (self.colVC.isToolBarShowing) {
+    if (self.previewController.isToolBarShowing) {
         if (!self.isHDR) {
             return;
         }
@@ -229,7 +227,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             default:
                 break;
         }
-        CGFloat minY = CGRectGetMaxY(self.colVC.navigationController.navigationBar.frame) + spacing;
+        CGFloat minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame) + spacing;
         if (badgeFrame.origin.y < minY) {
             badgeFrame.origin.y = minY;
         }
@@ -297,10 +295,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)closeActionOnSlidingDown {
-    if ([self.colVC.navigationController.viewControllers.lastObject isEqual:self.colVC]) {
-        [self.colVC.navigationController popViewControllerAnimated:YES];
+    if ([self.previewController.navigationController.viewControllers.lastObject isEqual:self.previewController]) {
+        [self.previewController.navigationController popViewControllerAnimated:YES];
     } else {
-        [self.colVC dismissViewControllerAnimated:YES completion:nil];
+        [self.previewController dismissViewControllerAnimated:YES completion:nil];
     }
 }
 
@@ -430,16 +428,16 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         {
             if (self.panDirection == DWImagePanDirectionTypeVertical) {
                 ///纵向可能是关闭动作，还是要看当前的缩放方向是否是横向，如果为非横向，有可能是滑动动作
-                if (!self.colVC.closeOnSlidingDown) {
+                if (!self.previewController.closeOnSlidingDown) {
                     return;
                 }
                 
                 BOOL needClose = NO;
                 if (self.zooming && self.zoomDirection != DWMediaPreviewZoomTypeHorizontal) {
-                    if (currentY > _closeThreshold && _zoomContainerView.contentOffset.y <= 0 ) {
+                    if (currentY > self.previewController.closeThreshold && _zoomContainerView.contentOffset.y <= 0 ) {
                         needClose = YES;
                     }
-                } else if (currentY > _closeThreshold && _zoomContainerView.contentOffset.y < ceil(self.fixStartAnchor * _zoomContainerView.zoomScale)) {
+                } else if (currentY > self.previewController.closeThreshold && _zoomContainerView.contentOffset.y < ceil(self.fixStartAnchor * _zoomContainerView.zoomScale)) {
                     needClose = YES;
                 }
                 
@@ -470,7 +468,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.panGes = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureAction:)];
         self.panGes.delegate = self;
         [self addGestureRecognizer:self.panGes];
-        _closeThreshold = 100;
     }
     return self;
 }
@@ -715,7 +712,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)configBadgeWithAnimated:(BOOL)animated {
-    if (self.colVC.isToolBarShowing) {
+    if (self.previewController.isToolBarShowing) {
         
         if (!self.livePhotoBadge.image) {
             self.livePhotoBadge.image = [PHLivePhotoView livePhotoBadgeImageWithOptions:(PHLivePhotoBadgeOptionsOverContent)];
@@ -743,7 +740,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             default:
                 break;
         }
-        CGFloat minY = CGRectGetMaxY(self.colVC.navigationController.navigationBar.frame) + spacing;
+        CGFloat minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame) + spacing;
         if (badgeFrame.origin.y < minY) {
             badgeFrame.origin.y = minY;
         }
@@ -1017,8 +1014,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     
     UIEdgeInsets safeMargin = UIEdgeInsetsZero;
     if (@available(iOS 11.0,*)) {
-        if ([self.colVC.view respondsToSelector:@selector(safeAreaInsets)]) {
-            safeMargin = self.colVC.view.safeAreaInsets;
+        if ([self.previewController.view respondsToSelector:@selector(safeAreaInsets)]) {
+            safeMargin = self.previewController.view.safeAreaInsets;
         }
     }
     

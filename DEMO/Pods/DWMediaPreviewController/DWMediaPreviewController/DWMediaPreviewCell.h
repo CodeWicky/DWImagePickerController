@@ -81,7 +81,7 @@ typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell *
 
 //Config the preview cell with previewController so that preview cell can handle something itself via previewController.You should always call it when you config the preview cell.
 ///给cell配置他对应的预览控制器，这样cell才可以根据他来处理相关布局问题。如果你重写了DWMediaPreviewController，在cellForItem代理中必须调用此方法。
--(void)configCollectionViewController:(DWMediaPreviewController *)colVC NS_REQUIRES_SUPER;
+-(void)configPreviewController:(DWMediaPreviewController *)previewController NS_REQUIRES_SUPER;
 #pragma mark --- call back method ---
 //These methods below are call back for different event.They maybe called on specific event automatically.Override it if you have other things to do on it.
 ///以下方法都是一些预制的钩子方法，在特定的事件中会自动调用一下方法。你可以重写这些方法来定制化你的cell。
