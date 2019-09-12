@@ -1,5 +1,5 @@
 target 'DWImagePickerController' do
-pod 'DWLogger', '~> 1.0.8.2'
+pod 'DWLogger', '~> 1.0.8.3'
 pod 'DWImagePickerController', :path => '../'
 end 
 
