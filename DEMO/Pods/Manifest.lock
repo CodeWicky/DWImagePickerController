@@ -1,7 +1,7 @@
 PODS:
   - DWCheckBox (1.0.3)
   - DWImagePickerController (0.0.0.1):
-    - DWMediaPreviewController (~> 0.0.0.7)
+    - DWMediaPreviewController
   - DWKit/DWUtils/DWOperationCancelFlag (0.0.0.3)
   - DWLogger (1.0.8.2):
     - DWCheckBox (~> 1.0.3)
@@ -52,7 +52,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   DWCheckBox: 566e20f6097a1013dc159ed0b619b3d2fff07468
-  DWImagePickerController: 869be0c8512ffc96c082fcaafe7e18d20f557d44
+  DWImagePickerController: 65e104e2956ca1ab76f57f3c213267cbc4f10e57
   DWKit: 6854772cbd248a6fedb9ee084d9c68a1e008d070
   DWLogger: c4d465fc7c726aa75772edd94cb84e97d00eb93b
   DWMediaPreviewController: efb9289bd467dda7759b66aedeff041095d296b9
