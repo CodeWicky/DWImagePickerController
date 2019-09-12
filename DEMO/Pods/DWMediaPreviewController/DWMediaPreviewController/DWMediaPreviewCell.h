@@ -20,6 +20,20 @@ typedef void(^DWMediaPreviewActionCallback)(DWMediaPreviewCell * cell);
 typedef void(^DWMediaPreviewDoubleClickActionCallback)(DWMediaPreviewCell * cell ,CGPoint point);
 typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell * cell ,BOOL hide);
 
+@protocol DWMediaPreviewLoadingProtocol
+
+@property (nonatomic ,assign ,readonly) BOOL isShowing;
+
+@property (nonatomic ,assign ,readonly) CGFloat progress;
+
+-(void)showLoading;
+
+-(void)updateProgress:(CGFloat)progress;
+
+-(void)hideLoading;
+
+@end
+
 //DWMediaPreviewCell is a abstract class of DWMediaPreviewController displaying unit.It provide some basic method to help you customize your preview cell by them or override them.
 ///DWMediaPreviewCell是DWMediaPreviewController展示单元的一个抽象类。提供了一些基础方法，通过他们，你可以在你定制的cell中直接调用这些基础方法，或者重写他们来满足你的需求。
 @interface DWMediaPreviewCell : UICollectionViewCell
@@ -39,6 +53,10 @@ typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell *
 //The poster for current media.Cell will show poster before finish fetching media.
 ///当前要展示的媒体的缩略图，在媒体资源获取完成之前，会优先展示缩略图。
 @property (nonatomic ,strong) UIImage * poster;
+
+//The indicator show the progress of fetching media.
+///展示获取媒体资源进度的指示器
+@property (nonatomic ,strong) UIView <DWMediaPreviewLoadingProtocol>* loadingIndicator;
 
 //Indicates whether the preview cell can zoom its media.Default by YES.
 ///当前cell是否可以缩放显示其展示的媒体。默认支持缩放。
@@ -81,7 +99,7 @@ typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell *
 
 //Config the preview cell with previewController so that preview cell can handle something itself via previewController.You should always call it when you config the preview cell.
 ///给cell配置他对应的预览控制器，这样cell才可以根据他来处理相关布局问题。如果你重写了DWMediaPreviewController，在cellForItem代理中必须调用此方法。
--(void)configCollectionViewController:(DWMediaPreviewController *)colVC NS_REQUIRES_SUPER;
+-(void)configPreviewController:(DWMediaPreviewController *)previewController NS_REQUIRES_SUPER;
 #pragma mark --- call back method ---
 //These methods below are call back for different event.They maybe called on specific event automatically.Override it if you have other things to do on it.
 ///以下方法都是一些预制的钩子方法，在特定的事件中会自动调用一下方法。你可以重写这些方法来定制化你的cell。

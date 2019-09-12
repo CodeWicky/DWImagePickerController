@@ -102,6 +102,10 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///下滑是否关闭。
 @property (nonatomic ,assign) BOOL closeOnSlidingDown;
 
+//The threshold for slide down to close.Default by 100.
+///下滑关闭的阈值，默认为100。
+@property (nonatomic ,assign) CGFloat closeThreshold;
+
 /**
  Config previewController to preview media at specific index.
  配置当前应该展示的角标。
