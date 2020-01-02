@@ -16,6 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic ,assign) UIEdgeInsets touchPaddingInsets;
 
+@property (nonatomic ,assign) CGSize minSize;
+
+@property (nonatomic ,assign) CGSize maxSize;
+
 @end
 
 NS_ASSUME_NONNULL_END
