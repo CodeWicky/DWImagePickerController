@@ -7,6 +7,7 @@
 
 #import "DWAlbumGridViewController.h"
 #import <DWMediaPreviewController/DWFixAdjustCollectionView.h>
+#import <DWKit/DWLabel.h>
 
 @interface DWAlbumModel ()
 
@@ -36,11 +37,15 @@
 
 @interface DWGridCell : UICollectionViewCell
 
+@property (nonatomic ,strong) DWImageAssetModel * model;
+
 @property (nonatomic ,strong) UIImageView * gridImage;
 
 @property (nonatomic ,strong) UILabel * durationLabel;
 
 @property (nonatomic ,copy) NSString * requestLocalID;
+
+@property (nonatomic ,strong) DWLabel * selectionLb;
 
 @end
 
@@ -52,6 +57,19 @@
     NSInteger sec = floorDuration % 60;
     NSInteger min = floorDuration / 60;
     self.durationLabel.text = [NSString stringWithFormat:@"%ld:%02ld",min,sec];
+    [self setNeedsLayout];
+}
+
+-(void)setSelectAtIndex:(NSInteger)index {
+    if (index > 0) {
+        self.selectionLb.backgroundColor = [UIColor blueColor];
+        self.selectionLb.layer.borderColor = [UIColor whiteColor].CGColor;
+        self.selectionLb.text = [NSString stringWithFormat:@"%ld",index];
+    } else {
+        self.selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
+        self.selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;
+        self.selectionLb.text = nil;
+    }
     [self setNeedsLayout];
 }
 
@@ -70,6 +88,16 @@
             self.durationLabel.frame = frame;
         }
     }
+    
+    if (_selectionLb && !_selectionLb.hidden) {
+        [self.selectionLb sizeToFit];
+        CGPoint origin = CGPointMake(self.bounds.size.width - self.selectionLb.bounds.size.width - 5, 5);
+        CGRect frame = self.selectionLb.frame;
+        frame.origin = origin;
+        if (!CGRectEqualToRect(self.selectionLb.frame, frame)) {
+            self.selectionLb.frame = frame;
+        }
+    }
 }
 
 -(void)prepareForReuse {
@@ -80,6 +108,14 @@
 }
 
 #pragma mark --- setter/getter ---
+-(void)setModel:(DWImageAssetModel *)model {
+    _model = model;
+    self.gridImage.image = model.media;
+    if (model.mediaType == PHAssetMediaTypeVideo) {
+        [self setupDuration:model.asset.duration];
+    }
+}
+
 -(UIImageView *)gridImage {
     if (!_gridImage) {
         _gridImage = [[UIImageView alloc] initWithFrame:self.bounds];
@@ -98,6 +134,19 @@
         [self.contentView addSubview:_durationLabel];
     }
     return _durationLabel;
+}
+
+-(DWLabel *)selectionLb {
+    if (!_selectionLb) {
+        _selectionLb = [[DWLabel alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
+        _selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
+        _selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;
+        _selectionLb.layer.borderWidth = 2;
+        _selectionLb.layer.cornerRadius = 11;
+        _selectionLb.layer.masksToBounds = YES;
+        [self.contentView addSubview:_selectionLb];
+    }
+    return _selectionLb;
 }
 
 @end
@@ -130,6 +179,8 @@
 
 @property (nonatomic ,strong) dispatch_queue_t preloadQueue;
 
+@property (nonatomic ,strong) Class cellClazz;
+
 @end
 
 @implementation DWAlbumGridViewController
@@ -142,6 +193,10 @@
     return self;
 }
 
+-(void)registGridCell:(Class)cellClazz {
+    self.cellClazz = cellClazz;
+}
+
 #pragma mark --- life cycle ---
 -(void)viewDidLoad {
     [super viewDidLoad];
@@ -149,8 +204,11 @@
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
     self.view.backgroundColor = [UIColor whiteColor];
     self.collectionView.backgroundColor = [UIColor whiteColor];
-    self.collectionView.prefetchDataSource = self;
-    [self.collectionView registerClass:[DWGridCell class] forCellWithReuseIdentifier:@"GridCell"];
+    if (@available(iOS 10.0,*)) {
+        self.collectionView.prefetchDataSource = self;
+    }
+    Class cls = self.cellClazz?:[DWGridCell class];
+    [self.collectionView registerClass:cls forCellWithReuseIdentifier:@"GridCell"];
     self.firstAppear = YES;
 }
 
@@ -490,10 +548,8 @@ NS_INLINE NSArray * animateExtensions() {
     [self.albumManager fetchImageWithAlbum:self.album index:indexPath.row targetSize:targetSize shouldCache:!thumnail progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                cell.gridImage.image = obj.media;
-                if (obj.mediaType == PHAssetMediaTypeVideo) {
-                    [cell setupDuration:obj.asset.duration];
-                }
+                cell.model = obj;
+                [cell setSelectAtIndex:1];
             });
         }
     }];

@@ -15,6 +15,8 @@
 
 -(instancetype)initWithItemWidth:(CGFloat)width;
 
+-(void)registGridCell:(Class)cellClazz;
+
 -(void)configWithPreviewVC:(DWMediaPreviewController *)previewVC;
 
 -(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager;

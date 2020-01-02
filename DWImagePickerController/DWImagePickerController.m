@@ -9,9 +9,6 @@
 
 
 #import "DWImagePickerController.h"
-#import <DWMediaPreviewController/DWMediaPreviewController.h>
-#import "DWAlbumGridViewController.h"
-#import "DWAlbumListViewController.h"
 
 @interface DWImagePickerController ()
 
@@ -40,6 +37,18 @@
         _spacing = spacing;
     }
     return self;
+}
+
+-(void)configGridVC:(DWAlbumGridViewController *)gridVC {
+    _gridVC = gridVC;
+}
+
+-(void)configListVC:(DWAlbumListViewController *)listVC {
+    _listVC = listVC;
+}
+
+-(void)configPreviewVC:(DWMediaPreviewController *)previewVC {
+    _previewVC = previewVC;
 }
 
 -(void)fetchCameraRollWithCompletion:(dispatch_block_t)completion {
