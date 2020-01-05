@@ -16,6 +16,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic ,assign) UIEdgeInsets touchPaddingInsets;
 
+@property (nonatomic ,assign) CGSize minSize;
+
+@property (nonatomic ,assign) CGSize maxSize;
+
+-(void)addAction:(void(^)(DWLabel * label))action;
+
+-(void)removeAction;
+
 @end
 
 NS_ASSUME_NONNULL_END

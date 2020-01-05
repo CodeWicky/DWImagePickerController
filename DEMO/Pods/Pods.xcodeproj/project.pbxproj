@@ -9,87 +9,84 @@
 /* Begin PBXBuildFile section */
 		01B090969F9586F420F936C5516A3286 /* DWLogView.h in Headers */ = {isa = PBXBuildFile; fileRef = FF45F85FEE9DFA61B462FA42207C100D /* DWLogView.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		028BA230E9431BD28FF57C19116F9DDC /* DWTableViewHelper-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C5B825B065617A237F84EDB86AB6EC4 /* DWTableViewHelper-dummy.m */; };
+		05498375D6F21146C305BE58CFD8DBA9 /* DWMediaPreviewLoading.h in Headers */ = {isa = PBXBuildFile; fileRef = F4D1F728037A1D14256491783A7F2F6B /* DWMediaPreviewLoading.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		06C2AB3F17744732A5485C1982EC2BBB /* UIDevice+DWDeviceUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 4ED8B10D39EAD80C6AC649C92BC783CA /* UIDevice+DWDeviceUtils.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		0A1AA4E824EBE2B094DA475D366366B1 /* YYImage-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = D6C8932C29AEDAC136A0058145F1FFE3 /* YYImage-dummy.m */; };
 		0B12C51257BAB898FFE336D8CA2851DA /* DWSearchView.m in Sources */ = {isa = PBXBuildFile; fileRef = 632CFDE7BBBB9C491FB1439164908B90 /* DWSearchView.m */; };
-		1587662DA07DB25A35B443A1F3854BB7 /* YYSpriteSheetImage.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F05013AD55680F7838B69E56932FCD /* YYSpriteSheetImage.m */; };
 		15882C194E34B69158D61A56B84DA9E0 /* DWLogger-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DAB521F1B1390EA0EEC82E97361FBA1 /* DWLogger-dummy.m */; };
-		15B8491D6D490928FDE70A3DEF8B7B2F /* DWAlbumManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A6EE2FBD47089F6F9B4A80E5AB750B9 /* DWAlbumManager.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		16737F074B0D2DADE495C12703957D22 /* DWFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DB395F877A9B1D44856621B01FC67C5A /* DWFileManager.m */; };
-		16F55035C6A9FDA43025C85DC968219C /* DWPlayerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B0399E6BC9E4729B904F35C5B59E540 /* DWPlayerManager.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		1777BD2EB799F00CC0BF730CC06396D2 /* DWMediaPreviewLoading.h in Headers */ = {isa = PBXBuildFile; fileRef = F4D1F728037A1D14256491783A7F2F6B /* DWMediaPreviewLoading.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		1906048751BD57C588A80785C145BF75 /* DWMediaPreviewVideoControl.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4E6901D26A7627B2964DCE3B1EAA77 /* DWMediaPreviewVideoControl.m */; };
-		2D59A1B6502973880F7886AA8BA942BA /* DWMediaPreviewController-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E23B4078BD30EAA0F39F2A65E2B0E513 /* DWMediaPreviewController-dummy.m */; };
-		30654F0FDE0A534761D6C7250F69AB5A /* DWAlbumGridViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = B8BD7ED24A27A88CFE2610A64C417A7B /* DWAlbumGridViewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		169FE9F24DEF0FFE2666859D2217465B /* DWImagePickerController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F59CE4A1EBDE2E8178CB098EFD2D975 /* DWImagePickerController.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		1E58764A5D46FC0195B5D2B1A8FF1AE7 /* DWPlayerViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BEDBDA65391A5EBD9B0194FB974094F /* DWPlayerViewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		298D2785776D37D8D05207C537559732 /* DWAlbumGridViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B7A4C9093E2958382182482C853EF6F /* DWAlbumGridViewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		2CF9F3F29756665C1A0642332D041CA0 /* DWPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 988A1EF6EBECED75EA454F84A25B1AF8 /* DWPlayer.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		2DC21E9D0D7BD114C67085500017C7AB /* DWLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 8076A693A99D112FC784153A318CBB24 /* DWLabel.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		2F7ECC14A3B286E2B4E2FFFA54C8E4C6 /* YYImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 70DA8F537A5C34EC65849FDA686A6D58 /* YYImage.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		3160B1444924037659DE6DADCCCC4EFB /* DWMediaPreviewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DF312B6A3ACBD1D81A435C445373D5E /* DWMediaPreviewCell.m */; };
 		33F05CD275734BE3ADA00AFC60336E59 /* DWLoggerMacro.h in Headers */ = {isa = PBXBuildFile; fileRef = D2274F18A253A22DB0CF15EA8B4AB6AC /* DWLoggerMacro.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		35FE1DBE64C112FD44EDC928790AFCBF /* DWAlbumListViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = AF278467C9DB129E25EAC6428CB72FFF /* DWAlbumListViewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		3743CE0EB8DD5DA3CAE5D55EED8B1A8E /* NSArray+DWArrayUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 168244964028E8EFFDECDF19619A7DC2 /* NSArray+DWArrayUtils.m */; };
 		3F4A70B96A597722C7F39FF99427EAD3 /* UIDevice+DWDeviceUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 90B557D13F4ACE98002265FEEE019992 /* UIDevice+DWDeviceUtils.m */; };
+		40DE5D4B1AEDB2BCDB288FE9D33BABEA /* YYImage-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = D6C8932C29AEDAC136A0058145F1FFE3 /* YYImage-dummy.m */; };
 		436F8C29C9BB91236FD08B8006B715EA /* DWTableViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = AEEF884DB6719E73F459639DF7B467AB /* DWTableViewHelper.m */; };
 		446B9190A17AE53024B77E730F9BC826 /* Pods-DWImagePickerController-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B4C79F6C8B30ECFD3E5088F477ADED2 /* Pods-DWImagePickerController-dummy.m */; };
-		469A6109A6E94FFCB8D6A78789D9E56F /* YYFrameImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 995A8E40A419BB988B103E29A083AC9D /* YYFrameImage.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		4A208712C51B3F88A6A3BB5FE4E00DEA /* DWPlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 94A2DFAB04EA79017A07A565CB22E58D /* DWPlayerView.m */; };
-		4B2A97E118241F27A3E6BE8AF0CAB3BC /* YYImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 70DA8F537A5C34EC65849FDA686A6D58 /* YYImage.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		5B09ED843D990DB8FDC9A60B49CA4A04 /* YYAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 969D2363E2E52DAA873FBC2279589DCE /* YYAnimatedImageView.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		5E8D8D0F3C90C859E24340DE9B176242 /* YYImageCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = F1900A661E6579A49A4675D4F0607534 /* YYImageCoder.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		643CAAF3046D0E07580CD73DF812A019 /* DWPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 223900D47D1FBEBE246A9F880A403989 /* DWPlayerViewController.m */; };
-		64EE5C25B4816D61A109A1628876A8B2 /* DWMediaPreviewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DF312B6A3ACBD1D81A435C445373D5E /* DWMediaPreviewCell.m */; };
-		66E046167BB3B15324016A7EC1C7CB3E /* YYSpriteSheetImage.h in Headers */ = {isa = PBXBuildFile; fileRef = AE048562F0AD553AE12A6800571B53F3 /* YYSpriteSheetImage.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		4DD3067607305BE978862EB058C872E5 /* DWMediaPreviewVideoControl.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4E6901D26A7627B2964DCE3B1EAA77 /* DWMediaPreviewVideoControl.m */; };
+		536217C74B55524891DA3B3BD0CC6FEF /* DWPlayerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B0399E6BC9E4729B904F35C5B59E540 /* DWPlayerManager.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		63A0C032CDC975EBB60331517F482677 /* YYFrameImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 749FF3DE9C35647DB1C9847882D03EF7 /* YYFrameImage.m */; };
 		6E39512884EA79F98BE5E0A3DEC21C6D /* DWTableViewHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = FC847B33A8CD2A1B83B0B62345FC2455 /* DWTableViewHelper.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		6E9C2EE2217388769935149B33A7B5A1 /* DWTransaction.m in Sources */ = {isa = PBXBuildFile; fileRef = BE52A6757CF578CA0419A1857FC1E010 /* DWTransaction.m */; };
-		6EEB1DF6699560285AC9A10851D630DB /* DWMediaPreviewVideoControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 64A46F23799DC39F21F8612D6DEE109F /* DWMediaPreviewVideoControl.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		751AA0CDD6E0E07DA998744027D450CD /* DWLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 8076A693A99D112FC784153A318CBB24 /* DWLabel.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		75A1886026C0F479658A34AFA3D76C49 /* DWMediaPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = ABF6EC2FA0FAD016AD34BFF35CE13833 /* DWMediaPreviewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		7ED0B73F41971DCFC843DCDED8036498 /* DWLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CDA46EBF1F3FA6D6687080FF1714DE /* DWLabel.m */; };
-		82ED7985EECA0CEBE898FA9D3E1A61A7 /* DWImagePickerController.h in Headers */ = {isa = PBXBuildFile; fileRef = A4970078A7874FA0DA188388A299E1FA /* DWImagePickerController.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		7344968831F250C4E8FFF6B4EA10FF00 /* DWTransaction.m in Sources */ = {isa = PBXBuildFile; fileRef = BE52A6757CF578CA0419A1857FC1E010 /* DWTransaction.m */; };
+		78C7F30B3C03D422EE9ADE3EA783C339 /* DWMediaPreviewLoading.m in Sources */ = {isa = PBXBuildFile; fileRef = 4974455395F22D15330373362261DB3B /* DWMediaPreviewLoading.m */; };
+		7A674D6BF9CFECBD969C07824DE63215 /* DWMediaPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 17DADB88C7A57BC16E3BD09A1935FE4C /* DWMediaPreviewController.m */; };
+		7B668612CF9BFE7737AF458A9F0245A4 /* YYAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DBE534ECB731FE7071C92256FFA3120 /* YYAnimatedImageView.m */; };
+		7CF2587FA75018378566950C47F82A14 /* DWAlbumManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 8555AC414CA16E4065BD962782FD0701 /* DWAlbumManager.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		7FE662960872C28921E5D9EAC64483A8 /* DWPlayerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 69BDAA23857B492CEFFE3B6210E4D1C7 /* DWPlayerView.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		80D850689431FB0F607CB575BFC0E8D9 /* DWFixAdjustCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 12C93C752E52C0A018F93D2C72935103 /* DWFixAdjustCollectionView.m */; };
 		84A02E7DEAFA419DCEDCD1BFFE32E2D6 /* DWLogManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F90733B70B91806F982AB1CC2F0DE44A /* DWLogManager.m */; };
+		86445B4EBE26350984C7E7076B915AB2 /* DWPlayer-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 71C900835CC7906A8D0A9F820E7C5954 /* DWPlayer-dummy.m */; };
 		89375C6D2D38391161A634020B63356D /* DWLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ABF5B6FEF09CE5961167396A7461A28 /* DWLogger.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		8A4DE6BA4797EACBBE38FF8A5702182E /* DWMediaPreviewHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = 119CAF36CF00D09E9F040AB2AF34EC9B /* DWMediaPreviewHeader.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		8F2A56569FC7C7E8450746B873219688 /* NSArray+DWArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = E234637AD2FCE228CE85D5CE1C457FD4 /* NSArray+DWArrayUtils.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		93F07974885648ADA30FD80F7C3D1F83 /* DWTransaction.h in Headers */ = {isa = PBXBuildFile; fileRef = 4A450FDA6E9C2A01EDDCBCC41E1412D3 /* DWTransaction.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		961A521F70092D0B9842495F88E25B17 /* DWFixAdjustCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 12C93C752E52C0A018F93D2C72935103 /* DWFixAdjustCollectionView.m */; };
+		92F8F68A6AA4A32275AB1B8907BB6BB9 /* DWOperationCancelFlag.h in Headers */ = {isa = PBXBuildFile; fileRef = DB57A77FECF419CCE0FC0B159ED59C14 /* DWOperationCancelFlag.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		93E2276374D3A9F42EFC4733FC9E75CD /* DWOperationCancelFlag.m in Sources */ = {isa = PBXBuildFile; fileRef = 56D2E7F15C18D3BDBA45F90336BC93E1 /* DWOperationCancelFlag.m */; };
 		9964F8E19D6BA6CB346B2EB0C6720686 /* UIWindow+DWLoggerShake.m in Sources */ = {isa = PBXBuildFile; fileRef = 20A0137A0905FFC802BBDF39F6884107 /* UIWindow+DWLoggerShake.m */; };
-		9ECD511446B47F69E39427E48AABA4C9 /* YYImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A52D096336D3E7AF15A3407F42E0AC1 /* YYImage.m */; };
+		9A2DED61F0367777D85E0240246A6346 /* DWImagePickerController-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DF15700D8A7D5F53A4BB9BF9EBF0BA /* DWImagePickerController-dummy.m */; };
+		A070356008BAA1A08BD0443B083ECBEC /* YYImageCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = F1900A661E6579A49A4675D4F0607534 /* YYImageCoder.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		A5AF3D60DC7921370D9023AE2C5EE9B7 /* DWCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 354E2D953ED75130E819F18BED6E5E83 /* DWCheckBox.m */; };
-		A84BF845F0EBC9B382C152C28E9294F3 /* DWPlayerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F296A3F71D0C24E96A3A63C1449CF31 /* DWPlayerManager.m */; };
-		AC1D623B523C74D9BD6D206F1EBA30B9 /* DWPlayerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 69BDAA23857B492CEFFE3B6210E4D1C7 /* DWPlayerView.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		B0ADF7C2D71D0E889E4E2F474E7F94A1 /* DWFixAdjustCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = BF2F20CC452C16C1D933F33D1AD1CC13 /* DWFixAdjustCollectionView.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		B36DC8BD98C47883351FC822949C6CA6 /* YYImageCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AB91E5A28B9C944562E2A3B669D1196 /* YYImageCoder.m */; };
-		B566680D0AE009744CA389BEA8B4782B /* DWOperationCancelFlag.h in Headers */ = {isa = PBXBuildFile; fileRef = DB57A77FECF419CCE0FC0B159ED59C14 /* DWOperationCancelFlag.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		B588A15E0C8E0800A81632A762E3DE4C /* DWAlbumListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C8ADC02128CFC36E60EDCD70620AA4EF /* DWAlbumListViewController.m */; };
-		BEE473AD264BE2A473EAC8EB26250E44 /* DWMediaPreviewLoading.m in Sources */ = {isa = PBXBuildFile; fileRef = 4974455395F22D15330373362261DB3B /* DWMediaPreviewLoading.m */; };
+		A658638B93B410FF22BCCE3495BE6B6C /* DWMediaPreviewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 319957B9BB98DD64C5668887AA6C16DA /* DWMediaPreviewCell.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		A6848DA7434BB54C77CC1B3D6931289F /* DWAlbumToolBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B329C23B1905E4E8C7B8717BE415157 /* DWAlbumToolBar.m */; };
+		AA16B99B39D3B57B8AE863535D43EA6D /* DWPlayerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F296A3F71D0C24E96A3A63C1449CF31 /* DWPlayerManager.m */; };
+		AACCCDBF364BE7B8C627A9C50FC82DF3 /* DWAlbumManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF93EBBB248E97CF87F00BBEC75E4A9 /* DWAlbumManager.m */; };
+		AB180DF05FCA25700785D328F141D1AB /* DWMediaPreviewController-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E23B4078BD30EAA0F39F2A65E2B0E513 /* DWMediaPreviewController-dummy.m */; };
+		B4B6155D88BF6388D00C47685FBC66DB /* DWAlbumToolBar.h in Headers */ = {isa = PBXBuildFile; fileRef = E0DBFCDB8160F55D57183D39B59998A2 /* DWAlbumToolBar.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		B81C7E18F995D0FE5955C4F62C134295 /* YYImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A52D096336D3E7AF15A3407F42E0AC1 /* YYImage.m */; };
+		BA468FCB4C4F4B1D3EBA51D9E7638140 /* DWAlbumGridViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83624939ABC55C1B13F4F5B00C217192 /* DWAlbumGridViewController.m */; };
 		BFC75FC68C22809C5A756DC2DD005FC4 /* DWCheckBox-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BA0BCC8B13BDA8A9B2DDBAC02C6E3B4 /* DWCheckBox-dummy.m */; };
-		C1344A112958EF08F0B4D96FE43BBB4C /* YYAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DBE534ECB731FE7071C92256FFA3120 /* YYAnimatedImageView.m */; };
-		C5CDB77D8177FC039E472925C862CECF /* DWPlayerViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BEDBDA65391A5EBD9B0194FB974094F /* DWPlayerViewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		C785456E56C4C5EE6731347DD577CD21 /* DWKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9783B08DF2235169BBAA86E85D080C /* DWKit-dummy.m */; };
-		C8B526BE6516D8A3FBE98E1A89833F5F /* DWMediaPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 17DADB88C7A57BC16E3BD09A1935FE4C /* DWMediaPreviewController.m */; };
+		BFCA160D00D3CFBDEFCADDE165C02A6F /* YYSpriteSheetImage.h in Headers */ = {isa = PBXBuildFile; fileRef = AE048562F0AD553AE12A6800571B53F3 /* YYSpriteSheetImage.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		C4AAE6B1643FE4C8599BE6588CCD0375 /* DWPlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 94A2DFAB04EA79017A07A565CB22E58D /* DWPlayerView.m */; };
+		C4AB70A0BB180EF3228B2D62B400C622 /* DWLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CDA46EBF1F3FA6D6687080FF1714DE /* DWLabel.m */; };
+		C68B979BF441B02DFC7B01C26B8283C0 /* DWPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 223900D47D1FBEBE246A9F880A403989 /* DWPlayerViewController.m */; };
 		C9AF2979888972B74658EA0E0CE70AE2 /* DWCrashCollector.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B4400311F8C3782AF247F3F7AB7DCC2 /* DWCrashCollector.m */; };
-		CF684C9451808A8FD03B8A15CF1B0E9F /* DWMediaPreviewHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = 119CAF36CF00D09E9F040AB2AF34EC9B /* DWMediaPreviewHeader.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		CA46537883D0952CFE8013253CC29F67 /* YYSpriteSheetImage.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F05013AD55680F7838B69E56932FCD /* YYSpriteSheetImage.m */; };
+		CC1BA758133888FA7765F85B462ECCB8 /* YYImageCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AB91E5A28B9C944562E2A3B669D1196 /* YYImageCoder.m */; };
+		CE061AB3EDD80754D5CDFEC9ADE96F10 /* YYFrameImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 995A8E40A419BB988B103E29A083AC9D /* YYFrameImage.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		D36C736CEEFA7C85149A55D2835895D7 /* UIWindow+DWLoggerShake.h in Headers */ = {isa = PBXBuildFile; fileRef = B16A1037969349D6ED46D1A69A44A52B /* UIWindow+DWLoggerShake.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		D58F55F830895A7C411AF143613041D2 /* DWCrashCollector.h in Headers */ = {isa = PBXBuildFile; fileRef = BAD972336D1AD5C2C95A61C79C26DE32 /* DWCrashCollector.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		D7A89B9417C6B82616EDC4C806304A7E /* DWImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 736C98FEC533831ECD11902099A5EE6A /* DWImagePickerController.m */; };
-		D97EB7C961173E20D4AEBE92E122CB53 /* DWOperationCancelFlag.m in Sources */ = {isa = PBXBuildFile; fileRef = 56D2E7F15C18D3BDBA45F90336BC93E1 /* DWOperationCancelFlag.m */; };
+		D640EB2A8A712D37A171C49657A17970 /* YYAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 969D2363E2E52DAA873FBC2279589DCE /* YYAnimatedImageView.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		D8AB3C4EF4E90A0CA406E7F8AF1F785D /* DWMediaPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = ABF6EC2FA0FAD016AD34BFF35CE13833 /* DWMediaPreviewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		DBD7BA09884E714ECF7877DBD9B83673 /* DWSearchView.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BE9912CD9428827158490F5FA16CBFC /* DWSearchView.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		DDB5D8DA9C6BDEA96AF2412BA1ADDCCD /* DWAlbumListViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 15893F0B963D3B3F8B05FDC9D04E006E /* DWAlbumListViewController.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		E1DD21C52D7EAF0FF3831E9F789447C9 /* YYFrameImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 749FF3DE9C35647DB1C9847882D03EF7 /* YYFrameImage.m */; };
+		DBEAA89EC20EFB8856C746FE737B438A /* DWKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9783B08DF2235169BBAA86E85D080C /* DWKit-dummy.m */; };
 		E33CD2A759185D0DD209CA3EA1E08154 /* DWFileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 497168B77D01153772A1DEA2DB4C49AA /* DWFileManager.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		E4AEF2E4EB1EFB1473DF7AA4B47D7FA6 /* DWFixAdjustCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = BF2F20CC452C16C1D933F33D1AD1CC13 /* DWFixAdjustCollectionView.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		E5B467438A3184AB8ABB17F5F3DB8686 /* DWImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 484DE2EB8CEE4E0CC6072663E7EBB428 /* DWImagePickerController.m */; };
 		E651CC972CE4D13C6E9D7952B1128951 /* DWCheckBox.h in Headers */ = {isa = PBXBuildFile; fileRef = B2E4509A487769765239BE990C1B92F5 /* DWCheckBox.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		E7E323CF9D8A7DBFBB32559C38A51146 /* DWAlbumListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BE9635C317E3527991701FDCD377742D /* DWAlbumListViewController.m */; };
+		EC8C54D0BFE3391126E54A7AD50BFB8B /* DWAlbumSelectionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 3EC9B02F0D4EA21EDE00C3399440DACE /* DWAlbumSelectionManager.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		EE1BA05F56491C965906414A06019C4B /* DWLogManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 3FB3A1C14CC25DB45718DBC656E5AE69 /* DWLogManager.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		F4297DE0D420D8745C7DFA1D9597999D /* DWPlayer-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 71C900835CC7906A8D0A9F820E7C5954 /* DWPlayer-dummy.m */; };
-		F7AD76D790AC7C1FD4035837EA81D012 /* DWImagePickerController-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B75D2FE7423FAB5C05DC5CD9BCA19FC /* DWImagePickerController-dummy.m */; };
+		EF8293F9F616164E1ADB5DB476EEAF0A /* DWAlbumSelectionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3E91079B4B0B464750082CC176EB29D9 /* DWAlbumSelectionManager.m */; };
+		F13D3856E44851EAFB33F9F1EE576DBD /* DWTransaction.h in Headers */ = {isa = PBXBuildFile; fileRef = 4A450FDA6E9C2A01EDDCBCC41E1412D3 /* DWTransaction.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		F7B366D04A6A932C54280705868E3BF1 /* DWLogView.m in Sources */ = {isa = PBXBuildFile; fileRef = ECF2006A89E7B1A3E4C36DDEF29D9059 /* DWLogView.m */; };
-		F9A1B597EFBFCA669B46DD932FBC189A /* DWPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 988A1EF6EBECED75EA454F84A25B1AF8 /* DWPlayer.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		FA974E3AC5850819F11DAA8C2631E833 /* DWAlbumManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 71BFDC8D5B1C0537B5D4E02D9E65C766 /* DWAlbumManager.m */; };
-		FFC18350C4A6BBB06903BB78100217F0 /* DWMediaPreviewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 319957B9BB98DD64C5668887AA6C16DA /* DWMediaPreviewCell.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		FFE54F39D73DE5EC5ECB81D544D2B849 /* DWAlbumGridViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 542766C16AB9BA119FAFB2D1314C1592 /* DWAlbumGridViewController.m */; };
+		F977736E1C855FF435970FE2FBB08784 /* DWMediaPreviewVideoControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 64A46F23799DC39F21F8612D6DEE109F /* DWMediaPreviewVideoControl.h */; settings = {ATTRIBUTES = (Project, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		14C505602D2A8E2943FC4F7668A307C8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CBAC1A28FE028734D86328EF5E99287D;
-			remoteInfo = DWMediaPreviewController;
-		};
 		1DA479424261F6E3B3E93CF381E8668A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -132,13 +129,6 @@
 			remoteGlobalIDString = A4098689422B015948D41C899D27F35F;
 			remoteInfo = DWImagePickerController;
 		};
-		6A2F8B9F8F8A9894D8C660EE14A61509 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 0C701BBEE5D869E57EF5A4A9353C2A29;
-			remoteInfo = DWKit;
-		};
 		7252D8055CD26CFC80DD3013A9D7C31A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -153,12 +143,12 @@
 			remoteGlobalIDString = 0C701BBEE5D869E57EF5A4A9353C2A29;
 			remoteInfo = DWKit;
 		};
-		953337D016422F2E02FC975D1C7C67D5 /* PBXContainerItemProxy */ = {
+		AB255D3E69F3DBA44A4EED0AA2E22897 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 1C2DFFF2C4B54A30D817B1691965A10F;
-			remoteInfo = DWPlayer;
+			remoteGlobalIDString = CBAC1A28FE028734D86328EF5E99287D;
+			remoteInfo = DWMediaPreviewController;
 		};
 		AC1DE1469589B0179B7CD980CFB79D17 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -174,6 +164,20 @@
 			remoteGlobalIDString = B5B90A1429A258AC8BCD6C16FEE0D191;
 			remoteInfo = DWTableViewHelper;
 		};
+		C301ECB31119A4E35D2951AC55AAC1A5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1C2DFFF2C4B54A30D817B1691965A10F;
+			remoteInfo = DWPlayer;
+		};
+		C6365750DB9B860A614196D454732A25 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 822E44240F2922DAB12018A6B649BD19;
+			remoteInfo = YYImage;
+		};
 		DC3BC3F1E1A24E19F482BC6D8A027527 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -181,12 +185,12 @@
 			remoteGlobalIDString = 210A8001D5FC262A77CC3BCF2E381A55;
 			remoteInfo = DWCheckBox;
 		};
-		F19308B267E19183886082B845DD081F /* PBXContainerItemProxy */ = {
+		DC66BE8AD1CE07068418B39ECEE5B40F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 822E44240F2922DAB12018A6B649BD19;
-			remoteInfo = YYImage;
+			remoteGlobalIDString = 0C701BBEE5D869E57EF5A4A9353C2A29;
+			remoteInfo = DWKit;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -197,11 +201,9 @@
 		0C6F4829D47D1826F47CDC4264F9F6A8 /* libYYImage.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libYYImage.a; path = libYYImage.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		119CAF36CF00D09E9F040AB2AF34EC9B /* DWMediaPreviewHeader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWMediaPreviewHeader.h; path = DWMediaPreviewController/DWMediaPreviewHeader.h; sourceTree = "<group>"; };
 		12C93C752E52C0A018F93D2C72935103 /* DWFixAdjustCollectionView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWFixAdjustCollectionView.m; path = DWMediaPreviewController/DWFixAdjustCollectionView.m; sourceTree = "<group>"; };
-		15893F0B963D3B3F8B05FDC9D04E006E /* DWAlbumListViewController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumListViewController.h; path = DWImagePickerController/DWAlbumListViewController.h; sourceTree = "<group>"; };
 		15BC62B7C19CDC826248EE5AA313CDC4 /* Pods-DWImagePickerController-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-DWImagePickerController-resources.sh"; sourceTree = "<group>"; };
 		168244964028E8EFFDECDF19619A7DC2 /* NSArray+DWArrayUtils.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSArray+DWArrayUtils.m"; path = "DWLogger/Dependence/DWArrayUtils/NSArray+DWArrayUtils.m"; sourceTree = "<group>"; };
 		17DADB88C7A57BC16E3BD09A1935FE4C /* DWMediaPreviewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWMediaPreviewController.m; path = DWMediaPreviewController/DWMediaPreviewController.m; sourceTree = "<group>"; };
-		1A6EE2FBD47089F6F9B4A80E5AB750B9 /* DWAlbumManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumManager.h; path = DWImagePickerController/DWAlbumManager.h; sourceTree = "<group>"; };
 		1ABF5B6FEF09CE5961167396A7461A28 /* DWLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWLogger.h; path = DWLogger/DWLogger.h; sourceTree = "<group>"; };
 		1B4400311F8C3782AF247F3F7AB7DCC2 /* DWCrashCollector.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWCrashCollector.m; path = DWLogger/DWCrashCollector.m; sourceTree = "<group>"; };
 		20A0137A0905FFC802BBDF39F6884107 /* UIWindow+DWLoggerShake.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIWindow+DWLoggerShake.m"; path = "DWLogger/UIWindow+DWLoggerShake.m"; sourceTree = "<group>"; };
@@ -210,19 +212,22 @@
 		31CDA46EBF1F3FA6D6687080FF1714DE /* DWLabel.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWLabel.m; path = DWKit/DWComponent/DWLabel/DWLabel.m; sourceTree = "<group>"; };
 		354E2D953ED75130E819F18BED6E5E83 /* DWCheckBox.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWCheckBox.m; path = DWCheckBox/DWCheckBox.m; sourceTree = "<group>"; };
 		3706558F2D22EF26245621839595B8CA /* DWCheckBox-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWCheckBox-prefix.pch"; sourceTree = "<group>"; };
+		3B329C23B1905E4E8C7B8717BE415157 /* DWAlbumToolBar.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumToolBar.m; path = DWImagePickerController/DWAlbumToolBar.m; sourceTree = "<group>"; };
 		3BA0BCC8B13BDA8A9B2DDBAC02C6E3B4 /* DWCheckBox-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWCheckBox-dummy.m"; sourceTree = "<group>"; };
 		3DF312B6A3ACBD1D81A435C445373D5E /* DWMediaPreviewCell.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWMediaPreviewCell.m; path = DWMediaPreviewController/DWMediaPreviewCell.m; sourceTree = "<group>"; };
+		3E91079B4B0B464750082CC176EB29D9 /* DWAlbumSelectionManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumSelectionManager.m; path = DWImagePickerController/DWAlbumSelectionManager.m; sourceTree = "<group>"; };
+		3EC9B02F0D4EA21EDE00C3399440DACE /* DWAlbumSelectionManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumSelectionManager.h; path = DWImagePickerController/DWAlbumSelectionManager.h; sourceTree = "<group>"; };
 		3FB3A1C14CC25DB45718DBC656E5AE69 /* DWLogManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWLogManager.h; path = DWLogger/DWLogManager.h; sourceTree = "<group>"; };
 		4341DC8AECE1E4FB48DC3339B950CE08 /* libDWCheckBox.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libDWCheckBox.a; path = libDWCheckBox.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		48200D7BA5CA37E251B00804B9AAE720 /* ReadMe.md */ = {isa = PBXFileReference; includeInIndex = 1; path = ReadMe.md; sourceTree = "<group>"; };
+		484DE2EB8CEE4E0CC6072663E7EBB428 /* DWImagePickerController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWImagePickerController.m; path = DWImagePickerController/DWImagePickerController.m; sourceTree = "<group>"; };
 		497168B77D01153772A1DEA2DB4C49AA /* DWFileManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWFileManager.h; path = DWLogger/Dependence/DWFileManager/DWFileManager.h; sourceTree = "<group>"; };
 		4974455395F22D15330373362261DB3B /* DWMediaPreviewLoading.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWMediaPreviewLoading.m; path = DWMediaPreviewController/DWMediaPreviewLoading.m; sourceTree = "<group>"; };
 		4A450FDA6E9C2A01EDDCBCC41E1412D3 /* DWTransaction.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWTransaction.h; path = DWKit/DWUtils/DWTransaction/DWTransaction.h; sourceTree = "<group>"; };
 		4B0399E6BC9E4729B904F35C5B59E540 /* DWPlayerManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWPlayerManager.h; path = DWPlayer/DWPlayerManager.h; sourceTree = "<group>"; };
 		4DBE534ECB731FE7071C92256FFA3120 /* YYAnimatedImageView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = YYAnimatedImageView.m; path = YYImage/YYAnimatedImageView.m; sourceTree = "<group>"; };
 		4ED8B10D39EAD80C6AC649C92BC783CA /* UIDevice+DWDeviceUtils.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIDevice+DWDeviceUtils.h"; path = "DWLogger/Dependence/DWDeviceUtils/UIDevice+DWDeviceUtils.h"; sourceTree = "<group>"; };
+		4F59CE4A1EBDE2E8178CB098EFD2D975 /* DWImagePickerController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWImagePickerController.h; path = DWImagePickerController/DWImagePickerController.h; sourceTree = "<group>"; };
 		50E406ECF1C57C89FF8341285FB3DEE8 /* YYImage.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = YYImage.xcconfig; sourceTree = "<group>"; };
-		542766C16AB9BA119FAFB2D1314C1592 /* DWAlbumGridViewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumGridViewController.m; path = DWImagePickerController/DWAlbumGridViewController.m; sourceTree = "<group>"; };
 		56D2E7F15C18D3BDBA45F90336BC93E1 /* DWOperationCancelFlag.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWOperationCancelFlag.m; path = DWKit/DWUtils/DWOperationCancelFlag/DWOperationCancelFlag.m; sourceTree = "<group>"; };
 		57227DA1FF6898D9D0DA08B3158CBD19 /* libDWPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libDWPlayer.a; path = libDWPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C5B825B065617A237F84EDB86AB6EC4 /* DWTableViewHelper-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWTableViewHelper-dummy.m"; sourceTree = "<group>"; };
@@ -232,21 +237,20 @@
 		64A46F23799DC39F21F8612D6DEE109F /* DWMediaPreviewVideoControl.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWMediaPreviewVideoControl.h; path = DWMediaPreviewController/DWMediaPreviewVideoControl.h; sourceTree = "<group>"; };
 		65BD601A1753352C1A2E325D87F040AD /* DWMediaPreviewController-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWMediaPreviewController-prefix.pch"; sourceTree = "<group>"; };
 		69BDAA23857B492CEFFE3B6210E4D1C7 /* DWPlayerView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWPlayerView.h; path = DWPlayer/DWPlayerView.h; sourceTree = "<group>"; };
+		6B7A4C9093E2958382182482C853EF6F /* DWAlbumGridViewController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumGridViewController.h; path = DWImagePickerController/DWAlbumGridViewController.h; sourceTree = "<group>"; };
 		6C276B77E4FE6CAD2B660EBACE9FF63E /* libPods-DWImagePickerController.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-DWImagePickerController.a"; path = "libPods-DWImagePickerController.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		70DA8F537A5C34EC65849FDA686A6D58 /* YYImage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = YYImage.h; path = YYImage/YYImage.h; sourceTree = "<group>"; };
-		71BFDC8D5B1C0537B5D4E02D9E65C766 /* DWAlbumManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumManager.m; path = DWImagePickerController/DWAlbumManager.m; sourceTree = "<group>"; };
 		71C900835CC7906A8D0A9F820E7C5954 /* DWPlayer-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWPlayer-dummy.m"; sourceTree = "<group>"; };
-		736C98FEC533831ECD11902099A5EE6A /* DWImagePickerController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWImagePickerController.m; path = DWImagePickerController/DWImagePickerController.m; sourceTree = "<group>"; };
 		7394D79EF4E42ED9D226A27823A91FF8 /* Pods-DWImagePickerController-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-DWImagePickerController-acknowledgements.markdown"; sourceTree = "<group>"; };
 		749FF3DE9C35647DB1C9847882D03EF7 /* YYFrameImage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = YYFrameImage.m; path = YYImage/YYFrameImage.m; sourceTree = "<group>"; };
-		753C9F590D4D32B93FB06ABDD6EF3F61 /* DWImagePickerController-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWImagePickerController-prefix.pch"; sourceTree = "<group>"; };
-		794BE9CECA8883A03D675C91132A9490 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
 		7A1950BC44A0872F4C2C9AA8A34B1CE6 /* DWTableViewHelperResource.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = DWTableViewHelperResource.bundle; path = DWTableViewHelper/DWTableViewHelperResource.bundle; sourceTree = "<group>"; };
 		7B4C79F6C8B30ECFD3E5088F477ADED2 /* Pods-DWImagePickerController-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-DWImagePickerController-dummy.m"; sourceTree = "<group>"; };
-		7B75D2FE7423FAB5C05DC5CD9BCA19FC /* DWImagePickerController-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWImagePickerController-dummy.m"; sourceTree = "<group>"; };
 		7E5E365A41F182A68A001EDA78FB3096 /* DWTableViewHelper.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DWTableViewHelper.xcconfig; sourceTree = "<group>"; };
 		7F296A3F71D0C24E96A3A63C1449CF31 /* DWPlayerManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWPlayerManager.m; path = DWPlayer/DWPlayerManager.m; sourceTree = "<group>"; };
 		8076A693A99D112FC784153A318CBB24 /* DWLabel.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWLabel.h; path = DWKit/DWComponent/DWLabel/DWLabel.h; sourceTree = "<group>"; };
+		83624939ABC55C1B13F4F5B00C217192 /* DWAlbumGridViewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumGridViewController.m; path = DWImagePickerController/DWAlbumGridViewController.m; sourceTree = "<group>"; };
+		8555AC414CA16E4065BD962782FD0701 /* DWAlbumManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumManager.h; path = DWImagePickerController/DWAlbumManager.h; sourceTree = "<group>"; };
+		8689FE9A1383780187A5C46250442D4E /* DWImagePickerController-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWImagePickerController-prefix.pch"; sourceTree = "<group>"; };
 		8A52D096336D3E7AF15A3407F42E0AC1 /* YYImage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = YYImage.m; path = YYImage/YYImage.m; sourceTree = "<group>"; };
 		8A57779A596166DA6E8D5BB0E82CD058 /* DWKit.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DWKit.xcconfig; sourceTree = "<group>"; };
 		8A5DA8297260157D04E09380534C618F /* DWCheckBox.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DWCheckBox.xcconfig; sourceTree = "<group>"; };
@@ -264,40 +268,44 @@
 		9D09CCDBF02BB00DD0EC8A7ACCD041F0 /* libDWTableViewHelper.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libDWTableViewHelper.a; path = libDWTableViewHelper.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		9DAB521F1B1390EA0EEC82E97361FBA1 /* DWLogger-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWLogger-dummy.m"; sourceTree = "<group>"; };
-		A4970078A7874FA0DA188388A299E1FA /* DWImagePickerController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWImagePickerController.h; path = DWImagePickerController/DWImagePickerController.h; sourceTree = "<group>"; };
+		A513CF365F7E6631439775832463A4AE /* DWImagePickerController.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DWImagePickerController.xcconfig; sourceTree = "<group>"; };
 		ABF6EC2FA0FAD016AD34BFF35CE13833 /* DWMediaPreviewController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWMediaPreviewController.h; path = DWMediaPreviewController/DWMediaPreviewController.h; sourceTree = "<group>"; };
 		AE048562F0AD553AE12A6800571B53F3 /* YYSpriteSheetImage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = YYSpriteSheetImage.h; path = YYImage/YYSpriteSheetImage.h; sourceTree = "<group>"; };
 		AEEF884DB6719E73F459639DF7B467AB /* DWTableViewHelper.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWTableViewHelper.m; path = DWTableViewHelper/DWTableViewHelper.m; sourceTree = "<group>"; };
+		AF278467C9DB129E25EAC6428CB72FFF /* DWAlbumListViewController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumListViewController.h; path = DWImagePickerController/DWAlbumListViewController.h; sourceTree = "<group>"; };
 		B0F05013AD55680F7838B69E56932FCD /* YYSpriteSheetImage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = YYSpriteSheetImage.m; path = YYImage/YYSpriteSheetImage.m; sourceTree = "<group>"; };
+		B15EFA65D2086B96BD82B7DF3642E8AF /* ReadMe.md */ = {isa = PBXFileReference; includeInIndex = 1; path = ReadMe.md; sourceTree = "<group>"; };
 		B16A1037969349D6ED46D1A69A44A52B /* UIWindow+DWLoggerShake.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIWindow+DWLoggerShake.h"; path = "DWLogger/UIWindow+DWLoggerShake.h"; sourceTree = "<group>"; };
 		B2E4509A487769765239BE990C1B92F5 /* DWCheckBox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWCheckBox.h; path = DWCheckBox/DWCheckBox.h; sourceTree = "<group>"; };
-		B8BD7ED24A27A88CFE2610A64C417A7B /* DWAlbumGridViewController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumGridViewController.h; path = DWImagePickerController/DWAlbumGridViewController.h; sourceTree = "<group>"; };
 		BAD972336D1AD5C2C95A61C79C26DE32 /* DWCrashCollector.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWCrashCollector.h; path = DWLogger/DWCrashCollector.h; sourceTree = "<group>"; };
 		BCA8F9D8D3D6D352C50D7849574E6D75 /* DWCheckBoxBundle.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = DWCheckBoxBundle.bundle; path = DWCheckBox/DWCheckBoxBundle.bundle; sourceTree = "<group>"; };
 		BE52A6757CF578CA0419A1857FC1E010 /* DWTransaction.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWTransaction.m; path = DWKit/DWUtils/DWTransaction/DWTransaction.m; sourceTree = "<group>"; };
+		BE9635C317E3527991701FDCD377742D /* DWAlbumListViewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumListViewController.m; path = DWImagePickerController/DWAlbumListViewController.m; sourceTree = "<group>"; };
 		BF2F20CC452C16C1D933F33D1AD1CC13 /* DWFixAdjustCollectionView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWFixAdjustCollectionView.h; path = DWMediaPreviewController/DWFixAdjustCollectionView.h; sourceTree = "<group>"; };
 		C2BB7B01CDDB0E7708E89A11F60D2439 /* DWKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWKit-prefix.pch"; sourceTree = "<group>"; };
-		C8ADC02128CFC36E60EDCD70620AA4EF /* DWAlbumListViewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumListViewController.m; path = DWImagePickerController/DWAlbumListViewController.m; sourceTree = "<group>"; };
 		C92A3EC3B9B346D39AA7D367E21B0249 /* YYImage-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "YYImage-prefix.pch"; sourceTree = "<group>"; };
-		CDCB6CA679AD56977A531CAAC64842A1 /* DWImagePickerController.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DWImagePickerController.xcconfig; sourceTree = "<group>"; };
 		D022E25C26880145878BA08C4C844E29 /* DWTableViewHelper-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWTableViewHelper-prefix.pch"; sourceTree = "<group>"; };
 		D2274F18A253A22DB0CF15EA8B4AB6AC /* DWLoggerMacro.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWLoggerMacro.h; path = DWLogger/DWLoggerMacro.h; sourceTree = "<group>"; };
+		D3D470C7A1AF1B712AA85FE9A73257CD /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
 		D6C8932C29AEDAC136A0058145F1FFE3 /* YYImage-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "YYImage-dummy.m"; sourceTree = "<group>"; };
-		D94020565C37C74B15F8D8947CD54FB9 /* DWImagePickerController.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = DWImagePickerController.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		DB395F877A9B1D44856621B01FC67C5A /* DWFileManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWFileManager.m; path = DWLogger/Dependence/DWFileManager/DWFileManager.m; sourceTree = "<group>"; };
 		DB57A77FECF419CCE0FC0B159ED59C14 /* DWOperationCancelFlag.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWOperationCancelFlag.h; path = DWKit/DWUtils/DWOperationCancelFlag/DWOperationCancelFlag.h; sourceTree = "<group>"; };
 		DD200AF74E68C21A42835EFE853432B3 /* DWLogger.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DWLogger.xcconfig; sourceTree = "<group>"; };
+		E0DBFCDB8160F55D57183D39B59998A2 /* DWAlbumToolBar.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWAlbumToolBar.h; path = DWImagePickerController/DWAlbumToolBar.h; sourceTree = "<group>"; };
 		E234637AD2FCE228CE85D5CE1C457FD4 /* NSArray+DWArrayUtils.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSArray+DWArrayUtils.h"; path = "DWLogger/Dependence/DWArrayUtils/NSArray+DWArrayUtils.h"; sourceTree = "<group>"; };
 		E23B4078BD30EAA0F39F2A65E2B0E513 /* DWMediaPreviewController-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWMediaPreviewController-dummy.m"; sourceTree = "<group>"; };
 		E5E0FFEEDF758870CA7E00235FABE5BD /* DWPlayer-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DWPlayer-prefix.pch"; sourceTree = "<group>"; };
 		E9326BBE32E329DA111439FD7F0B5FF5 /* Pods-DWImagePickerController.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-DWImagePickerController.debug.xcconfig"; sourceTree = "<group>"; };
+		EA079E494C17D625575E89A43791DBE4 /* DWImagePickerController.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = DWImagePickerController.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		EB6BD0A1CB29B6D2D3D1DE81C60307DD /* libDWImagePickerController.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libDWImagePickerController.a; path = libDWImagePickerController.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECF2006A89E7B1A3E4C36DDEF29D9059 /* DWLogView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWLogView.m; path = DWLogger/DWLogView.m; sourceTree = "<group>"; };
 		F0003AA12AC725F1DB4020B9BE7E2C99 /* Pods-DWImagePickerController.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-DWImagePickerController.release.xcconfig"; sourceTree = "<group>"; };
 		F1900A661E6579A49A4675D4F0607534 /* YYImageCoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = YYImageCoder.h; path = YYImage/YYImageCoder.h; sourceTree = "<group>"; };
 		F4D1F728037A1D14256491783A7F2F6B /* DWMediaPreviewLoading.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWMediaPreviewLoading.h; path = DWMediaPreviewController/DWMediaPreviewLoading.h; sourceTree = "<group>"; };
+		F5DF15700D8A7D5F53A4BB9BF9EBF0BA /* DWImagePickerController-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DWImagePickerController-dummy.m"; sourceTree = "<group>"; };
 		F6E733CD5888AC5B4E90EC7A292E9CCB /* libDWMediaPreviewController.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libDWMediaPreviewController.a; path = libDWMediaPreviewController.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F90733B70B91806F982AB1CC2F0DE44A /* DWLogManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWLogManager.m; path = DWLogger/DWLogManager.m; sourceTree = "<group>"; };
+		FAF93EBBB248E97CF87F00BBEC75E4A9 /* DWAlbumManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWAlbumManager.m; path = DWImagePickerController/DWAlbumManager.m; sourceTree = "<group>"; };
 		FB4E6901D26A7627B2964DCE3B1EAA77 /* DWMediaPreviewVideoControl.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DWMediaPreviewVideoControl.m; path = DWMediaPreviewController/DWMediaPreviewVideoControl.m; sourceTree = "<group>"; };
 		FC847B33A8CD2A1B83B0B62345FC2455 /* DWTableViewHelper.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DWTableViewHelper.h; path = DWTableViewHelper/DWTableViewHelper.h; sourceTree = "<group>"; };
 		FDE8DF1FD146CCC5CF3800AAB4CDDF68 /* DWLoggerBundle.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = DWLoggerBundle.bundle; path = DWLogger/DWLoggerBundle.bundle; sourceTree = "<group>"; };
@@ -319,21 +327,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3436021FBFE8A91ABD0CC88183FFC9A3 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		3B97EAB90042AD5A364BDCF4F0550F60 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		5333359F4930E4DA7AC6D9437E5CF304 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A132D67889918C0B92F382C06A2155D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -347,21 +348,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		90794188CFC8FB6203FCAB86825406C6 /* Frameworks */ = {
+		9209200ED6BE04D73433A911EB8D2D34 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B9D9560B3C353F2E08AB91E8F93098B4 /* Frameworks */ = {
+		A4A5F70EDE2F5271CC3534CD3AE2919A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E4054214354F39A49B0BAB60D868D5A1 /* Frameworks */ = {
+		B79D9D054B71E784F454221E5E73D598 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E62B9A4FEFC0D98AB7CEAEB239B761F2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -428,6 +436,28 @@
 			name = DWUtils;
 			sourceTree = "<group>";
 		};
+		23C52E94C09105E0F3E86FAE25B96FAE /* DWImagePickerController */ = {
+			isa = PBXGroup;
+			children = (
+				6B7A4C9093E2958382182482C853EF6F /* DWAlbumGridViewController.h */,
+				83624939ABC55C1B13F4F5B00C217192 /* DWAlbumGridViewController.m */,
+				AF278467C9DB129E25EAC6428CB72FFF /* DWAlbumListViewController.h */,
+				BE9635C317E3527991701FDCD377742D /* DWAlbumListViewController.m */,
+				8555AC414CA16E4065BD962782FD0701 /* DWAlbumManager.h */,
+				FAF93EBBB248E97CF87F00BBEC75E4A9 /* DWAlbumManager.m */,
+				3EC9B02F0D4EA21EDE00C3399440DACE /* DWAlbumSelectionManager.h */,
+				3E91079B4B0B464750082CC176EB29D9 /* DWAlbumSelectionManager.m */,
+				E0DBFCDB8160F55D57183D39B59998A2 /* DWAlbumToolBar.h */,
+				3B329C23B1905E4E8C7B8717BE415157 /* DWAlbumToolBar.m */,
+				4F59CE4A1EBDE2E8178CB098EFD2D975 /* DWImagePickerController.h */,
+				484DE2EB8CEE4E0CC6072663E7EBB428 /* DWImagePickerController.m */,
+				D4351261CE23182A5F65CD12383D19FE /* Pod */,
+				8E0BD26BA922A5A4F28E98434B3202F2 /* Support Files */,
+			);
+			name = DWImagePickerController;
+			path = ../..;
+			sourceTree = "<group>";
+		};
 		3536311D5558236205428DD528515D02 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -445,14 +475,6 @@
 				05B3144BCB303EC7D96C578D71D1D93D /* Pods-DWImagePickerController */,
 			);
 			name = "Targets Support Files";
-			sourceTree = "<group>";
-		};
-		3F21E0E714B06B7E4774EC7BFF862541 /* Development Pods */ = {
-			isa = PBXGroup;
-			children = (
-				C65AF1567DA68DE09B343F828959C8BF /* DWImagePickerController */,
-			);
-			name = "Development Pods";
 			sourceTree = "<group>";
 		};
 		4D24BCCE1CB1763339FC5B0B458DADEC /* DWLogger */ = {
@@ -508,17 +530,6 @@
 			);
 			name = "Support Files";
 			path = "../Target Support Files/DWLogger";
-			sourceTree = "<group>";
-		};
-		64821CB40DAC6874B00F8CDC8635B216 /* Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				CDCB6CA679AD56977A531CAAC64842A1 /* DWImagePickerController.xcconfig */,
-				7B75D2FE7423FAB5C05DC5CD9BCA19FC /* DWImagePickerController-dummy.m */,
-				753C9F590D4D32B93FB06ABDD6EF3F61 /* DWImagePickerController-prefix.pch */,
-			);
-			name = "Support Files";
-			path = "DEMO/Pods/Target Support Files/DWImagePickerController";
 			sourceTree = "<group>";
 		};
 		6E71556921A21B951740801F745FDDB1 /* Dependence */ = {
@@ -598,16 +609,6 @@
 			path = "../Target Support Files/DWTableViewHelper";
 			sourceTree = "<group>";
 		};
-		836F282C9BEE5604BA0C85CC21CC7C60 /* Pod */ = {
-			isa = PBXGroup;
-			children = (
-				D94020565C37C74B15F8D8947CD54FB9 /* DWImagePickerController.podspec */,
-				794BE9CECA8883A03D675C91132A9490 /* LICENSE */,
-				48200D7BA5CA37E251B00804B9AAE720 /* ReadMe.md */,
-			);
-			name = Pod;
-			sourceTree = "<group>";
-		};
 		8499FDF70BF1190F7F69CC429275C288 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -626,6 +627,17 @@
 				BE52A6757CF578CA0419A1857FC1E010 /* DWTransaction.m */,
 			);
 			name = DWTransaction;
+			sourceTree = "<group>";
+		};
+		8E0BD26BA922A5A4F28E98434B3202F2 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				A513CF365F7E6631439775832463A4AE /* DWImagePickerController.xcconfig */,
+				F5DF15700D8A7D5F53A4BB9BF9EBF0BA /* DWImagePickerController-dummy.m */,
+				8689FE9A1383780187A5C46250442D4E /* DWImagePickerController-prefix.pch */,
+			);
+			name = "Support Files";
+			path = "DEMO/Pods/Target Support Files/DWImagePickerController";
 			sourceTree = "<group>";
 		};
 		959FE72DB304715D5883AF7CABD645FF /* Support Files */ = {
@@ -710,24 +722,6 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		C65AF1567DA68DE09B343F828959C8BF /* DWImagePickerController */ = {
-			isa = PBXGroup;
-			children = (
-				B8BD7ED24A27A88CFE2610A64C417A7B /* DWAlbumGridViewController.h */,
-				542766C16AB9BA119FAFB2D1314C1592 /* DWAlbumGridViewController.m */,
-				15893F0B963D3B3F8B05FDC9D04E006E /* DWAlbumListViewController.h */,
-				C8ADC02128CFC36E60EDCD70620AA4EF /* DWAlbumListViewController.m */,
-				1A6EE2FBD47089F6F9B4A80E5AB750B9 /* DWAlbumManager.h */,
-				71BFDC8D5B1C0537B5D4E02D9E65C766 /* DWAlbumManager.m */,
-				A4970078A7874FA0DA188388A299E1FA /* DWImagePickerController.h */,
-				736C98FEC533831ECD11902099A5EE6A /* DWImagePickerController.m */,
-				836F282C9BEE5604BA0C85CC21CC7C60 /* Pod */,
-				64821CB40DAC6874B00F8CDC8635B216 /* Support Files */,
-			);
-			name = DWImagePickerController;
-			path = ../..;
-			sourceTree = "<group>";
-		};
 		CA0F730E281A6A4D0D04295CE2C2E98F /* DWOperationCancelFlag */ = {
 			isa = PBXGroup;
 			children = (
@@ -757,6 +751,14 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		CE3E2D5E9107F6E0B2BF014084448806 /* Development Pods */ = {
+			isa = PBXGroup;
+			children = (
+				23C52E94C09105E0F3E86FAE25B96FAE /* DWImagePickerController */,
+			);
+			name = "Development Pods";
+			sourceTree = "<group>";
+		};
 		CF00E2AD7CD2D8F07BA181683B5E77E7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -769,12 +771,22 @@
 			isa = PBXGroup;
 			children = (
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
-				3F21E0E714B06B7E4774EC7BFF862541 /* Development Pods */,
+				CE3E2D5E9107F6E0B2BF014084448806 /* Development Pods */,
 				D89477F20FB1DE18A04690586D7808C4 /* Frameworks */,
 				C1D4A26A757C1F885819BDF8FF6B39A3 /* Pods */,
 				0BA6B5C520AED942D2C8D89656125872 /* Products */,
 				373575398583CF3E4720205DFCAAB745 /* Targets Support Files */,
 			);
+			sourceTree = "<group>";
+		};
+		D4351261CE23182A5F65CD12383D19FE /* Pod */ = {
+			isa = PBXGroup;
+			children = (
+				EA079E494C17D625575E89A43791DBE4 /* DWImagePickerController.podspec */,
+				D3D470C7A1AF1B712AA85FE9A73257CD /* LICENSE */,
+				B15EFA65D2086B96BD82B7DF3642E8AF /* ReadMe.md */,
+			);
+			name = Pod;
 			sourceTree = "<group>";
 		};
 		D89477F20FB1DE18A04690586D7808C4 /* Frameworks */ = {
@@ -804,26 +816,16 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		162460F27003BC00F1BFDD10707BD923 /* Headers */ = {
+		121813295245A8240B254F632F6A495B /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				30654F0FDE0A534761D6C7250F69AB5A /* DWAlbumGridViewController.h in Headers */,
-				DDB5D8DA9C6BDEA96AF2412BA1ADDCCD /* DWAlbumListViewController.h in Headers */,
-				15B8491D6D490928FDE70A3DEF8B7B2F /* DWAlbumManager.h in Headers */,
-				82ED7985EECA0CEBE898FA9D3E1A61A7 /* DWImagePickerController.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2B5D045587ECCA811B29DF9340EDB658 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				5B09ED843D990DB8FDC9A60B49CA4A04 /* YYAnimatedImageView.h in Headers */,
-				469A6109A6E94FFCB8D6A78789D9E56F /* YYFrameImage.h in Headers */,
-				4B2A97E118241F27A3E6BE8AF0CAB3BC /* YYImage.h in Headers */,
-				5E8D8D0F3C90C859E24340DE9B176242 /* YYImageCoder.h in Headers */,
-				66E046167BB3B15324016A7EC1C7CB3E /* YYSpriteSheetImage.h in Headers */,
+				298D2785776D37D8D05207C537559732 /* DWAlbumGridViewController.h in Headers */,
+				35FE1DBE64C112FD44EDC928790AFCBF /* DWAlbumListViewController.h in Headers */,
+				7CF2587FA75018378566950C47F82A14 /* DWAlbumManager.h in Headers */,
+				EC8C54D0BFE3391126E54A7AD50BFB8B /* DWAlbumSelectionManager.h in Headers */,
+				B4B6155D88BF6388D00C47685FBC66DB /* DWAlbumToolBar.h in Headers */,
+				169FE9F24DEF0FFE2666859D2217465B /* DWImagePickerController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -844,16 +846,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		48ABAE6FAE28C06D97D52D480DA74807 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				751AA0CDD6E0E07DA998744027D450CD /* DWLabel.h in Headers */,
-				B566680D0AE009744CA389BEA8B4782B /* DWOperationCancelFlag.h in Headers */,
-				93F07974885648ADA30FD80F7C3D1F83 /* DWTransaction.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7BC204D737931A09F7524AFCB4D87DE5 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -862,14 +854,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8BDD86D912792D0B62453FD60D90B255 /* Headers */ = {
+		81AEFE1C376BD50527CCBA250DC04693 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9A1B597EFBFCA669B46DD932FBC189A /* DWPlayer.h in Headers */,
-				16F55035C6A9FDA43025C85DC968219C /* DWPlayerManager.h in Headers */,
-				AC1D623B523C74D9BD6D206F1EBA30B9 /* DWPlayerView.h in Headers */,
-				C5CDB77D8177FC039E472925C862CECF /* DWPlayerViewController.h in Headers */,
+				E4AEF2E4EB1EFB1473DF7AA4B47D7FA6 /* DWFixAdjustCollectionView.h in Headers */,
+				A658638B93B410FF22BCCE3495BE6B6C /* DWMediaPreviewCell.h in Headers */,
+				D8AB3C4EF4E90A0CA406E7F8AF1F785D /* DWMediaPreviewController.h in Headers */,
+				8A4DE6BA4797EACBBE38FF8A5702182E /* DWMediaPreviewHeader.h in Headers */,
+				05498375D6F21146C305BE58CFD8DBA9 /* DWMediaPreviewLoading.h in Headers */,
+				F977736E1C855FF435970FE2FBB08784 /* DWMediaPreviewVideoControl.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B97E81EE4DA06C1B0675108293E4B82 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CF9F3F29756665C1A0642332D041CA0 /* DWPlayer.h in Headers */,
+				536217C74B55524891DA3B3BD0CC6FEF /* DWPlayerManager.h in Headers */,
+				7FE662960872C28921E5D9EAC64483A8 /* DWPlayerView.h in Headers */,
+				1E58764A5D46FC0195B5D2B1A8FF1AE7 /* DWPlayerViewController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -880,16 +885,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D760DD5E45046999580DD23DD53FA2AE /* Headers */ = {
+		C97D7BEE6908886A5144CCBE55F87FD7 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0ADF7C2D71D0E889E4E2F474E7F94A1 /* DWFixAdjustCollectionView.h in Headers */,
-				FFC18350C4A6BBB06903BB78100217F0 /* DWMediaPreviewCell.h in Headers */,
-				75A1886026C0F479658A34AFA3D76C49 /* DWMediaPreviewController.h in Headers */,
-				CF684C9451808A8FD03B8A15CF1B0E9F /* DWMediaPreviewHeader.h in Headers */,
-				1777BD2EB799F00CC0BF730CC06396D2 /* DWMediaPreviewLoading.h in Headers */,
-				6EEB1DF6699560285AC9A10851D630DB /* DWMediaPreviewVideoControl.h in Headers */,
+				D640EB2A8A712D37A171C49657A17970 /* YYAnimatedImageView.h in Headers */,
+				CE061AB3EDD80754D5CDFEC9ADE96F10 /* YYFrameImage.h in Headers */,
+				2F7ECC14A3B286E2B4E2FFFA54C8E4C6 /* YYImage.h in Headers */,
+				A070356008BAA1A08BD0443B083ECBEC /* YYImageCoder.h in Headers */,
+				BFCA160D00D3CFBDEFCADDE165C02A6F /* YYSpriteSheetImage.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -898,6 +902,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				E651CC972CE4D13C6E9D7952B1128951 /* DWCheckBox.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCC032B546C96A5B181EFE2BA3DD4D78 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DC21E9D0D7BD114C67085500017C7AB /* DWLabel.h in Headers */,
+				92F8F68A6AA4A32275AB1B8907BB6BB9 /* DWOperationCancelFlag.h in Headers */,
+				F13D3856E44851EAFB33F9F1EE576DBD /* DWTransaction.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -931,11 +945,11 @@
 		};
 		0C701BBEE5D869E57EF5A4A9353C2A29 /* DWKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DAC309908372064FB2B241CA8172EB42 /* Build configuration list for PBXNativeTarget "DWKit" */;
+			buildConfigurationList = 2B81C4C989155C7319094299283ABB0F /* Build configuration list for PBXNativeTarget "DWKit" */;
 			buildPhases = (
-				48ABAE6FAE28C06D97D52D480DA74807 /* Headers */,
-				EED6958637A550D4D1882CD8491F56C5 /* Sources */,
-				3436021FBFE8A91ABD0CC88183FFC9A3 /* Frameworks */,
+				FCC032B546C96A5B181EFE2BA3DD4D78 /* Headers */,
+				A6155D39E4FB979DD7978B720FA3EBC6 /* Sources */,
+				A4A5F70EDE2F5271CC3534CD3AE2919A /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -948,11 +962,11 @@
 		};
 		1C2DFFF2C4B54A30D817B1691965A10F /* DWPlayer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 723D53E17C21256CA81C9CD27FAA0CC8 /* Build configuration list for PBXNativeTarget "DWPlayer" */;
+			buildConfigurationList = F1DAD45CB7809F481F1830BDC383C6AE /* Build configuration list for PBXNativeTarget "DWPlayer" */;
 			buildPhases = (
-				8BDD86D912792D0B62453FD60D90B255 /* Headers */,
-				434E4E9D3893ADF7ECDFCD66009688DD /* Sources */,
-				3B97EAB90042AD5A364BDCF4F0550F60 /* Frameworks */,
+				8B97E81EE4DA06C1B0675108293E4B82 /* Headers */,
+				8EC9A3D5FFF40385EEC161BBAFE22356 /* Sources */,
+				9209200ED6BE04D73433A911EB8D2D34 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -982,11 +996,11 @@
 		};
 		822E44240F2922DAB12018A6B649BD19 /* YYImage */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2F9C7F39E69FFDEAF9BA4969D3CB17AE /* Build configuration list for PBXNativeTarget "YYImage" */;
+			buildConfigurationList = 4451FEEC3EE297A613762D06F0F21F53 /* Build configuration list for PBXNativeTarget "YYImage" */;
 			buildPhases = (
-				2B5D045587ECCA811B29DF9340EDB658 /* Headers */,
-				6608EFD9D514884D2D6F8770BC4FADC6 /* Sources */,
-				B9D9560B3C353F2E08AB91E8F93098B4 /* Frameworks */,
+				C97D7BEE6908886A5144CCBE55F87FD7 /* Headers */,
+				8D535A1C8ECBACF3842CBA21E387BB27 /* Sources */,
+				E62B9A4FEFC0D98AB7CEAEB239B761F2 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1018,16 +1032,16 @@
 		};
 		A4098689422B015948D41C899D27F35F /* DWImagePickerController */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9D18B20869177008DDAD584C39E83B6D /* Build configuration list for PBXNativeTarget "DWImagePickerController" */;
+			buildConfigurationList = 15840A5EDEFD4355C6B2338001ED497F /* Build configuration list for PBXNativeTarget "DWImagePickerController" */;
 			buildPhases = (
-				162460F27003BC00F1BFDD10707BD923 /* Headers */,
-				7264A4170937182EB20D7A1CC82E2EF4 /* Sources */,
-				E4054214354F39A49B0BAB60D868D5A1 /* Frameworks */,
+				121813295245A8240B254F632F6A495B /* Headers */,
+				50CBA6C4E939511120DC63702E5D6C15 /* Sources */,
+				7A132D67889918C0B92F382C06A2155D /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				FF5039BBB1896EF0C63C7523884CF71D /* PBXTargetDependency */,
+				A48E0B94EAE941BDF6C52A5CD2552DA5 /* PBXTargetDependency */,
 			);
 			name = DWImagePickerController;
 			productName = DWImagePickerController;
@@ -1054,18 +1068,18 @@
 		};
 		CBAC1A28FE028734D86328EF5E99287D /* DWMediaPreviewController */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1A7E475B6199ED1111D33BAA7607CF9F /* Build configuration list for PBXNativeTarget "DWMediaPreviewController" */;
+			buildConfigurationList = 081E9F9D1926A1E56D5BAEDA4E35C334 /* Build configuration list for PBXNativeTarget "DWMediaPreviewController" */;
 			buildPhases = (
-				D760DD5E45046999580DD23DD53FA2AE /* Headers */,
-				F28880DDF27EAC2FBC20EAB86BDD0AD2 /* Sources */,
-				90794188CFC8FB6203FCAB86825406C6 /* Frameworks */,
+				81AEFE1C376BD50527CCBA250DC04693 /* Headers */,
+				68B82A955A6A13A95EBC136C5A359F80 /* Sources */,
+				B79D9D054B71E784F454221E5E73D598 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				05225E3A6F634F4E5E920537B270CBE3 /* PBXTargetDependency */,
-				F93412D214ED5689D47ECB1BFC95467A /* PBXTargetDependency */,
-				0233B8D1EF836B77CEDAE2C40232A168 /* PBXTargetDependency */,
+				0C59D42DBCD0017EC7940FA8445B2911 /* PBXTargetDependency */,
+				E696D54E21482ACB7CF947D4B61DE3B3 /* PBXTargetDependency */,
+				B89B84C93DEA4F1547C6A94D9AFB016D /* PBXTargetDependency */,
 			);
 			name = DWMediaPreviewController;
 			productName = DWMediaPreviewController;
@@ -1141,39 +1155,65 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		434E4E9D3893ADF7ECDFCD66009688DD /* Sources */ = {
+		50CBA6C4E939511120DC63702E5D6C15 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4297DE0D420D8745C7DFA1D9597999D /* DWPlayer-dummy.m in Sources */,
-				A84BF845F0EBC9B382C152C28E9294F3 /* DWPlayerManager.m in Sources */,
-				4A208712C51B3F88A6A3BB5FE4E00DEA /* DWPlayerView.m in Sources */,
-				643CAAF3046D0E07580CD73DF812A019 /* DWPlayerViewController.m in Sources */,
+				BA468FCB4C4F4B1D3EBA51D9E7638140 /* DWAlbumGridViewController.m in Sources */,
+				E7E323CF9D8A7DBFBB32559C38A51146 /* DWAlbumListViewController.m in Sources */,
+				AACCCDBF364BE7B8C627A9C50FC82DF3 /* DWAlbumManager.m in Sources */,
+				EF8293F9F616164E1ADB5DB476EEAF0A /* DWAlbumSelectionManager.m in Sources */,
+				A6848DA7434BB54C77CC1B3D6931289F /* DWAlbumToolBar.m in Sources */,
+				9A2DED61F0367777D85E0240246A6346 /* DWImagePickerController-dummy.m in Sources */,
+				E5B467438A3184AB8ABB17F5F3DB8686 /* DWImagePickerController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6608EFD9D514884D2D6F8770BC4FADC6 /* Sources */ = {
+		68B82A955A6A13A95EBC136C5A359F80 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C1344A112958EF08F0B4D96FE43BBB4C /* YYAnimatedImageView.m in Sources */,
-				E1DD21C52D7EAF0FF3831E9F789447C9 /* YYFrameImage.m in Sources */,
-				0A1AA4E824EBE2B094DA475D366366B1 /* YYImage-dummy.m in Sources */,
-				9ECD511446B47F69E39427E48AABA4C9 /* YYImage.m in Sources */,
-				B36DC8BD98C47883351FC822949C6CA6 /* YYImageCoder.m in Sources */,
-				1587662DA07DB25A35B443A1F3854BB7 /* YYSpriteSheetImage.m in Sources */,
+				80D850689431FB0F607CB575BFC0E8D9 /* DWFixAdjustCollectionView.m in Sources */,
+				3160B1444924037659DE6DADCCCC4EFB /* DWMediaPreviewCell.m in Sources */,
+				AB180DF05FCA25700785D328F141D1AB /* DWMediaPreviewController-dummy.m in Sources */,
+				7A674D6BF9CFECBD969C07824DE63215 /* DWMediaPreviewController.m in Sources */,
+				78C7F30B3C03D422EE9ADE3EA783C339 /* DWMediaPreviewLoading.m in Sources */,
+				4DD3067607305BE978862EB058C872E5 /* DWMediaPreviewVideoControl.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7264A4170937182EB20D7A1CC82E2EF4 /* Sources */ = {
+		8D535A1C8ECBACF3842CBA21E387BB27 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FFE54F39D73DE5EC5ECB81D544D2B849 /* DWAlbumGridViewController.m in Sources */,
-				B588A15E0C8E0800A81632A762E3DE4C /* DWAlbumListViewController.m in Sources */,
-				FA974E3AC5850819F11DAA8C2631E833 /* DWAlbumManager.m in Sources */,
-				F7AD76D790AC7C1FD4035837EA81D012 /* DWImagePickerController-dummy.m in Sources */,
-				D7A89B9417C6B82616EDC4C806304A7E /* DWImagePickerController.m in Sources */,
+				7B668612CF9BFE7737AF458A9F0245A4 /* YYAnimatedImageView.m in Sources */,
+				63A0C032CDC975EBB60331517F482677 /* YYFrameImage.m in Sources */,
+				40DE5D4B1AEDB2BCDB288FE9D33BABEA /* YYImage-dummy.m in Sources */,
+				B81C7E18F995D0FE5955C4F62C134295 /* YYImage.m in Sources */,
+				CC1BA758133888FA7765F85B462ECCB8 /* YYImageCoder.m in Sources */,
+				CA46537883D0952CFE8013253CC29F67 /* YYSpriteSheetImage.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EC9A3D5FFF40385EEC161BBAFE22356 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86445B4EBE26350984C7E7076B915AB2 /* DWPlayer-dummy.m in Sources */,
+				AA16B99B39D3B57B8AE863535D43EA6D /* DWPlayerManager.m in Sources */,
+				C4AAE6B1643FE4C8599BE6588CCD0375 /* DWPlayerView.m in Sources */,
+				C68B979BF441B02DFC7B01C26B8283C0 /* DWPlayerViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A6155D39E4FB979DD7978B720FA3EBC6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DBEAA89EC20EFB8856C746FE737B438A /* DWKit-dummy.m in Sources */,
+				C4AB70A0BB180EF3228B2D62B400C622 /* DWLabel.m in Sources */,
+				93E2276374D3A9F42EFC4733FC9E75CD /* DWOperationCancelFlag.m in Sources */,
+				7344968831F250C4E8FFF6B4EA10FF00 /* DWTransaction.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1185,44 +1225,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EED6958637A550D4D1882CD8491F56C5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C785456E56C4C5EE6731347DD577CD21 /* DWKit-dummy.m in Sources */,
-				7ED0B73F41971DCFC843DCDED8036498 /* DWLabel.m in Sources */,
-				D97EB7C961173E20D4AEBE92E122CB53 /* DWOperationCancelFlag.m in Sources */,
-				6E9C2EE2217388769935149B33A7B5A1 /* DWTransaction.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F28880DDF27EAC2FBC20EAB86BDD0AD2 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				961A521F70092D0B9842495F88E25B17 /* DWFixAdjustCollectionView.m in Sources */,
-				64EE5C25B4816D61A109A1628876A8B2 /* DWMediaPreviewCell.m in Sources */,
-				2D59A1B6502973880F7886AA8BA942BA /* DWMediaPreviewController-dummy.m in Sources */,
-				C8B526BE6516D8A3FBE98E1A89833F5F /* DWMediaPreviewController.m in Sources */,
-				BEE473AD264BE2A473EAC8EB26250E44 /* DWMediaPreviewLoading.m in Sources */,
-				1906048751BD57C588A80785C145BF75 /* DWMediaPreviewVideoControl.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		0233B8D1EF836B77CEDAE2C40232A168 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = YYImage;
-			target = 822E44240F2922DAB12018A6B649BD19 /* YYImage */;
-			targetProxy = F19308B267E19183886082B845DD081F /* PBXContainerItemProxy */;
-		};
-		05225E3A6F634F4E5E920537B270CBE3 /* PBXTargetDependency */ = {
+		0C59D42DBCD0017EC7940FA8445B2911 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = DWKit;
 			target = 0C701BBEE5D869E57EF5A4A9353C2A29 /* DWKit */;
-			targetProxy = 6A2F8B9F8F8A9894D8C660EE14A61509 /* PBXContainerItemProxy */;
+			targetProxy = DC66BE8AD1CE07068418B39ECEE5B40F /* PBXContainerItemProxy */;
 		};
 		1FD7A7F0868607D1C500E3DE4A1F3F36 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1266,11 +1276,23 @@
 			target = B5B90A1429A258AC8BCD6C16FEE0D191 /* DWTableViewHelper */;
 			targetProxy = 7252D8055CD26CFC80DD3013A9D7C31A /* PBXContainerItemProxy */;
 		};
+		A48E0B94EAE941BDF6C52A5CD2552DA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DWMediaPreviewController;
+			target = CBAC1A28FE028734D86328EF5E99287D /* DWMediaPreviewController */;
+			targetProxy = AB255D3E69F3DBA44A4EED0AA2E22897 /* PBXContainerItemProxy */;
+		};
 		B209B8B3E7C51DA586CBD80B6FF86D45 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = DWCheckBox;
 			target = 210A8001D5FC262A77CC3BCF2E381A55 /* DWCheckBox */;
 			targetProxy = DC3BC3F1E1A24E19F482BC6D8A027527 /* PBXContainerItemProxy */;
+		};
+		B89B84C93DEA4F1547C6A94D9AFB016D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = YYImage;
+			target = 822E44240F2922DAB12018A6B649BD19 /* YYImage */;
+			targetProxy = C6365750DB9B860A614196D454732A25 /* PBXContainerItemProxy */;
 		};
 		BD567B7D74FDBDC084FC7882FB67D410 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1278,17 +1300,17 @@
 			target = 931A456BA73F90C003EB4704DA9E6682 /* DWLogger */;
 			targetProxy = 296940DE25DCC1DB6C0A78C83D473276 /* PBXContainerItemProxy */;
 		};
+		E696D54E21482ACB7CF947D4B61DE3B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DWPlayer;
+			target = 1C2DFFF2C4B54A30D817B1691965A10F /* DWPlayer */;
+			targetProxy = C301ECB31119A4E35D2951AC55AAC1A5 /* PBXContainerItemProxy */;
+		};
 		F789E1B1012C403C0A11E3B1370B7F85 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = DWKit;
 			target = 0C701BBEE5D869E57EF5A4A9353C2A29 /* DWKit */;
 			targetProxy = 274A1F3B10544078DE7C76F78FC7ADB3 /* PBXContainerItemProxy */;
-		};
-		F93412D214ED5689D47ECB1BFC95467A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = DWPlayer;
-			target = 1C2DFFF2C4B54A30D817B1691965A10F /* DWPlayer */;
-			targetProxy = 953337D016422F2E02FC975D1C7C67D5 /* PBXContainerItemProxy */;
 		};
 		FE490692AF22936C60CA2CB148CF2ADF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1296,30 +1318,24 @@
 			target = CBAC1A28FE028734D86328EF5E99287D /* DWMediaPreviewController */;
 			targetProxy = 1DA479424261F6E3B3E93CF381E8668A /* PBXContainerItemProxy */;
 		};
-		FF5039BBB1896EF0C63C7523884CF71D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = DWMediaPreviewController;
-			target = CBAC1A28FE028734D86328EF5E99287D /* DWMediaPreviewController */;
-			targetProxy = 14C505602D2A8E2943FC4F7668A307C8 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		0120DB9F9CF5901831AD5B925107F87A /* Release */ = {
+		1160F6B3BA40A905BEFD7DAD445DC48E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8A57779A596166DA6E8D5BB0E82CD058 /* DWKit.xcconfig */;
+			baseConfigurationReference = 50E406ECF1C57C89FF8341285FB3DEE8 /* YYImage.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/DWKit/DWKit-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				GCC_PREFIX_HEADER = "Target Support Files/YYImage/YYImage-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = DWKit;
-				PRODUCT_NAME = DWKit;
+				PRODUCT_MODULE_NAME = YYImage;
+				PRODUCT_NAME = YYImage;
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1328,6 +1344,29 @@
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
+		};
+		1774243349B04DBFDA10BB51859B524F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 96675F90F8321F7DE828BF87BA100FA9 /* DWMediaPreviewController.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/DWMediaPreviewController/DWMediaPreviewController-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = DWMediaPreviewController;
+				PRODUCT_NAME = DWMediaPreviewController;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		196DFA3E4A09A28224918543529A1885 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1393,30 +1432,6 @@
 			};
 			name = Debug;
 		};
-		247AA159A3BA44BBB8656A6235D0A6D4 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CDCB6CA679AD56977A531CAAC64842A1 /* DWImagePickerController.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/DWImagePickerController/DWImagePickerController-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = DWImagePickerController;
-				PRODUCT_NAME = DWImagePickerController;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		2987F06D5D67198BEEA9FBA816090BE7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7E5E365A41F182A68A001EDA78FB3096 /* DWTableViewHelper.xcconfig */;
@@ -1432,29 +1447,6 @@
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_MODULE_NAME = DWTableViewHelper;
 				PRODUCT_NAME = DWTableViewHelper;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		31CB16C1613163FC17139311BB84245C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CDCB6CA679AD56977A531CAAC64842A1 /* DWImagePickerController.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/DWImagePickerController/DWImagePickerController-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = DWImagePickerController;
-				PRODUCT_NAME = DWImagePickerController;
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1485,6 +1477,29 @@
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
+		};
+		5407CBE99CFED5F16ECD0A4CBF1CBB66 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 50E406ECF1C57C89FF8341285FB3DEE8 /* YYImage.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/YYImage/YYImage-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = YYImage;
+				PRODUCT_NAME = YYImage;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		5F0EFF3D01BE0C8D6555B4D0F62E34A3 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1532,7 +1547,7 @@
 			};
 			name = Release;
 		};
-		9682E44B1EEB2DE00291EE06731EBFF6 /* Release */ = {
+		7EB26E86E3FB3BF37678820774F46343 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 094B65E2F9D6EEC021E71B073922F844 /* DWPlayer.xcconfig */;
 			buildSettings = {
@@ -1555,6 +1570,100 @@
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
+		};
+		835957EE62120DE7E3E13F519EB06FE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 96675F90F8321F7DE828BF87BA100FA9 /* DWMediaPreviewController.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/DWMediaPreviewController/DWMediaPreviewController-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = DWMediaPreviewController;
+				PRODUCT_NAME = DWMediaPreviewController;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8C6C6277FBC14E8515C97DD9EEE92246 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A513CF365F7E6631439775832463A4AE /* DWImagePickerController.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/DWImagePickerController/DWImagePickerController-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = DWImagePickerController;
+				PRODUCT_NAME = DWImagePickerController;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8D0A81B9FAB73188D26C167172991587 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A513CF365F7E6631439775832463A4AE /* DWImagePickerController.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/DWImagePickerController/DWImagePickerController-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = DWImagePickerController;
+				PRODUCT_NAME = DWImagePickerController;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		98A5F7F78F5508574F37AFB826E76B0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8A57779A596166DA6E8D5BB0E82CD058 /* DWKit.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/DWKit/DWKit-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = DWKit;
+				PRODUCT_NAME = DWKit;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		9C9639D57A9B54EE2D10D6CD949F8C9B /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1639,7 +1748,7 @@
 			};
 			name = Release;
 		};
-		B2722D9047984ED98AC530BC6EF07FFC /* Debug */ = {
+		C13AB2317C7AE00AC9F193CB4913EED8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 094B65E2F9D6EEC021E71B073922F844 /* DWPlayer.xcconfig */;
 			buildSettings = {
@@ -1661,100 +1770,6 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
-		};
-		BFEA9FE7891038E513C86EAA58F86F12 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8A57779A596166DA6E8D5BB0E82CD058 /* DWKit.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/DWKit/DWKit-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = DWKit;
-				PRODUCT_NAME = DWKit;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		BFF730D929F45838D9C237D1634546DF /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 96675F90F8321F7DE828BF87BA100FA9 /* DWMediaPreviewController.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/DWMediaPreviewController/DWMediaPreviewController-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = DWMediaPreviewController;
-				PRODUCT_NAME = DWMediaPreviewController;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		C3F82E208FDACBDE826B3ACE7FAF7EA6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 50E406ECF1C57C89FF8341285FB3DEE8 /* YYImage.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/YYImage/YYImage-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = YYImage;
-				PRODUCT_NAME = YYImage;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		C68D6B9FDA48FFD5EDA5D28A019BA5DE /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 50E406ECF1C57C89FF8341285FB3DEE8 /* YYImage.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/YYImage/YYImage-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = YYImage;
-				PRODUCT_NAME = YYImage;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
 		};
 		CBE49F48A1610A567B59F4642BC728DE /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -1803,29 +1818,6 @@
 			};
 			name = Debug;
 		};
-		EA24424722079919B704EF5474C50C58 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 96675F90F8321F7DE828BF87BA100FA9 /* DWMediaPreviewController.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/DWMediaPreviewController/DWMediaPreviewController-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = DWMediaPreviewController;
-				PRODUCT_NAME = DWMediaPreviewController;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
 		EF90844310073966F0D00F58EEE02B3A /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8A5DA8297260157D04E09380534C618F /* DWCheckBox.xcconfig */;
@@ -1850,23 +1842,56 @@
 			};
 			name = Release;
 		};
+		F0936823C3B4B4F36B5FB9014DB96D5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8A57779A596166DA6E8D5BB0E82CD058 /* DWKit.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/DWKit/DWKit-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = DWKit;
+				PRODUCT_NAME = DWKit;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1A7E475B6199ED1111D33BAA7607CF9F /* Build configuration list for PBXNativeTarget "DWMediaPreviewController" */ = {
+		081E9F9D1926A1E56D5BAEDA4E35C334 /* Build configuration list for PBXNativeTarget "DWMediaPreviewController" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EA24424722079919B704EF5474C50C58 /* Debug */,
-				BFF730D929F45838D9C237D1634546DF /* Release */,
+				1774243349B04DBFDA10BB51859B524F /* Debug */,
+				835957EE62120DE7E3E13F519EB06FE4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2F9C7F39E69FFDEAF9BA4969D3CB17AE /* Build configuration list for PBXNativeTarget "YYImage" */ = {
+		15840A5EDEFD4355C6B2338001ED497F /* Build configuration list for PBXNativeTarget "DWImagePickerController" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C3F82E208FDACBDE826B3ACE7FAF7EA6 /* Debug */,
-				C68D6B9FDA48FFD5EDA5D28A019BA5DE /* Release */,
+				8D0A81B9FAB73188D26C167172991587 /* Debug */,
+				8C6C6277FBC14E8515C97DD9EEE92246 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2B81C4C989155C7319094299283ABB0F /* Build configuration list for PBXNativeTarget "DWKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98A5F7F78F5508574F37AFB826E76B0D /* Debug */,
+				F0936823C3B4B4F36B5FB9014DB96D5E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1876,6 +1901,15 @@
 			buildConfigurations = (
 				D3C854AB00AA3456E7FB4402EF966A24 /* Debug */,
 				EF90844310073966F0D00F58EEE02B3A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4451FEEC3EE297A613762D06F0F21F53 /* Build configuration list for PBXNativeTarget "YYImage" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5407CBE99CFED5F16ECD0A4CBF1CBB66 /* Debug */,
+				1160F6B3BA40A905BEFD7DAD445DC48E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1898,29 +1932,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		723D53E17C21256CA81C9CD27FAA0CC8 /* Build configuration list for PBXNativeTarget "DWPlayer" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				B2722D9047984ED98AC530BC6EF07FFC /* Debug */,
-				9682E44B1EEB2DE00291EE06731EBFF6 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		827317FD40B6E3DE2D6FCD3B2C39A2A0 /* Build configuration list for PBXNativeTarget "Pods-DWImagePickerController" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5F0EFF3D01BE0C8D6555B4D0F62E34A3 /* Debug */,
 				501F6A495B3F9076F54F8779C5B2DC2E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		9D18B20869177008DDAD584C39E83B6D /* Build configuration list for PBXNativeTarget "DWImagePickerController" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				31CB16C1613163FC17139311BB84245C /* Debug */,
-				247AA159A3BA44BBB8656A6235D0A6D4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1934,11 +1950,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DAC309908372064FB2B241CA8172EB42 /* Build configuration list for PBXNativeTarget "DWKit" */ = {
+		F1DAD45CB7809F481F1830BDC383C6AE /* Build configuration list for PBXNativeTarget "DWPlayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BFEA9FE7891038E513C86EAA58F86F12 /* Debug */,
-				0120DB9F9CF5901831AD5B925107F87A /* Release */,
+				C13AB2317C7AE00AC9F193CB4913EED8 /* Debug */,
+				7EB26E86E3FB3BF37678820774F46343 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

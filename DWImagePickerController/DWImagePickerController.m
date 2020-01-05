@@ -9,6 +9,7 @@
 
 
 #import "DWImagePickerController.h"
+#import "DWAlbumToolBar.h"
 
 @interface DWImagePickerController ()
 
@@ -22,6 +23,7 @@
 
 @implementation DWImagePickerController
 @synthesize albumManager = _albumManager;
+@synthesize selectionManager = _selectionManager;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -35,8 +37,13 @@
         _fetchOption = opt;
         _columnCount = columnCount;
         _spacing = spacing;
+        self.modalPresentationStyle = UIModalPresentationFullScreen;
     }
     return self;
+}
+
+-(void)configSelectionManager:(DWAlbumSelectionManager *)selectionManager {
+    _selectionManager = selectionManager;
 }
 
 -(void)configGridVC:(DWAlbumGridViewController *)gridVC {
@@ -71,6 +78,7 @@
         return nil;
     }
     DWImagePickerController * imagePicker = [((DWImagePickerController *)[self alloc]) initWithAlbumManager:albumManager option:opt columnCount:4 spacing:0.5];
+    imagePicker.modalPresentationStyle = UIModalPresentationFullScreen;
     [imagePicker fetchCameraRollWithCompletion:^{
         [currentVC presentViewController:imagePicker animated:YES completion:nil];
     }];
@@ -101,6 +109,7 @@
         CGFloat width = ([UIScreen mainScreen].bounds.size.width - (_columnCount - 1) * _spacing) / _columnCount;
         _gridVC = [[DWAlbumGridViewController alloc] initWithItemWidth:width];
         [_gridVC configWithPreviewVC:self.previewVC];
+        _gridVC.bottomToolBar = [DWAlbumToolBar toolBar];
         self.previewVC.dataSource = _gridVC;
         _gridVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismiss)];
         _gridVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];
@@ -124,4 +133,12 @@
     }
     return _albumManager;
 }
+
+-(DWAlbumSelectionManager *)selectionManager {
+    if (!_selectionManager) {
+        _selectionManager = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:self.maxSelectCount];
+    }
+    return _selectionManager;
+}
+
 @end

@@ -8,25 +8,111 @@
 
 #import "DWLabel.h"
 
+@interface DWLabel ()
+
+@property (nonatomic ,strong) NSMutableArray * innerConstraints;
+
+@property (nonatomic ,copy) void(^tapAction)(DWLabel * label);
+
+@property (nonatomic ,strong) UITapGestureRecognizer * tapGes;
+
+@end
+
 @implementation DWLabel
 
 #pragma mark --- margin insets 相关 ---
+#pragma mark --- tool method ---
+-(void)addInnerConstraintsIfNeeded {
+    if (!self.innerConstraints) {
+        NSMutableArray * constraints = [NSMutableArray arrayWithCapacity:2];
+        if (self.maxSize.width > 0) {
+            NSLayoutConstraint * widthMaxConstraint = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:self.maxSize.width - self.marginInsets.left - self.marginInsets.right];
+            
+            if (widthMaxConstraint) {
+                widthMaxConstraint.priority = UILayoutPriorityRequired;
+                [constraints addObject:widthMaxConstraint];
+            }
+        }
+        
+        if (self.minSize.width > 0) {
+            NSLayoutConstraint * widthMinConstraint = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:self.minSize.width - self.marginInsets.left - self.marginInsets.right];
+            
+            if (widthMinConstraint) {
+                widthMinConstraint.priority = UILayoutPriorityRequired;
+                [constraints addObject:widthMinConstraint];
+            }
+        }
+        
+        if (self.maxSize.height > 0) {
+            NSLayoutConstraint * heightMaxConstraints = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:self.maxSize.height - self.marginInsets.top - self.marginInsets.bottom];
+            if (heightMaxConstraints) {
+                heightMaxConstraints.priority = UILayoutPriorityRequired;
+                [constraints addObject:heightMaxConstraints];
+            }
+        }
+        
+        if (self.minSize.height > 0) {
+            NSLayoutConstraint * heightMinConstraints = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:self.minSize.height - self.marginInsets.top - self.marginInsets.bottom];
+            if (heightMinConstraints) {
+                heightMinConstraints.priority = UILayoutPriorityRequired;
+                [constraints addObject:heightMinConstraints];
+            }
+        }
+        
+        if (constraints.count) {
+            [self addConstraints:constraints];
+        }
+        
+        self.innerConstraints = constraints;
+    }
+}
+
+-(void)removeInnerConstraintsIfNeeded {
+    if (self.innerConstraints) {
+        [self removeConstraints:self.constraints];
+        self.innerConstraints = nil;
+    }
+}
+
 #pragma mark --- override ---
 -(void)drawTextInRect:(CGRect)rect {
     [super drawTextInRect:UIEdgeInsetsInsetRect(rect, self.marginInsets)];
 }
 
--(CGSize)sizeThatFits:(CGSize)size {
-    size = [super sizeThatFits:size];
+-(void)sizeToFit {
+    CGSize fixMaxSize = CGSizeZero;
+    if (self.maxSize.width > 0) {
+        fixMaxSize.width = self.maxSize.width - self.marginInsets.left - self.marginInsets.right;
+    }
+    CGSize size = [super sizeThatFits:fixMaxSize];
     size.width += self.marginInsets.left + self.marginInsets.right;
     size.height += self.marginInsets.top + self.marginInsets.bottom;
-    return size;
+    
+    if (size.width < self.minSize.width) {
+        size.width = self.minSize.width;
+    } else if (self.maxSize.width > 0 && size.width > self.maxSize.width) {
+        size.width = self.maxSize.width;
+    }
+    
+    if (size.height < self.minSize.height) {
+        size.height = self.minSize.height;
+    } else if (self.maxSize.height > 0 && size.height > self.maxSize.height) {
+        size.height = self.maxSize.height;
+    }
+    
+    CGRect frame = self.frame;
+    frame.size = size;
+    self.frame = frame;
+    
 }
 
 -(CGSize)intrinsicContentSize {
+    [self addInnerConstraintsIfNeeded];
+    
     CGSize size = [super intrinsicContentSize];
     size.width += self.marginInsets.left + self.marginInsets.right;
     size.height += self.marginInsets.top + self.marginInsets.bottom;
+
     return size;
 }
 
@@ -42,8 +128,27 @@
 
 #pragma mark --- setter/getter ---
 -(void)setMarginInsets:(UIEdgeInsets)marginInsets {
-    _marginInsets = marginInsets;
-    [self invalidateIntrinsicContentSize];
+    if (!UIEdgeInsetsEqualToEdgeInsets(marginInsets, _marginInsets)) {
+        _marginInsets = marginInsets;
+        [self removeInnerConstraintsIfNeeded];
+        [self invalidateIntrinsicContentSize];
+    }
+}
+
+-(void)setMinSize:(CGSize)minSize {
+    if (!CGSizeEqualToSize(minSize, _minSize)) {
+        _minSize = minSize;
+        [self removeInnerConstraintsIfNeeded];
+        [self invalidateIntrinsicContentSize];
+    }
+}
+
+-(void)setMaxSize:(CGSize)maxSize {
+    if (!CGSizeEqualToSize(maxSize, _maxSize)) {
+        _maxSize = maxSize;
+        [self removeInnerConstraintsIfNeeded];
+        [self invalidateIntrinsicContentSize];
+    }
 }
 
 #pragma mark --- touch padding 相关 ---
@@ -58,6 +163,41 @@
     rect.size.width += self.touchPaddingInsets.left + self.touchPaddingInsets.right;
     rect.size.height += self.touchPaddingInsets.top + self.touchPaddingInsets.bottom;
     return CGRectContainsPoint(rect, point);
+}
+
+#pragma mark --- action 相关 ---
+#pragma mark --- interface method ---
+-(void)addAction:(void (^)(DWLabel * _Nonnull))action {
+    self.tapAction = action;
+    if (!self.tapGes.view) {
+        [self addGestureRecognizer:self.tapGes];
+    }
+}
+
+-(void)removeAction {
+    self.tapAction = nil;
+    if (self.tapGes.view) {
+        [self removeGestureRecognizer:self.tapGes];
+    }
+}
+
+#pragma mark --- tap action ---
+-(void)onTap:(UITapGestureRecognizer *)sender {
+    if (self.tapAction) {
+        sender.enabled = NO;
+        self.tapAction(self);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            sender.enabled = YES;
+        });
+    }
+}
+
+#pragma mark --- setter/getter ---
+-(UITapGestureRecognizer *)tapGes {
+    if (!_tapGes) {
+        _tapGes = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onTap:)];
+    }
+    return _tapGes;
 }
 
 @end

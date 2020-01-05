@@ -2,9 +2,9 @@ PODS:
   - DWCheckBox (1.1.1)
   - DWImagePickerController (0.0.0.1):
     - DWMediaPreviewController
-  - DWKit/DWComponent/DWLabel (0.0.0.8)
-  - DWKit/DWUtils/DWOperationCancelFlag (0.0.0.8)
-  - DWKit/DWUtils/DWTransaction (0.0.0.8)
+  - DWKit/DWComponent/DWLabel (0.0.0.10)
+  - DWKit/DWUtils/DWOperationCancelFlag (0.0.0.10)
+  - DWKit/DWUtils/DWTransaction (0.0.0.10)
   - DWLogger (1.0.8.3):
     - DWCheckBox
     - DWLogger/Dependence (= 1.0.8.3)
@@ -24,9 +24,9 @@ PODS:
   - DWLogger/Dependence/DWFileManager (1.0.8.3):
     - DWCheckBox
     - DWTableViewHelper
-  - DWMediaPreviewController (0.0.0.8):
-    - DWKit/DWComponent/DWLabel (~> 0.0.0.8)
-    - DWKit/DWUtils/DWOperationCancelFlag (~> 0.0.0.3)
+  - DWMediaPreviewController (0.0.0.10):
+    - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
+    - DWKit/DWUtils/DWOperationCancelFlag (~> 0.0.0.8)
     - DWPlayer (~> 0.0.0.3)
     - YYImage (~> 1.0.4)
   - DWPlayer (0.0.0.4)
@@ -58,9 +58,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   DWCheckBox: 349e0671fdb7291cc5b0aa1554ca9084a8fd48d9
   DWImagePickerController: 65e104e2956ca1ab76f57f3c213267cbc4f10e57
-  DWKit: f3f74df0181b8b29cc607f96d8fcba44877139cf
+  DWKit: d0b857eaee0941b634953bf805c27465352fca92
   DWLogger: 19f475aa40456c99307543b96c54cc222d539f2c
-  DWMediaPreviewController: 8a4e52abf96d7a348d2dea42c5bd85ab35377150
+  DWMediaPreviewController: e4ec810c4583ae471904db64337e63fdf22dc644
   DWPlayer: c371dd6dce09ead6f9045cc8a84a4fcb2a7c58dd
   DWTableViewHelper: 01a2dc66b62526c78e547f2bc6eef8a3afed32a7
   YYImage: 1e1b62a9997399593e4b9c4ecfbbabbf1d3f3b54

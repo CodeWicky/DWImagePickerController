@@ -11,12 +11,15 @@
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
 #import "DWAlbumGridViewController.h"
 #import "DWAlbumListViewController.h"
+#import "DWAlbumSelectionManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DWImagePickerController : UINavigationController
 
 @property (nonatomic ,strong ,readonly) DWAlbumManager * albumManager;
+
+@property (nonatomic ,strong ,readonly) DWAlbumSelectionManager * selectionManager;
 
 @property (nonatomic ,strong ,readonly) DWAlbumGridViewController * gridVC;
 
@@ -33,6 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic ,assign ) NSInteger maxSelectCount;
 
 -(instancetype)initWithAlbumManager:(nullable DWAlbumManager *)albumManager option:(nullable DWAlbumFetchOption *)opt columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing;
+
+-(void)configSelectionManager:(DWAlbumSelectionManager *)selectionManager;
 
 -(void)configGridVC:(DWAlbumGridViewController *)gridVC;
 

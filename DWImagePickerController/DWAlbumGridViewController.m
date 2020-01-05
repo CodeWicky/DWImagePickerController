@@ -56,15 +56,15 @@
     NSInteger floorDuration = floor(duration + 0.5);
     NSInteger sec = floorDuration % 60;
     NSInteger min = floorDuration / 60;
-    self.durationLabel.text = [NSString stringWithFormat:@"%ld:%02ld",min,sec];
+    self.durationLabel.text = [NSString stringWithFormat:@"%ld:%02ld",(long)min,(long)sec];
     [self setNeedsLayout];
 }
 
 -(void)setSelectAtIndex:(NSInteger)index {
     if (index > 0) {
-        self.selectionLb.backgroundColor = [UIColor blueColor];
+        self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
         self.selectionLb.layer.borderColor = [UIColor whiteColor].CGColor;
-        self.selectionLb.text = [NSString stringWithFormat:@"%ld",index];
+        self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
     } else {
         self.selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
         self.selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;
@@ -139,11 +139,16 @@
 -(DWLabel *)selectionLb {
     if (!_selectionLb) {
         _selectionLb = [[DWLabel alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
+        _selectionLb.minSize = CGSizeMake(22, 22);
+        _selectionLb.font = [UIFont systemFontOfSize:13];
+        _selectionLb.adjustsFontSizeToFitWidth = YES;
+        _selectionLb.textColor = [UIColor whiteColor];
         _selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
         _selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;
         _selectionLb.layer.borderWidth = 2;
         _selectionLb.layer.cornerRadius = 11;
         _selectionLb.layer.masksToBounds = YES;
+        _selectionLb.textAlignment = NSTextAlignmentCenter;
         [self.contentView addSubview:_selectionLb];
     }
     return _selectionLb;
@@ -202,13 +207,16 @@
     [super viewDidLoad];
     
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+    
+    if (self.bottomToolBar) {
+        [self.view addSubview:self.bottomToolBar];
+    }
+    [self.view addSubview:self.collectionView];
     self.view.backgroundColor = [UIColor whiteColor];
     self.collectionView.backgroundColor = [UIColor whiteColor];
     if (@available(iOS 10.0,*)) {
         self.collectionView.prefetchDataSource = self;
     }
-    Class cls = self.cellClazz?:[DWGridCell class];
-    [self.collectionView registerClass:cls forCellWithReuseIdentifier:@"GridCell"];
     self.firstAppear = YES;
 }
 
@@ -513,7 +521,7 @@ NS_INLINE NSArray * animateExtensions() {
     [indexes enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSInteger index = [obj integerValue];
         dispatch_async(self.preloadQueue, ^{
-            NSLog(@"start preload %lu",index);
+            NSLog(@"start preload %ld",(long)index);
             PHAsset * asset = [self.results objectAtIndex:index];
             DWMediaPreviewType previewType = [self previewTypeForAsset:asset];
             [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
@@ -549,7 +557,7 @@ NS_INLINE NSArray * animateExtensions() {
         if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 cell.model = obj;
-                [cell setSelectAtIndex:1];
+                [cell setSelectAtIndex:12];
             });
         }
     }];
@@ -601,10 +609,10 @@ NS_INLINE NSArray * animateExtensions() {
 }
 
 #pragma mark --- override ---
--(void)loadView {
-    [super loadView];
-    self.view = self.collectionView;
-}
+//-(void)loadView {
+//    [super loadView];
+//    self.view = self.collectionView;
+//}
 
 -(void)dealloc {
     [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
@@ -628,7 +636,13 @@ NS_INLINE NSArray * animateExtensions() {
 
 -(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
-        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
+        CGRect frame = self.view.bounds;
+        if (self.bottomToolBar) {
+            frame.size.height = self.bottomToolBar.frame.origin.y;
+        }
+        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:frame collectionViewLayout:self.collectionViewLayout];
+        Class cls = self.cellClazz?:[DWGridCell class];
+        [self.collectionView registerClass:cls forCellWithReuseIdentifier:@"GridCell"];
         _collectionView.delegate = self;
         _collectionView.dataSource = self;
         _collectionView.showsVerticalScrollIndicator = NO;

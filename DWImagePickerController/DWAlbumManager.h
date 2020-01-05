@@ -350,6 +350,9 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///额外信息
 @property (nonatomic ,strong ,readonly) id info;
 
+///用户信息
+@property (nonatomic ,strong) id userInfo;
+
 ///当前数据是否符合指定尺寸
 -(BOOL)satisfiedSize:(CGSize)targetSize;
 

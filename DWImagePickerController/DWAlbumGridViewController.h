@@ -8,10 +8,15 @@
 #import <UIKit/UIKit.h>
 #import "DWAlbumManager.h"
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
+#import "DWAlbumToolBar.h"
 
 @interface DWAlbumGridViewController : UIViewController<DWMediaPreviewDataSource>
 
 @property (nonatomic ,assign) CGFloat itemWidth;
+
+@property (nonatomic ,assign) NSInteger maxSelectCount;
+
+@property (nonatomic ,strong) __kindof DWAlbumBaseToolBar * bottomToolBar;
 
 -(instancetype)initWithItemWidth:(CGFloat)width;
 
