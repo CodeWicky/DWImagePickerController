@@ -22,27 +22,7 @@
     
     self.view.backgroundColor = [UIColor greenColor];
     
-    DWAlbumToolBar * toolBar = [DWAlbumToolBar toolBar];
     
-    [self.view addSubview:toolBar];
-    
-    toolBar.previewAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
-        NSLog(@"preview");
-    };
-    
-    toolBar.originImageAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
-        toolBar.selectionManager.useOriginImage = !toolBar.selectionManager.useOriginImage;
-        [toolBar.selectionManager addSelection:[DWImageAssetModel new]];
-        [toolBar refreshSelection];
-    };
-    
-    toolBar.sendAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
-        NSLog(@"send");
-    };
-    
-    DWAlbumSelectionManager * mgr = [DWAlbumSelectionManager new];
-    
-    [toolBar configWithSelectionManager:mgr];
 }
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
