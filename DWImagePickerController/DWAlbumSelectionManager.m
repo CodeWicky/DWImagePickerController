@@ -19,30 +19,48 @@
     return self;
 }
 
--(void)addSelection:(DWImageAssetModel *)asset {
+-(BOOL)addSelection:(PHAsset *)asset {
     if (asset) {
         if ((self.maxSelectCount > 0 && self.selections.count < self.maxSelectCount) || self.maxSelectCount <= 0) {
             DWAlbumSelectionModel * model = [DWAlbumSelectionModel new];
             model.asset = asset;
             [self.selections addObject:model];
+            return YES;
         }
+    }
+    return NO;
+}
+
+-(void)addUserInfo:(id)userInfo forAsset:(PHAsset *)asset {
+    NSInteger index = [self indexOfSelection:asset];
+    [self addUserInfo:userInfo atIndex:index];
+}
+
+-(void)addUserInfo:(id)userInfo atIndex:(NSInteger)index {
+    if (index < self.selections.count) {
+        DWAlbumSelectionModel * model = [self.selections objectAtIndex:index];
+        model.userInfo = userInfo;
     }
 }
 
--(void)removeSelection:(DWImageAssetModel *)asset {
+-(BOOL)removeSelection:(PHAsset *)asset {
     NSInteger idx = [self indexOfSelection:asset];
     if (idx != NSNotFound) {
         [self.selections removeObjectAtIndex:idx];
+        return YES;
     }
+    return NO;
 }
 
--(void)removeSelectionAtIndex:(NSInteger)index {
+-(BOOL)removeSelectionAtIndex:(NSInteger)index {
     if (index < self.selections.count) {
         [self.selections removeObjectAtIndex:index];
+        return YES;
     }
+    return NO;
 }
 
--(NSInteger)indexOfSelection:(DWImageAssetModel *)asset {
+-(NSInteger)indexOfSelection:(PHAsset *)asset {
     __block NSInteger index = NSNotFound;
     [self.selections enumerateObjectsUsingBlock:^(DWAlbumSelectionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if ([obj.asset isEqual:asset]) {
@@ -51,6 +69,17 @@
         }
     }];
     return index;
+}
+
+-(DWAlbumSelectionModel *)selectionModelAtIndex:(NSInteger)index {
+    if (index >= 0 && index < self.selections.count) {
+        return [self.selections objectAtIndex:index];
+    }
+    return nil;
+}
+
+-(PHAsset *)selectionAtIndex:(NSInteger)index {
+    return [self selectionModelAtIndex:index].asset;
 }
 
 #pragma mark --- setter/getter ---

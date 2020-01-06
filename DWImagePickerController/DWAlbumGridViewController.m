@@ -9,6 +9,8 @@
 #import <DWMediaPreviewController/DWFixAdjustCollectionView.h>
 #import "DWAlbumGridCell.h"
 
+
+
 @interface DWAlbumModel ()
 
 -(void)configWithResult:(PHFetchResult *)result;
@@ -151,6 +153,56 @@
 -(void)configWithPreviewVC:(DWMediaPreviewController *)previewVC {
     if (![_previewVC isEqual:previewVC]) {
         _previewVC = previewVC;
+    }
+}
+
+-(void)configCellSelect:(DWAlbumGridCell *)cell asset:(PHAsset *)asset {
+    if (self.selectionManager) {
+        cell.showSelectButton = YES;
+        NSInteger idx = [self.selectionManager indexOfSelection:asset];
+        [self.selectionManager addUserInfo:cell atIndex:idx];
+        [cell setSelectAtIndex:idx + 1];
+        __weak typeof(self) weakSelf = self;
+        cell.onSelect = ^(DWAlbumGridCell *aCell) {
+            [weakSelf handleSelectWithAsset:asset cell:aCell];
+        };
+    } else {
+        cell.showSelectButton = NO;
+    }
+}
+
+-(void)handleSelectWithAsset:(PHAsset *)asset cell:(DWAlbumGridCell *)cell {
+    NSInteger idx = [self.selectionManager indexOfSelection:asset];
+    if (idx == NSNotFound) {
+        if ([self.selectionManager addSelection:asset]) {
+            NSInteger index = self.selectionManager.selections.count;
+            [self.selectionManager addUserInfo:cell atIndex:index - 1];
+            [cell setSelectAtIndex:index];
+        } else {
+            NSLog(@"max");
+        }
+    } else {
+        if (idx < self.selectionManager.selections.count) {
+            BOOL isLast = idx == self.selectionManager.selections.count - 1;
+            ///两种情况，如果移除对位的话，只影响队尾，否则删除后需要更改对应idx后的序号
+            [self resetSelectionCellAtIndex:idx toIndex:0];
+            [self.selectionManager removeSelectionAtIndex:idx];
+            
+            if (!isLast) {
+                for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
+                    [self resetSelectionCellAtIndex:i toIndex:i + 1];
+                }
+            }
+        }
+    }
+    [self.bottomToolBar refreshSelection];
+}
+
+-(void)resetSelectionCellAtIndex:(NSInteger)index toIndex:(NSInteger)toIndex {
+    DWAlbumSelectionModel * model  = [self.selectionManager selectionModelAtIndex:index];
+    DWAlbumGridCell * cellToRemove = (DWAlbumGridCell *)model.userInfo;
+    if (cellToRemove && [self.collectionView.visibleCells containsObject:cellToRemove] && [cellToRemove.requestLocalID isEqualToString:model.asset.localIdentifier]) {
+        [cellToRemove setSelectAtIndex:toIndex];
     }
 }
 
@@ -421,6 +473,8 @@ NS_INLINE NSArray * animateExtensions() {
     DWAlbumGridCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GridCell" forIndexPath:indexPath];
     cell.requestLocalID = asset.localIdentifier;
     
+    [self configCellSelect:cell asset:asset];
+
     ///通过速度、滚动、偏移量联合控制是否展示缩略图
     ///显示缩略图的情景应为快速拖动，故前两个条件为判断快速及拖动
     ///1.速度
@@ -439,7 +493,6 @@ NS_INLINE NSArray * animateExtensions() {
         if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 cell.model = obj;
-                [cell setSelectAtIndex:12];
             });
         }
     }];

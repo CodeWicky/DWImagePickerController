@@ -152,6 +152,10 @@
     [self refreshUI];
 }
 
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    ///这里用touchBegan来避免事件穿透至底层视图中实现touchBegan的事件中。只要空实现即可
+}
+
 #pragma mark --- setter/getter ---
 -(DWLabel *)previewButton {
     if (!_previewButton) {

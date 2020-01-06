@@ -110,7 +110,7 @@
         CGFloat width = (shortSide - (_columnCount - 1) * _spacing) / _columnCount;
         _gridVC = [[DWAlbumGridViewController alloc] initWithItemWidth:width];
         [_gridVC configWithPreviewVC:self.previewVC];
-        
+        _gridVC.selectionManager = self.selectionManager;
         DWAlbumToolBar * toolBar = [DWAlbumToolBar toolBar];
         toolBar.sendAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
             NSLog(@"click send");

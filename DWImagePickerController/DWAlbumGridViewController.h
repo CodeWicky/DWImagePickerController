@@ -18,6 +18,8 @@
 
 @property (nonatomic ,strong) __kindof DWAlbumBaseToolBar * bottomToolBar;
 
+@property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
+
 -(instancetype)initWithItemWidth:(CGFloat)width;
 
 -(void)registGridCell:(Class)cellClazz;

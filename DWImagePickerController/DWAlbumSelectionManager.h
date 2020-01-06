@@ -20,19 +20,29 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount;
 
--(void)addSelection:(DWImageAssetModel *)asset;
+-(BOOL)addSelection:(PHAsset *)asset;
 
--(void)removeSelection:(DWImageAssetModel *)asset;
+-(void)addUserInfo:(id)userInfo forAsset:(PHAsset *)asset;
 
--(void)removeSelectionAtIndex:(NSInteger)index;
+-(void)addUserInfo:(id)userInfo atIndex:(NSInteger)index;
 
--(NSInteger)indexOfSelection:(DWImageAssetModel *)asset;
+-(BOOL)removeSelection:(PHAsset *)asset;
+
+-(BOOL)removeSelectionAtIndex:(NSInteger)index;
+
+-(NSInteger)indexOfSelection:(PHAsset *)asset;
+
+-(DWAlbumSelectionModel *)selectionModelAtIndex:(NSInteger)index;
+
+-(PHAsset *)selectionAtIndex:(NSInteger)index;
 
 @end
 
 @interface DWAlbumSelectionModel : NSObject
 
-@property (nonatomic ,strong) DWImageAssetModel * asset;
+@property (nonatomic ,strong) PHAsset * asset;
+
+@property (nonatomic ,strong) id userInfo;
 
 @end
 
