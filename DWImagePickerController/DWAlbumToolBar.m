@@ -10,6 +10,13 @@
 
 @implementation DWAlbumBaseToolBar
 
+-(instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        _toolBarHeight = 49;
+    }
+    return self;
+}
+
 -(void)configWithSelectionManager:(DWAlbumSelectionManager *)seletionManager {
     _selectionManager = seletionManager;
 }
@@ -43,7 +50,11 @@
 
 #pragma mark --- tool method ---
 -(void)setupUI {
-    self.backgroundColor = [UIColor colorWithWhite:1 alpha:0.9];
+    UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
+    UIVisualEffectView * blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    blurView.frame = self.bounds;
+    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [self addSubview:blurView];
     [self addSubview:self.previewButton];
     [self addSubview:self.originCircle];
     [self.originCircle addSubview:self.originIndicator];
@@ -64,7 +75,7 @@
     [self.previewButton sizeToFit];
     CGRect btnFrame = self.previewButton.frame;
     CGSize btnSize = btnFrame.size;
-    btnFrame.origin.y = (49 - btnSize.height) * 0.5;
+    btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     btnFrame.origin.x = 15;
     
     if (@available(iOS 11.0,*)) {
@@ -81,14 +92,14 @@
     btnFrame = self.originCircle.frame;
     btnSize = btnFrame.size;
     btnFrame.origin.x = [UIScreen mainScreen].bounds.size.width * 0.5 - 1 - btnSize.width;
-    btnFrame.origin.y = (49 - btnSize.height) * 0.5;
+    btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     self.originCircle.frame = btnFrame;
     
     [self.originLb sizeToFit];
     btnFrame = self.originLb.frame;
     btnSize = btnFrame.size;
     btnFrame.origin.x = [UIScreen mainScreen].bounds.size.width * 0.5 + 1;
-    btnFrame.origin.y = (49 - btnSize.height) * 0.5;
+    btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     self.originLb.frame = btnFrame;
     
     if (self.selectionManager.selections.count) {
@@ -103,7 +114,7 @@
     [self.sendButton sizeToFit];
     btnFrame = self.sendButton.frame;
     btnSize = btnFrame.size;
-    btnFrame.origin.y = (49 - btnSize.height) * 0.5;
+    btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     btnFrame.origin.x = [UIScreen mainScreen].bounds.size.width - 15 - btnSize.width;
     
     if (@available(iOS 11.0,*)) {
@@ -112,7 +123,7 @@
     
     self.sendButton.frame = btnFrame;
     
-    btnFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - 49, [UIScreen mainScreen].bounds.size.width, 49);
+    btnFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - self.toolBarHeight, [UIScreen mainScreen].bounds.size.width, self.toolBarHeight);
     
     if (@available(iOS 11.0,*)) {
         btnFrame.size.height += self.safeAreaInsets.bottom;

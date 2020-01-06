@@ -106,10 +106,26 @@
 
 -(DWAlbumGridViewController *)gridVC {
     if (!_gridVC) {
-        CGFloat width = ([UIScreen mainScreen].bounds.size.width - (_columnCount - 1) * _spacing) / _columnCount;
+        CGFloat shortSide = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+        CGFloat width = (shortSide - (_columnCount - 1) * _spacing) / _columnCount;
         _gridVC = [[DWAlbumGridViewController alloc] initWithItemWidth:width];
         [_gridVC configWithPreviewVC:self.previewVC];
-        _gridVC.bottomToolBar = [DWAlbumToolBar toolBar];
+        
+        DWAlbumToolBar * toolBar = [DWAlbumToolBar toolBar];
+        toolBar.sendAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
+            NSLog(@"click send");
+        };
+        
+        toolBar.previewAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
+            NSLog(@"click preview");
+        };
+        
+        toolBar.originImageAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
+            NSLog(@"click original");
+        };
+        [toolBar configWithSelectionManager:self.selectionManager];
+        
+        _gridVC.bottomToolBar = toolBar;
         self.previewVC.dataSource = _gridVC;
         _gridVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismiss)];
         _gridVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];

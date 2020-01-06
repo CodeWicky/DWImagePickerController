@@ -7,7 +7,7 @@
 
 #import "DWAlbumGridViewController.h"
 #import <DWMediaPreviewController/DWFixAdjustCollectionView.h>
-#import <DWKit/DWLabel.h>
+#import "DWAlbumGridCell.h"
 
 @interface DWAlbumModel ()
 
@@ -31,127 +31,6 @@
     } else {
         self.minimumLineSpacing = self.minimumInteritemSpacing = (viewWidth - sizeWidth * column) / (column - 1) - __FLT_EPSILON__;
     }
-}
-
-@end
-
-@interface DWGridCell : UICollectionViewCell
-
-@property (nonatomic ,strong) DWImageAssetModel * model;
-
-@property (nonatomic ,strong) UIImageView * gridImage;
-
-@property (nonatomic ,strong) UILabel * durationLabel;
-
-@property (nonatomic ,copy) NSString * requestLocalID;
-
-@property (nonatomic ,strong) DWLabel * selectionLb;
-
-@end
-
-@implementation DWGridCell
-
--(void)setupDuration:(NSTimeInterval)duration {
-    self.durationLabel.hidden = NO;
-    NSInteger floorDuration = floor(duration + 0.5);
-    NSInteger sec = floorDuration % 60;
-    NSInteger min = floorDuration / 60;
-    self.durationLabel.text = [NSString stringWithFormat:@"%ld:%02ld",(long)min,(long)sec];
-    [self setNeedsLayout];
-}
-
--(void)setSelectAtIndex:(NSInteger)index {
-    if (index > 0) {
-        self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
-        self.selectionLb.layer.borderColor = [UIColor whiteColor].CGColor;
-        self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
-    } else {
-        self.selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
-        self.selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;
-        self.selectionLb.text = nil;
-    }
-    [self setNeedsLayout];
-}
-
-#pragma mark --- override ---
--(void)layoutSubviews {
-    [super layoutSubviews];
-    if (!CGRectEqualToRect(self.gridImage.frame, self.bounds)) {
-        self.gridImage.frame = self.bounds;
-    }
-    if (_durationLabel && !_durationLabel.hidden) {
-        [self.durationLabel sizeToFit];
-        CGPoint origin = CGPointMake(5, self.bounds.size.height - 5 - self.durationLabel.bounds.size.height);
-        CGRect frame = self.durationLabel.frame;
-        frame.origin = origin;
-        if (!CGRectEqualToRect(self.durationLabel.frame, frame)) {
-            self.durationLabel.frame = frame;
-        }
-    }
-    
-    if (_selectionLb && !_selectionLb.hidden) {
-        [self.selectionLb sizeToFit];
-        CGPoint origin = CGPointMake(self.bounds.size.width - self.selectionLb.bounds.size.width - 5, 5);
-        CGRect frame = self.selectionLb.frame;
-        frame.origin = origin;
-        if (!CGRectEqualToRect(self.selectionLb.frame, frame)) {
-            self.selectionLb.frame = frame;
-        }
-    }
-}
-
--(void)prepareForReuse {
-    [super prepareForReuse];
-    self.gridImage.image = nil;
-    _durationLabel.text = nil;
-    _durationLabel.hidden = YES;
-}
-
-#pragma mark --- setter/getter ---
--(void)setModel:(DWImageAssetModel *)model {
-    _model = model;
-    self.gridImage.image = model.media;
-    if (model.mediaType == PHAssetMediaTypeVideo) {
-        [self setupDuration:model.asset.duration];
-    }
-}
-
--(UIImageView *)gridImage {
-    if (!_gridImage) {
-        _gridImage = [[UIImageView alloc] initWithFrame:self.bounds];
-        _gridImage.contentMode = UIViewContentModeScaleAspectFill;
-        _gridImage.clipsToBounds = YES;
-        [self.contentView addSubview:_gridImage];
-    }
-    return _gridImage;
-}
-
--(UILabel *)durationLabel {
-    if (!_durationLabel) {
-        _durationLabel = [[UILabel alloc] init];
-        _durationLabel.font = [UIFont systemFontOfSize:12];
-        _durationLabel.textColor = [UIColor whiteColor];
-        [self.contentView addSubview:_durationLabel];
-    }
-    return _durationLabel;
-}
-
--(DWLabel *)selectionLb {
-    if (!_selectionLb) {
-        _selectionLb = [[DWLabel alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
-        _selectionLb.minSize = CGSizeMake(22, 22);
-        _selectionLb.font = [UIFont systemFontOfSize:13];
-        _selectionLb.adjustsFontSizeToFitWidth = YES;
-        _selectionLb.textColor = [UIColor whiteColor];
-        _selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
-        _selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;
-        _selectionLb.layer.borderWidth = 2;
-        _selectionLb.layer.cornerRadius = 11;
-        _selectionLb.layer.masksToBounds = YES;
-        _selectionLb.textAlignment = NSTextAlignmentCenter;
-        [self.contentView addSubview:_selectionLb];
-    }
-    return _selectionLb;
 }
 
 @end
@@ -208,10 +87,13 @@
     
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
     
+    [self.view addSubview:self.collectionView];
     if (self.bottomToolBar) {
         [self.view addSubview:self.bottomToolBar];
+        UIEdgeInsets insets = self.collectionView.contentInset;
+        insets.bottom += self.bottomToolBar.toolBarHeight;
+        self.collectionView.contentInset = insets;
     }
-    [self.view addSubview:self.collectionView];
     self.view.backgroundColor = [UIColor whiteColor];
     self.collectionView.backgroundColor = [UIColor whiteColor];
     if (@available(iOS 10.0,*)) {
@@ -536,7 +418,7 @@ NS_INLINE NSArray * animateExtensions() {
 
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     PHAsset * asset = [self.results objectAtIndex:indexPath.row];
-    DWGridCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GridCell" forIndexPath:indexPath];
+    DWAlbumGridCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GridCell" forIndexPath:indexPath];
     cell.requestLocalID = asset.localIdentifier;
     
     ///通过速度、滚动、偏移量联合控制是否展示缩略图
@@ -608,6 +490,15 @@ NS_INLINE NSArray * animateExtensions() {
     self.collectionView.dw_autoFixContentOffset = YES;
 }
 
+-(void)viewSafeAreaInsetsDidChange {
+    [super viewSafeAreaInsetsDidChange];
+    UIEdgeInsets insets = self.collectionView.contentInset;
+    insets.left = self.view.safeAreaInsets.left;
+    insets.right = self.view.safeAreaInsets.right;
+    self.collectionView.contentInset = insets;
+    self.collectionView.frame = self.view.frame;
+}
+
 #pragma mark --- override ---
 //-(void)loadView {
 //    [super loadView];
@@ -636,12 +527,8 @@ NS_INLINE NSArray * animateExtensions() {
 
 -(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
-        CGRect frame = self.view.bounds;
-        if (self.bottomToolBar) {
-            frame.size.height = self.bottomToolBar.frame.origin.y;
-        }
-        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:frame collectionViewLayout:self.collectionViewLayout];
-        Class cls = self.cellClazz?:[DWGridCell class];
+        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
+        Class cls = self.cellClazz?:[DWAlbumGridCell class];
         [self.collectionView registerClass:cls forCellWithReuseIdentifier:@"GridCell"];
         _collectionView.delegate = self;
         _collectionView.dataSource = self;

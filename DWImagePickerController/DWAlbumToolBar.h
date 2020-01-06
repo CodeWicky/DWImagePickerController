@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DWAlbumBaseToolBar : UIView
 
+@property (nonatomic ,assign) CGFloat toolBarHeight;
+
 @property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
 
 -(void)configWithSelectionManager:(DWAlbumSelectionManager *)seletionManager;
