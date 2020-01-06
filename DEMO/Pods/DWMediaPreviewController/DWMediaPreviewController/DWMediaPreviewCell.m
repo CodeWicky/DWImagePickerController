@@ -233,7 +233,14 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             default:
                 break;
         }
-        CGFloat minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame) + spacing;
+        
+        CGFloat minY = 0;
+        if (@available(iOS 11.0,*)) {
+            minY = self.safeAreaInsets.top + spacing;
+        } else {
+            minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame);
+        }
+
         if (badgeFrame.origin.y < minY) {
             badgeFrame.origin.y = minY;
         }
@@ -243,7 +250,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.hdrBadge.frame = badgeFrame;
         
         if (animated) {
-            [UIView animateWithDuration:0.2 animations:^{
+            [UIView animateWithDuration:0.25 animations:^{
                 self.hdrBadge.alpha = 1;
             }];
         } else {
@@ -251,7 +258,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
     } else {
         if (animated) {
-            [UIView animateWithDuration:0.2 animations:^{
+            [UIView animateWithDuration:0.25 animations:^{
                 self.hdrBadge.alpha = 0;
             }];
         } else {
@@ -279,6 +286,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)tapAction:(UITapGestureRecognizer *)tap {
     if (self.tapAction) {
         self.tapAction(self);
+    }
+    ///如果没有导航控制器的话，不会走layoutSubviews。所以要处理一下角标
+    if (!self.previewController.navigationController) {
+        [self configBadgeWithAnimated:YES];
     }
 }
 
@@ -753,7 +764,14 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             default:
                 break;
         }
-        CGFloat minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame) + spacing;
+        
+        CGFloat minY = 0;
+        if (@available(iOS 11.0,*)) {
+            minY = self.safeAreaInsets.top + spacing;
+        } else {
+            minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame);
+        }
+    
         if (badgeFrame.origin.y < minY) {
             badgeFrame.origin.y = minY;
         }
@@ -775,7 +793,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
         
         if (animated) {
-            [UIView animateWithDuration:0.2 animations:^{
+            [UIView animateWithDuration:0.25 animations:^{
                 self.livePhotoBadge.alpha = 1;
                 if (self.isHDR) {
                     self.hdrBadge.alpha = 1;
@@ -789,7 +807,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
     } else {
         if (animated) {
-            [UIView animateWithDuration:0.2 animations:^{
+            [UIView animateWithDuration:0.25 animations:^{
                 self.livePhotoBadge.alpha = 0;
                 if (self.isHDR) {
                     self.hdrBadge.alpha = 0;
@@ -1056,6 +1074,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
     if (self.tapAction) {
         self.tapAction(self);
+    }
+    if (!self.previewController.navigationController) {
+        [self configBadgeWithAnimated:YES];
     }
 }
 

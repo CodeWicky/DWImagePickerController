@@ -1,5 +1,2 @@
 ${PODS_ROOT}/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources.sh
-${PODS_ROOT}/DWCheckBox/DWCheckBox/DWCheckBoxBundle.bundle
-${PODS_ROOT}/DWLogger/DWLogger/DWLoggerBundle.bundle
 ${PODS_ROOT}/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.bundle
-${PODS_ROOT}/DWTableViewHelper/DWTableViewHelper/DWTableViewHelperResource.bundle

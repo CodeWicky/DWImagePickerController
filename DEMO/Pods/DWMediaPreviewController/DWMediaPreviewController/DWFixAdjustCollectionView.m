@@ -6,6 +6,7 @@
 //
 
 #import "DWFixAdjustCollectionView.h"
+#import <DWKit/NSArray+DWArrayUtils.h>
 
 @interface UICollectionView (DWFixAdjust)
 
@@ -43,7 +44,7 @@
     ///是的，今天第三天。后续要改成按照visibleCells计算，首先就要取到之前的第一个cell，然后保证旋屏之后还是第一个即可。所以这里要获取旋屏后指定indexPath的cell的frame信息，故要求先调用super，再修正contentOffset。所以这里做了改造，修改了dw_autoFixContentOffset置NO的时机及index计算的方式。总算调节完了。
     
     ///最后一改，去掉不必要约束，pagingEnabled。
-    NSIndexPath * oriFirstIdp = self.indexPathsForVisibleItems.firstObject;
+    NSIndexPath * oriFirstIdp = [self.indexPathsForVisibleItems dw_getObjectWithKeyPath:nil action:(DWArrayKeyPathActionTypeMinimum)];
     [super setFrame:frame];
     if (self.dw_autoFixContentOffset) {
         self.dw_autoFixContentOffset = NO;
@@ -51,8 +52,14 @@
         CGPoint fixContentOffset = CGPointZero;
         if (((UICollectionViewFlowLayout *)self.collectionViewLayout).scrollDirection == UICollectionViewScrollDirectionHorizontal) {
             fixContentOffset.x = attr.frame.origin.x;
+            if (@available(iOS 11.0,*)) {
+                fixContentOffset.x -= self.adjustedContentInset.left;
+            }
         } else {
             fixContentOffset.y = attr.frame.origin.y;
+            if (@available(iOS 11.0,*)) {
+                fixContentOffset.y -= self.adjustedContentInset.top;
+            }
         }
         [self setContentOffset:fixContentOffset];
     }

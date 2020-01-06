@@ -97,16 +97,10 @@ EOM
   esac
 }
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_resource "${PODS_ROOT}/DWCheckBox/DWCheckBox/DWCheckBoxBundle.bundle"
-  install_resource "${PODS_ROOT}/DWLogger/DWLogger/DWLoggerBundle.bundle"
   install_resource "${PODS_ROOT}/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.bundle"
-  install_resource "${PODS_ROOT}/DWTableViewHelper/DWTableViewHelper/DWTableViewHelperResource.bundle"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_resource "${PODS_ROOT}/DWCheckBox/DWCheckBox/DWCheckBoxBundle.bundle"
-  install_resource "${PODS_ROOT}/DWLogger/DWLogger/DWLoggerBundle.bundle"
   install_resource "${PODS_ROOT}/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.bundle"
-  install_resource "${PODS_ROOT}/DWTableViewHelper/DWTableViewHelper/DWTableViewHelperResource.bundle"
 fi
 
 mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
