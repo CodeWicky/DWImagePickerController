@@ -152,8 +152,24 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
         [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
     }
+    
     self.navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
-    [self setToolBarHidden:NO];
+    if (self.topToolBar) {
+        
+        if (self.navigationController) {
+            [self.navigationController setNavigationBarHidden:YES animated:YES];
+        }
+        
+        if (!self.topToolBar.superview) {
+            [self.view addSubview:self.topToolBar];
+        }
+    }
+    
+    if (self.bottomToolBar && !self.bottomToolBar.superview) {
+        [self.view addSubview:self.bottomToolBar];
+    }
+    
+    [self setFocusMode:NO];
 }
 
 -(void)clearPreview {
@@ -162,11 +178,28 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [self turnToDarkBackground:NO];
 }
 
--(void)setToolBarHidden:(BOOL)hidden {
-    if (_isToolBarShowing == hidden) {
-        [self.navigationController setNavigationBarHidden:hidden animated:YES];
+-(void)setFocusMode:(BOOL)hidden {
+    if (_isFocusOnMedia != hidden) {
+        if (self.topToolBar) {
+            if (hidden) {
+                [self.topToolBar hideToolBarWithAnimated:YES];
+            } else {
+                [self.topToolBar showToolBarWithAnimated:YES];
+            }
+        } else {
+            [self.navigationController setNavigationBarHidden:hidden animated:YES];
+        }
+        
+        if (self.bottomToolBar) {
+            if (hidden) {
+                [self.bottomToolBar hideToolBarWithAnimated:YES];
+            } else {
+                [self.bottomToolBar showToolBarWithAnimated:YES];
+            }
+        }
+        
         [self turnToDarkBackground:hidden];
-        _isToolBarShowing = !hidden;
+        _isFocusOnMedia = hidden;
     }
 }
 
@@ -200,20 +233,25 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     __weak typeof(self)weakSelf = self;
     cell.tapAction = ^(DWMediaPreviewCell * _Nonnull cell) {
         __strong typeof(weakSelf)StrongSelf = weakSelf;
-        [StrongSelf setToolBarHidden:StrongSelf.isToolBarShowing];
+        [StrongSelf setFocusMode:!StrongSelf.isFocusOnMedia];
     };
     
     cell.doubleClickAction = ^(DWMediaPreviewCell * _Nonnull cell ,CGPoint point) {
         __strong typeof(weakSelf)StrongSelf = weakSelf;
-        if (StrongSelf.isToolBarShowing) {
-            [StrongSelf setToolBarHidden:YES];
+        if (!StrongSelf.isFocusOnMedia) {
+            [StrongSelf setFocusMode:YES];
         }
         [cell zoomMediaView:!cell.zooming point:point];
     };
     
-    cell.callNavigationHide = ^(DWMediaPreviewCell * _Nonnull cell ,BOOL hide) {
+    cell.enterFocus = ^(DWMediaPreviewCell * _Nonnull cell ,BOOL hide) {
         __strong typeof(weakSelf)StrongSelf = weakSelf;
-        [StrongSelf setToolBarHidden:hide];
+        [StrongSelf setFocusMode:hide];
+    };
+    
+    cell.onSlideCloseAction = ^(DWMediaPreviewCell * _Nonnull cell) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        [strongSelf setFocusMode:NO];
     };
 }
 
@@ -333,13 +371,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 #pragma mark --- life cycle ---
--(void)loadView {
-    [super loadView];
-    self.view = self.collectionView;
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
+    ///本次添加了toolBar后要将toolbar添加在self.view中，所以底部视图不能是collectionView，否则toolbar跟随滚动。故将collectionView缩放模式改为跟self.view等大，保证旋屏自动改变布局
+    [self.view addSubview:self.collectionView];
+    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWNormalImagePreviewCell class] forCellWithReuseIdentifier:normalImageID];
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];
@@ -368,7 +404,9 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
         self.navigationController.interactivePopGestureRecognizer.enabled = self.sourceInteractivePopGestureEnabled;
     }
-    [self.navigationController setNavigationBarHidden:self.navigationBarShouldHidden animated:YES];
+   
+    [self.navigationController setNavigationBarHidden:self.navigationBarShouldHidden animated:animated];
+    
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
@@ -498,7 +536,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _cacheCount = 10;
         _prefetchCount = 2;
         _previewSize = [UIScreen mainScreen].bounds.size;
-        _isToolBarShowing = YES;
         _closeOnSlidingDown = YES;
         _closeThreshold = 100;
         if (@available(iOS 11.0,*)) {

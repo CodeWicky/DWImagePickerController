@@ -8,25 +8,6 @@
 #import "DWAlbumToolBar.h"
 #import <DWKit/DWLabel.h>
 
-@implementation DWAlbumBaseToolBar
-
--(instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        _toolBarHeight = 49;
-    }
-    return self;
-}
-
--(void)configWithSelectionManager:(DWAlbumSelectionManager *)seletionManager {
-    _selectionManager = seletionManager;
-}
-
--(void)refreshSelection {
-    //Override this.
-}
-
-@end
-
 @interface DWAlbumToolBar ()
 
 @property (nonatomic ,strong) DWLabel * previewButton;
@@ -43,12 +24,18 @@
 
 @implementation DWAlbumToolBar
 
+@synthesize selectionManager,toolBarHeight;
+
 #pragma mark --- interface method ---
 +(instancetype)toolBar {
     return [self new];
 }
 
 #pragma mark --- tool method ---
+-(void)setupDefaultValue {
+    self.toolBarHeight = 49;
+}
+
 -(void)setupUI {
     UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
     UIVisualEffectView * blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
@@ -135,12 +122,16 @@
 
 #pragma mark --- override ---
 -(void)refreshSelection {
-    [super refreshSelection];
     [self refreshUI];
+}
+
+- (void)configWithSelectionManager:(DWAlbumSelectionManager *)selectionManager {
+    self.selectionManager = selectionManager;
 }
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        [self setupDefaultValue];
         [self setupUI];
         [self refreshUI];
     }

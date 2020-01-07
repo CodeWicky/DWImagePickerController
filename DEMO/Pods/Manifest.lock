@@ -1,12 +1,12 @@
 PODS:
   - DWImagePickerController (0.0.0.1):
+    - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
     - DWMediaPreviewController
   - DWKit/DWCategory/DWArrayUtils (0.0.0.10)
   - DWKit/DWComponent/DWLabel (0.0.0.10)
   - DWKit/DWUtils/DWOperationCancelFlag (0.0.0.10)
-  - DWMediaPreviewController (0.0.0.13):
+  - DWMediaPreviewController (0.0.0.14):
     - DWKit/DWCategory/DWArrayUtils (~> 0.0.0.10)
-    - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
     - DWKit/DWUtils/DWOperationCancelFlag (~> 0.0.0.8)
     - DWPlayer (~> 0.0.0.3)
     - YYImage (~> 1.0.4)
@@ -30,9 +30,9 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  DWImagePickerController: 65e104e2956ca1ab76f57f3c213267cbc4f10e57
+  DWImagePickerController: 6806ab978aa5bad955507405c68c9dec96eefb85
   DWKit: d0b857eaee0941b634953bf805c27465352fca92
-  DWMediaPreviewController: f760dfb6bcc6127c1c42672e9bc9f7b2068c85cd
+  DWMediaPreviewController: f9db204945558886e3b9355c35f11b8d2164c892
   DWPlayer: c371dd6dce09ead6f9045cc8a84a4fcb2a7c58dd
   YYImage: 1e1b62a9997399593e4b9c4ecfbbabbf1d3f3b54
 

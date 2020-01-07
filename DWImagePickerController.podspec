@@ -11,5 +11,6 @@ s.ios.deployment_target = '9.1'
 s.source_files = 'DWImagePickerController/**/*.{h,m}'
 s.frameworks = 'UIKit'
 s.dependency 'DWMediaPreviewController'
+s.dependency 'DWKit/DWComponent/DWLabel', '~> 0.0.0.10'
 
 end

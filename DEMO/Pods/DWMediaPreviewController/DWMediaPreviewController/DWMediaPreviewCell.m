@@ -153,6 +153,21 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self configBadgeWithAnimated:YES];
 }
 
+-(void)beforeZooming {
+    if (self.enterFocus) {
+        self.enterFocus(self,YES);
+    }
+    [self setBadgeHidden:YES animated:YES];
+}
+
+-(void)onZooming:(CGFloat)zoomScale {
+    
+}
+
+-(void)afterZooming {
+    
+}
+
 -(CGSize)sizeForMedia:(id)media {
     return CGSizeZero;
 }
@@ -201,7 +216,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)configBadgeWithAnimated:(BOOL)animated {
-    if (self.previewController.isToolBarShowing) {
+    if (!self.previewController.isFocusOnMedia) {
         if (!self.isHDR) {
             return;
         }
@@ -235,12 +250,18 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
         
         CGFloat minY = 0;
-        if (@available(iOS 11.0,*)) {
-            minY = self.safeAreaInsets.top + spacing;
+        ///如果有toolBar，以toolBar的baseLine做基准
+        if (self.previewController.topToolBar) {
+            minY = [self.previewController.topToolBar baseLineForBadge] + spacing;
         } else {
-            minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame);
+            ///如果没有已Navigation为准，如果是11以上，用safeAreaInsets更加准确
+            if (@available(iOS 11.0,*)) {
+                minY = self.safeAreaInsets.top + spacing;
+            } else {
+                minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame);
+            }
         }
-
+        
         if (badgeFrame.origin.y < minY) {
             badgeFrame.origin.y = minY;
         }
@@ -248,22 +269,26 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             badgeFrame.origin.x = spacing;
         }
         self.hdrBadge.frame = badgeFrame;
-        
-        if (animated) {
-            [UIView animateWithDuration:0.25 animations:^{
-                self.hdrBadge.alpha = 1;
-            }];
-        } else {
-            self.hdrBadge.alpha = 1;
-        }
+        [self setBadgeHidden:NO animated:animated];
     } else {
-        if (animated) {
-            [UIView animateWithDuration:0.25 animations:^{
-                self.hdrBadge.alpha = 0;
-            }];
-        } else {
-            self.hdrBadge.alpha = 0;
-        }
+        [self setBadgeHidden:YES animated:animated];
+    }
+}
+
+-(void)setBadgeHidden:(BOOL)hidden animated:(BOOL)animated {
+    if (!self.isHDR) {
+        return;
+    }
+    CGFloat alpha = 1;
+    if (hidden) {
+        alpha = 0;
+    }
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:^{
+            self.hdrBadge.alpha = alpha;
+        }];
+    } else {
+        self.hdrBadge.alpha = alpha;
     }
 }
 
@@ -290,6 +315,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     ///如果没有导航控制器的话，不会走layoutSubviews。所以要处理一下角标
     if (!self.previewController.navigationController) {
         [self configBadgeWithAnimated:YES];
+    } else if (self.previewController.topToolBar) {
+        [self configBadgeWithAnimated:YES];
     }
 }
 
@@ -314,8 +341,18 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)closeActionOnSlidingDown {
     if ([self.previewController.navigationController.viewControllers.lastObject isEqual:self.previewController]) {
         [self.previewController.navigationController popViewControllerAnimated:YES];
+       
+        if (self.onSlideCloseAction) {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                self.onSlideCloseAction(self);
+            });
+        }
     } else {
-        [self.previewController dismissViewControllerAnimated:YES completion:nil];
+        [self.previewController dismissViewControllerAnimated:YES completion:^{
+            if (self.onSlideCloseAction) {
+                self.onSlideCloseAction(self);
+            }
+        }];
     }
 }
 
@@ -325,23 +362,23 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view {
+    [self beforeZooming];
     self.scrollIsZooming = YES;
 }
 
 -(void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale {
     self.scrollIsZooming = NO;
+    [self afterZooming];
 }
 
 -(void)scrollViewDidZoom:(UIScrollView *)scrollView {
-    if (self.callNavigationHide) {
-        self.callNavigationHide(self,YES);
-    }
+    [self onZooming:scrollView.zoomScale];
     CGFloat fixInset = 0;
     if (scrollView.zoomScale >= self.preferredZoomScale) {
         ///大于偏好缩放比则让inset为负的修正后的fixAnchor，这样则不会显示黑边
         fixInset = - ceil(self.fixStartAnchor * scrollView.zoomScale);
     } else {
-        ///小于的时候应该由负的修正值g线性过渡为正的修正值，这样可以避免临界处的跳动
+        ///小于的时候应该由负的修正值线性过渡为正的修正值，这样可以避免临界处的跳动
         fixInset = - ceil(self.fixStartAnchor * (scrollView.zoomScale - 1) / (self.preferredZoomScale - 1));
     }
     
@@ -736,7 +773,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)configBadgeWithAnimated:(BOOL)animated {
-    if (self.previewController.isToolBarShowing) {
+    if (!self.previewController.isFocusOnMedia) {
         
         if (!self.livePhotoBadge.image) {
             self.livePhotoBadge.image = [PHLivePhotoView livePhotoBadgeImageWithOptions:(PHLivePhotoBadgeOptionsOverContent)];
@@ -766,12 +803,18 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
         
         CGFloat minY = 0;
-        if (@available(iOS 11.0,*)) {
-            minY = self.safeAreaInsets.top + spacing;
+        ///如果有toolBar，以toolBar的baseLine做基准
+        if (self.previewController.topToolBar) {
+            minY = [self.previewController.topToolBar baseLineForBadge] + spacing;
         } else {
-            minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame);
+            ///如果没有已Navigation为准，如果是11以上，用safeAreaInsets更加准确
+            if (@available(iOS 11.0,*)) {
+                minY = self.safeAreaInsets.top + spacing;
+            } else {
+                minY = CGRectGetMaxY(self.previewController.navigationController.navigationBar.frame);
+            }
         }
-    
+        
         if (badgeFrame.origin.y < minY) {
             badgeFrame.origin.y = minY;
         }
@@ -791,34 +834,29 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             CGRect hdrBadgeFrame = CGRectMake(CGRectGetMaxX(badgeFrame) + spacing, badgeFrame.origin.y, badgeLength, badgeLength);
             self.hdrBadge.frame = hdrBadgeFrame;
         }
-        
-        if (animated) {
-            [UIView animateWithDuration:0.25 animations:^{
-                self.livePhotoBadge.alpha = 1;
-                if (self.isHDR) {
-                    self.hdrBadge.alpha = 1;
-                }
-            }];
-        } else {
-            self.livePhotoBadge.alpha = 1;
-            if (self.isHDR) {
-                self.hdrBadge.alpha = 1;
-            }
-        }
+        [self setBadgeHidden:NO animated:animated];
     } else {
-        if (animated) {
-            [UIView animateWithDuration:0.25 animations:^{
-                self.livePhotoBadge.alpha = 0;
-                if (self.isHDR) {
-                    self.hdrBadge.alpha = 0;
-                }
-            }];
-        } else {
-            self.livePhotoBadge.alpha = 0;
+        [self setBadgeHidden:YES animated:animated];
+    }
+}
+
+-(void)setBadgeHidden:(BOOL)hidden animated:(BOOL)animated {
+    CGFloat alpha = 1;
+    if (hidden) {
+        alpha = 0;
+    }
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:^{
             if (self.isHDR) {
-                self.hdrBadge.alpha = 0;
+                self.hdrBadge.alpha = alpha;
             }
+            self.livePhotoBadge.alpha = alpha;
+        }];
+    } else {
+        if (self.isHDR) {
+            self.hdrBadge.alpha = alpha;
         }
+        self.livePhotoBadge.alpha = alpha;
     }
 }
 
@@ -942,8 +980,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)play {
     [self.mediaView play];
     self.playBtn.hidden = YES;
-    if (self.callNavigationHide) {
-        self.callNavigationHide(self,YES);
+    if (self.enterFocus) {
+        self.enterFocus(self,YES);
     }
 }
 
@@ -1075,7 +1113,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (self.tapAction) {
         self.tapAction(self);
     }
+
     if (!self.previewController.navigationController) {
+        [self configBadgeWithAnimated:YES];
+    } else if (self.previewController.topToolBar) {
         [self configBadgeWithAnimated:YES];
     }
 }

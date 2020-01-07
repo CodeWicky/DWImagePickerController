@@ -8,7 +8,19 @@
 #import <UIKit/UIKit.h>
 #import "DWAlbumManager.h"
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
-#import "DWAlbumToolBar.h"
+#import "DWAlbumSelectionManager.h"
+
+@protocol DWAlbumGridToolBarProtocol <NSObject>
+
+@property (nonatomic ,assign) CGFloat toolBarHeight;
+
+@property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
+
+-(void)configWithSelectionManager:(DWAlbumSelectionManager *)selectionManager;
+
+-(void)refreshSelection;
+
+@end
 
 @interface DWAlbumGridViewController : UIViewController<DWMediaPreviewDataSource>
 
@@ -18,9 +30,9 @@
 
 @property (nonatomic ,strong ,readonly) DWAlbumModel * album;
 
-@property (nonatomic ,strong) __kindof DWAlbumBaseToolBar * topToolBar;
+@property (nonatomic ,strong) UIView <DWAlbumGridToolBarProtocol>* topToolBar;
 
-@property (nonatomic ,strong) __kindof DWAlbumBaseToolBar * bottomToolBar;
+@property (nonatomic ,strong) UIView <DWAlbumGridToolBarProtocol>* bottomToolBar;
 
 @property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
 

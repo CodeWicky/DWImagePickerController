@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class DWMediaPreviewCell;
 typedef void(^DWMediaPreviewActionCallback)(DWMediaPreviewCell * cell);
 typedef void(^DWMediaPreviewDoubleClickActionCallback)(DWMediaPreviewCell * cell ,CGPoint point);
-typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell * cell ,BOOL hide);
+typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,BOOL focus);
 
 @protocol DWMediaPreviewLoadingProtocol
 
@@ -80,7 +80,11 @@ typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell *
 
 //Callback for previewCell to call DWMediaPreviewController to hide navigationBar.It will be call on cell zooming.And you can call it where you want in you subclass to hide navigationBar and do something else at the same time.
 ///当cell通知DWMediaPreviewController隐藏导航栏时触发的回调。当缩放媒体的时候回触发此回调。你也可以在子类中按照你的需求在合适的实际调用他去隐藏导航栏，同时你也可以做一些其他的事情。
-@property (nonatomic ,copy) DWMediaPreviewCellCallNavigationHideCallback callNavigationHide;
+@property (nonatomic ,copy) DWMediaPreviewCellEnterFocusCallback enterFocus;
+
+//Callback for previewCell to notify DWMediaPreviewController has close on slide down.
+///当cell下滑关闭时触发的回调。
+@property (nonatomic ,copy) DWMediaPreviewActionCallback onSlideCloseAction;
 
 #pragma mark --- interface method ---
 
@@ -116,6 +120,12 @@ typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell *
 ///配置子视图的回调方法，每次调用 -layoutSubviews 时都会调用。
 -(void)setupSubviews;
 
+//Call back for preview media zooming.
+///媒体缩放的回调方法
+-(void)beforeZooming;
+-(void)onZooming:(CGFloat)zoomScale;
+-(void)afterZooming;
+
 //Indicates the size for media in order to config scale factor,called on -setMedia: .
 ///表明当前资源的实际尺寸。这个尺寸将用来配置缩放参数。在 -setMedia: 时会调用此方法。
 -(CGSize)sizeForMedia:(id)media;
@@ -127,6 +137,10 @@ typedef void(^DWMediaPreviewCellCallNavigationHideCallback)(DWMediaPreviewCell *
 //Config the badge such as HDR and livephoto for cell.It will be called on -setMedia: and -setupSubviews.
 ///配置当前资源的角标视图。在 -setMedia: 及 -setupSubviews 中会调用此方法。
 -(void)configBadgeWithAnimated:(BOOL)animated;
+
+//Set badge hidden.It will be called on -configBadgeWithAnimated: and -beforeZooming.
+///设置角标视图的显隐。在 -configBadgeWithAnimated: and -beforeZooming 中会调用此方法。
+-(void)setBadgeHidden:(BOOL)hidden animated:(BOOL)animated;
 
 //Call back for reset cell zoom status,called on -clearCell.
 ///重置当前cell的一些状态信息。在 -clearCell 中会调用。

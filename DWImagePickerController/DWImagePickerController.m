@@ -10,6 +10,7 @@
 
 #import "DWImagePickerController.h"
 #import "DWAlbumToolBar.h"
+#import "DWAlbumPreviewToolBar.h"
 
 @interface DWImagePickerController ()
 
@@ -113,21 +114,21 @@
         _gridVC.selectionManager = self.selectionManager;
         DWAlbumToolBar * toolBar = [DWAlbumToolBar toolBar];
         __weak typeof(self) weakSelf = self;
-        toolBar.sendAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
+        toolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (strongSelf.selectionManager.sendAction) {
                 strongSelf.selectionManager.sendAction(strongSelf.selectionManager);
             }
         };
         
-        toolBar.previewAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
+        toolBar.previewAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             PHAsset * asset = strongSelf.selectionManager.selections.firstObject.asset;
             NSInteger idx = [strongSelf.gridVC.album.fetchResult indexOfObject:asset];
             [strongSelf.gridVC previewAtIndex:idx];
         };
         
-        toolBar.originImageAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
+        toolBar.originImageAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
            __strong typeof(weakSelf) strongSelf = weakSelf;
            strongSelf.selectionManager.useOriginImage = !strongSelf.selectionManager.useOriginImage;
            [toolBar refreshSelection];
@@ -147,6 +148,7 @@
 -(DWMediaPreviewController *)previewVC {
     if (!_previewVC) {
         _previewVC = [[DWMediaPreviewController alloc] init];
+        _previewVC.bottomToolBar = [DWAlbumPreviewToolBar toolBar];
         _previewVC.closeOnSlidingDown = YES;
     }
     return _previewVC;

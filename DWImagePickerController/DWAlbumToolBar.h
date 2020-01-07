@@ -6,24 +6,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DWAlbumSelectionManager.h"
+#import "DWAlbumGridViewController.h"
 NS_ASSUME_NONNULL_BEGIN
 
-@interface DWAlbumBaseToolBar : UIView
+@class DWAlbumToolBar;
+typedef void(^ToolBarAction)(DWAlbumToolBar * toolBar);
 
-@property (nonatomic ,assign) CGFloat toolBarHeight;
-
-@property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
-
--(void)configWithSelectionManager:(DWAlbumSelectionManager *)seletionManager;
-
--(void)refreshSelection;
-
-@end
-
-typedef void(^ToolBarAction)(DWAlbumBaseToolBar * toolBar);
-
-@interface DWAlbumToolBar : DWAlbumBaseToolBar
+@interface DWAlbumToolBar : UIView<DWAlbumGridToolBarProtocol>
 
 @property (nonatomic ,copy) ToolBarAction previewAction;
 

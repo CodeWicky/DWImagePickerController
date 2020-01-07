@@ -25,6 +25,48 @@ typedef void(^DWMediaPreviewFetchMediaProgress)(CGFloat progressNum);
 typedef void(^DWMediaPreviewFetchPosterCompletion)(_Nullable id media, NSUInteger index, BOOL satisfiedSize);
 typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger index);
 
+//Protocol of toolbar for previewController.
+//PreviewController使用的toolBar的协议
+@protocol DWMediaPreviewToolBarProtocol
+
+/**
+ Indicates whether the tool bar is showing.
+ Tool bar 是否正在展示
+ */
+-(BOOL)isShowing;
+
+
+/**
+ Notify toolbar to show with animated.
+ 展示工具栏
+ 
+ @param animated 是否具有动画
+ */
+-(void)showToolBarWithAnimated:(BOOL)animated;
+
+
+/**
+ Notify toolbar to hide with animated.
+ 隐藏工具栏
+ 
+ @param animated 是否具有动画
+ */
+-(void)hideToolBarWithAnimated:(BOOL)animated;
+
+@end
+
+@protocol DWMediaPreviewTopToolBarProtocol <DWMediaPreviewToolBarProtocol>
+
+/**
+ Indicates the base line for badge in cell.The badge has more 3 pixel than base line in vertical.
+ 指定Cell中的角标的基准线。角标的y值比基准线多3个像素
+ 
+ @return 基准线
+ */
+-(CGFloat)baseLineForBadge;
+
+@end
+
 //DWMediaPreviewController is a controller to preiview different type of media,support to preview UIImage/Aniamte Image/Live Photo/Video.
 ///DWMediaPreviewController是一个用来预览媒体资源的控制器，当前支持UIImage/Animate Image/Live Photo/Video.
 @class DWMediaPreviewController;
@@ -86,6 +128,14 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///预览尺寸。
 @property (nonatomic ,assign ,readonly) CGSize previewSize;
 
+//Top tool bar of previewController.
+///当前的顶部工具栏
+@property (nonatomic ,strong) UIView <DWMediaPreviewTopToolBarProtocol>* topToolBar;
+
+//Bottom tool bar of previewController.
+///当前的底部工具栏
+@property (nonatomic ,strong) UIView <DWMediaPreviewToolBarProtocol>* bottomToolBar;
+
 //The limit of count to cache.
 ///缓存个数。
 @property (nonatomic ,assign) NSUInteger cacheCount;
@@ -94,9 +144,9 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///预加载个数。
 @property (nonatomic ,assign) NSUInteger prefetchCount;
 
-//An flag indicates whether the toolBar is showing.
-///工具栏是否正在展示。
-@property (nonatomic ,assign ,readonly) BOOL isToolBarShowing;
+//An flag indicates whether the is in focus media mode(it will attemp to hide tool bar and turn backgroundColor into black in focus mode)
+///是否正在专注媒体模式（专注模式将隐藏工具栏并将背景转为黑色）
+@property (nonatomic ,assign ,readonly) BOOL isFocusOnMedia;
 
 //An flag indicates whether to close previewController on sliding down in preview cell.
 ///下滑是否关闭。
