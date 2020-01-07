@@ -112,16 +112,25 @@
         [_gridVC configWithPreviewVC:self.previewVC];
         _gridVC.selectionManager = self.selectionManager;
         DWAlbumToolBar * toolBar = [DWAlbumToolBar toolBar];
+        __weak typeof(self) weakSelf = self;
         toolBar.sendAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
-            NSLog(@"click send");
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf.selectionManager.sendAction) {
+                strongSelf.selectionManager.sendAction(strongSelf.selectionManager);
+            }
         };
         
         toolBar.previewAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
-            NSLog(@"click preview");
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            PHAsset * asset = strongSelf.selectionManager.selections.firstObject.asset;
+            NSInteger idx = [strongSelf.gridVC.album.fetchResult indexOfObject:asset];
+            [strongSelf.gridVC previewAtIndex:idx];
         };
         
         toolBar.originImageAction = ^(DWAlbumBaseToolBar * _Nonnull toolBar) {
-            NSLog(@"click original");
+           __strong typeof(weakSelf) strongSelf = weakSelf;
+           strongSelf.selectionManager.useOriginImage = !strongSelf.selectionManager.useOriginImage;
+           [toolBar refreshSelection];
         };
         [toolBar configWithSelectionManager:self.selectionManager];
         
@@ -138,7 +147,7 @@
 -(DWMediaPreviewController *)previewVC {
     if (!_previewVC) {
         _previewVC = [[DWMediaPreviewController alloc] init];
-        _previewVC.closeOnSlidingDown = NO;
+        _previewVC.closeOnSlidingDown = YES;
     }
     return _previewVC;
 }

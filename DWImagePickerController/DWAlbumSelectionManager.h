@@ -10,6 +10,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class DWAlbumSelectionModel;
+@class DWAlbumSelectionManager;
+typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
+
 @interface DWAlbumSelectionManager : NSObject
 
 @property (nonatomic ,strong) NSMutableArray <DWAlbumSelectionModel *>* selections;
@@ -17,6 +20,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic ,assign ,readonly) NSInteger maxSelectCount;
 
 @property (nonatomic ,assign) BOOL useOriginImage;
+
+@property (nonatomic ,copy) DWAlbumSelectionAction reachMaxSelectCount;
+
+@property (nonatomic ,copy) DWAlbumSelectionAction sendAction;
 
 -(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount;
 

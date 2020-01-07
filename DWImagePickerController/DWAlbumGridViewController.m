@@ -43,8 +43,6 @@
 
 @property (nonatomic ,strong) DWGridFlowLayout * collectionViewLayout;
 
-@property (nonatomic ,strong) DWAlbumModel * album;
-
 @property (nonatomic ,strong) PHFetchResult * results;
 
 @property (nonatomic ,strong) DWAlbumManager * albumManager;
@@ -67,6 +65,8 @@
 
 @property (nonatomic ,strong) Class cellClazz;
 
+@property (nonatomic ,assign) NSInteger currentPreviewIndex;
+
 @end
 
 @implementation DWAlbumGridViewController
@@ -83,6 +83,13 @@
     self.cellClazz = cellClazz;
 }
 
+-(void)previewAtIndex:(NSInteger)index {
+    if (index < self.album.fetchResult.count) {
+        [self.previewVC previewAtIndex:index];
+        [self.navigationController pushViewController:self.previewVC animated:YES];
+    }
+}
+
 #pragma mark --- life cycle ---
 -(void)viewDidLoad {
     [super viewDidLoad];
@@ -96,12 +103,21 @@
         insets.bottom += self.bottomToolBar.toolBarHeight;
         self.collectionView.contentInset = insets;
     }
+    
+    if (self.topToolBar) {
+        [self.view addSubview:self.topToolBar];
+        UIEdgeInsets insets = self.collectionView.contentInset;
+        insets.top += self.topToolBar.toolBarHeight;
+        self.collectionView.contentInset = insets;
+    }
+    
     self.view.backgroundColor = [UIColor whiteColor];
     self.collectionView.backgroundColor = [UIColor whiteColor];
     if (@available(iOS 10.0,*)) {
         self.collectionView.prefetchDataSource = self;
     }
     self.firstAppear = YES;
+    self.currentPreviewIndex = -1;
 }
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -130,6 +146,12 @@
         } else {
             [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
         }
+    } else if (self.currentPreviewIndex >= 0 && self.results.count) {
+        if (self.currentPreviewIndex < self.results.count) {
+            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.currentPreviewIndex inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
+        }
+        
+        self.currentPreviewIndex = -1;
     }
     self.firstAppear = NO;
     self.needScrollToEdge = NO;
@@ -179,22 +201,23 @@
             [self.selectionManager addUserInfo:cell atIndex:index - 1];
             [cell setSelectAtIndex:index];
         } else {
-            NSLog(@"max");
+            if (self.selectionManager.reachMaxSelectCount) {
+                self.selectionManager.reachMaxSelectCount(self.selectionManager);
+            }
         }
     } else {
         if (idx < self.selectionManager.selections.count) {
-            BOOL isLast = idx == self.selectionManager.selections.count - 1;
             ///两种情况，如果移除对位的话，只影响队尾，否则删除后需要更改对应idx后的序号
             [self resetSelectionCellAtIndex:idx toIndex:0];
             [self.selectionManager removeSelectionAtIndex:idx];
             
-            if (!isLast) {
-                for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
-                    [self resetSelectionCellAtIndex:i toIndex:i + 1];
-                }
+            
+            for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
+                [self resetSelectionCellAtIndex:i toIndex:i + 1];
             }
         }
     }
+    [self.topToolBar refreshSelection];
     [self.bottomToolBar refreshSelection];
 }
 
@@ -463,6 +486,10 @@ NS_INLINE NSArray * animateExtensions() {
     }];
 }
 
+-(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index {
+    self.currentPreviewIndex = index;
+}
+
 #pragma mark --- collectionView delegate ---
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return self.results.count;
@@ -502,8 +529,7 @@ NS_INLINE NSArray * animateExtensions() {
 }
 
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    [self.previewVC previewAtIndex:indexPath.row];
-    [self.navigationController pushViewController:self.previewVC animated:YES];
+    [self previewAtIndex:indexPath.row];
 }
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView {

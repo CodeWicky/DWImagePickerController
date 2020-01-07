@@ -16,6 +16,10 @@
 
 @property (nonatomic ,assign) NSInteger maxSelectCount;
 
+@property (nonatomic ,strong ,readonly) DWAlbumModel * album;
+
+@property (nonatomic ,strong) __kindof DWAlbumBaseToolBar * topToolBar;
+
 @property (nonatomic ,strong) __kindof DWAlbumBaseToolBar * bottomToolBar;
 
 @property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
@@ -27,5 +31,7 @@
 -(void)configWithPreviewVC:(DWMediaPreviewController *)previewVC;
 
 -(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager;
+
+-(void)previewAtIndex:(NSInteger)index;
 
 @end
