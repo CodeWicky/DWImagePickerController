@@ -9,6 +9,7 @@ s.source = { :git => 'https://github.com/CodeWicky/DWImagePickerController.git',
 s.requires_arc = true
 s.ios.deployment_target = '9.1'
 s.source_files = 'DWImagePickerController/**/*.{h,m}'
+s.resource = 'DWImagePickerController/DWImagePickerController.bundle'
 s.frameworks = 'UIKit'
 s.dependency 'DWMediaPreviewController'
 s.dependency 'DWKit/DWComponent/DWLabel', '~> 0.0.0.10'

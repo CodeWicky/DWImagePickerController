@@ -59,4 +59,13 @@
     return self;
 }
 
+-(void)refreshUI {
+    [super refreshUI];
+    if (!self.show) {
+        CGRect frame =  self.frame;
+        frame.origin.y = self.superview.bounds.size.height;
+        self.frame = frame;
+    }
+}
+
 @end

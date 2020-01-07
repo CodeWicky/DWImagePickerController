@@ -11,6 +11,7 @@
 #import "DWImagePickerController.h"
 #import "DWAlbumToolBar.h"
 #import "DWAlbumPreviewToolBar.h"
+#import "DWAlbumPreviewNavigationBar.h"
 
 @interface DWImagePickerController ()
 
@@ -149,6 +150,7 @@
     if (!_previewVC) {
         _previewVC = [[DWMediaPreviewController alloc] init];
         _previewVC.bottomToolBar = [DWAlbumPreviewToolBar toolBar];
+        _previewVC.topToolBar = [DWAlbumPreviewNavigationBar toolBar];
         _previewVC.closeOnSlidingDown = YES;
     }
     return _previewVC;

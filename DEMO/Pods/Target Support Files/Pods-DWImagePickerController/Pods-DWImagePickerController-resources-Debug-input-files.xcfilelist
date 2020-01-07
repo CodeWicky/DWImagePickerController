@@ -1,2 +1,3 @@
 ${PODS_ROOT}/Target Support Files/Pods-DWImagePickerController/Pods-DWImagePickerController-resources.sh
+${PODS_ROOT}/../../DWImagePickerController/DWImagePickerController.bundle
 ${PODS_ROOT}/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.bundle

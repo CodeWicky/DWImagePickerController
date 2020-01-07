@@ -78,14 +78,14 @@
     }
     btnFrame = self.originCircle.frame;
     btnSize = btnFrame.size;
-    btnFrame.origin.x = [UIScreen mainScreen].bounds.size.width * 0.5 - 1 - btnSize.width;
+    btnFrame.origin.x = self.superview.bounds.size.width * 0.5 - 1 - btnSize.width;
     btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     self.originCircle.frame = btnFrame;
     
     [self.originLb sizeToFit];
     btnFrame = self.originLb.frame;
     btnSize = btnFrame.size;
-    btnFrame.origin.x = [UIScreen mainScreen].bounds.size.width * 0.5 + 1;
+    btnFrame.origin.x = self.superview.bounds.size.width * 0.5 + 1;
     btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     self.originLb.frame = btnFrame;
     
@@ -102,7 +102,7 @@
     btnFrame = self.sendButton.frame;
     btnSize = btnFrame.size;
     btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
-    btnFrame.origin.x = [UIScreen mainScreen].bounds.size.width - 15 - btnSize.width;
+    btnFrame.origin.x = self.superview.bounds.size.width - 15 - btnSize.width;
     
     if (@available(iOS 11.0,*)) {
         btnFrame.origin.x -= self.safeAreaInsets.right;
@@ -110,7 +110,7 @@
     
     self.sendButton.frame = btnFrame;
     
-    btnFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - self.toolBarHeight, [UIScreen mainScreen].bounds.size.width, self.toolBarHeight);
+    btnFrame = CGRectMake(0, self.superview.bounds.size.height - self.toolBarHeight, self.superview.bounds.size.width, self.toolBarHeight);
     
     if (@available(iOS 11.0,*)) {
         btnFrame.size.height += self.safeAreaInsets.bottom;

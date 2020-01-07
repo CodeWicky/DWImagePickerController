@@ -19,6 +19,7 @@
     "ios": "9.1"
   },
   "source_files": "DWImagePickerController/**/*.{h,m}",
+  "resources": "DWImagePickerController/DWImagePickerController.bundle",
   "frameworks": "UIKit",
   "dependencies": {
     "DWMediaPreviewController": [

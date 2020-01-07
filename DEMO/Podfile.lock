@@ -30,7 +30,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  DWImagePickerController: 6806ab978aa5bad955507405c68c9dec96eefb85
+  DWImagePickerController: c45b48679e9bf2a75acb6d6e59b4d2205884bcbd
   DWKit: d0b857eaee0941b634953bf805c27465352fca92
   DWMediaPreviewController: f9db204945558886e3b9355c35f11b8d2164c892
   DWPlayer: c371dd6dce09ead6f9045cc8a84a4fcb2a7c58dd
@@ -38,4 +38,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: ebdb6c1279bc583bb9af46160f66c3db71e614aa
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.7.2

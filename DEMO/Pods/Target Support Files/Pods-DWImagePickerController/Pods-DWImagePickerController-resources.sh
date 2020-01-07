@@ -97,9 +97,11 @@ EOM
   esac
 }
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_resource "${PODS_ROOT}/../../DWImagePickerController/DWImagePickerController.bundle"
   install_resource "${PODS_ROOT}/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.bundle"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
+  install_resource "${PODS_ROOT}/../../DWImagePickerController/DWImagePickerController.bundle"
   install_resource "${PODS_ROOT}/DWMediaPreviewController/DWMediaPreviewController/DWMediaPreviewController.bundle"
 fi
 

@@ -22,6 +22,10 @@ typedef void(^ToolBarAction)(DWAlbumToolBar * toolBar);
 
 +(instancetype)toolBar;
 
+-(void)setupDefaultValue;
+-(void)setupUI;
+-(void)refreshUI;
+
 @end
 
 NS_ASSUME_NONNULL_END
