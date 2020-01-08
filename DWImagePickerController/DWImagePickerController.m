@@ -150,7 +150,14 @@
     if (!_previewVC) {
         _previewVC = [[DWMediaPreviewController alloc] init];
         _previewVC.bottomToolBar = [DWAlbumPreviewToolBar toolBar];
-        _previewVC.topToolBar = [DWAlbumPreviewNavigationBar toolBar];
+        DWAlbumPreviewNavigationBar * topBar = [DWAlbumPreviewNavigationBar toolBar];
+        __weak typeof(self) weakSelf = self;
+        topBar.retAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf popViewControllerAnimated:YES];
+        };
+        _previewVC.topToolBar = topBar;
+        
         _previewVC.closeOnSlidingDown = YES;
     }
     return _previewVC;

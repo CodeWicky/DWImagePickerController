@@ -131,8 +131,10 @@
 }
 
 #pragma mark --- btn action ---
--(void)retAction:(UIButton *)sender {
-    
+-(void)retBtnAction:(UIButton *)sender {
+    if (self.retAction) {
+        self.retAction(self);
+    }
 }
 
 #pragma mark --- override ---
@@ -155,7 +157,7 @@
     if (!_retBtn) {
         _retBtn = [DWAlbumPreviewReturnBarButton buttonWithType:(UIButtonTypeCustom)];
         [_retBtn setFrame:CGRectMake(0, 0, 44, 44)];
-        [_retBtn addTarget:self action:@selector(retAction:) forControlEvents:(UIControlEventTouchUpInside)];
+        [_retBtn addTarget:self action:@selector(retBtnAction:) forControlEvents:(UIControlEventTouchUpInside)];
     }
     return _retBtn;
 }
