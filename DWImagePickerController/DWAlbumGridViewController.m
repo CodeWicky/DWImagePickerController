@@ -67,7 +67,7 @@
 
 @property (nonatomic ,assign) NSInteger currentPreviewIndex;
 
-@property (nonatomic ,strong) NSMutableDictionary <PHAsset *,DWImageAssetModel *>* assetModelMap;
+@property (nonatomic ,strong) NSMutableDictionary <PHAsset *,DWImageAssetModel *>* cachedAssetModel;
 
 @end
 
@@ -164,7 +164,7 @@
     if (![_album isEqual:model]) {
         _album = model;
         _results = model.fetchResult;
-        _assetModelMap = nil;
+        _cachedAssetModel = nil;
         self.title = model.name;
         _needScrollToEdge = YES;
         [self.collectionView reloadData];
@@ -520,7 +520,7 @@ NS_INLINE NSArray * animateExtensions() {
         thumnail = YES;
     }
     
-    DWImageAssetModel * cachedModel = [self.assetModelMap objectForKey:asset];
+    DWImageAssetModel * cachedModel = [self.cachedAssetModel objectForKey:asset];
     if (cachedModel) {
         if (!cachedModel.isDegraded || thumnail) {
             cell.model = cachedModel;
@@ -531,7 +531,7 @@ NS_INLINE NSArray * animateExtensions() {
     
     CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
     [self.albumManager fetchImageWithAlbum:self.album index:indexPath.row targetSize:targetSize shouldCache:!thumnail progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        [self.assetModelMap setObject:obj forKey:asset];
+        [self.cachedAssetModel setObject:obj forKey:asset];
         if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 cell.model = obj;
@@ -631,11 +631,11 @@ NS_INLINE NSArray * animateExtensions() {
     return _collectionView;
 }
 
--(NSMutableDictionary<NSString *,DWImageAssetModel *> *)assetModelMap {
-    if (!_assetModelMap) {
-        _assetModelMap = [NSMutableDictionary dictionaryWithCapacity:self.results.count];
+-(NSMutableDictionary<PHAsset *,DWImageAssetModel *> *)cachedAssetModel {
+    if (!_cachedAssetModel) {
+        _cachedAssetModel = [NSMutableDictionary dictionaryWithCapacity:self.results.count];
     }
-    return _assetModelMap;
+    return _cachedAssetModel;
 }
 
 @end
