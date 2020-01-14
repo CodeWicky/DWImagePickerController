@@ -164,7 +164,7 @@
     if (![_album isEqual:model]) {
         _album = model;
         _results = model.fetchResult;
-        [self.assetModelMap removeAllObjects];
+        _assetModelMap = nil;
         self.title = model.name;
         _needScrollToEdge = YES;
         [self.collectionView reloadData];
