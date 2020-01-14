@@ -491,7 +491,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                     if (currentY > self.previewController.closeThreshold && _zoomContainerView.contentOffset.y <= 0 ) {
                         needClose = YES;
                     }
-                } else if (currentY > self.previewController.closeThreshold && _zoomContainerView.contentOffset.y < ceil(self.fixStartAnchor * _zoomContainerView.zoomScale)) {
+                } else if (currentY > self.previewController.closeThreshold && _zoomContainerView.contentOffset.y <= ceil(self.fixStartAnchor * _zoomContainerView.zoomScale)) {
                     needClose = YES;
                 }
                 

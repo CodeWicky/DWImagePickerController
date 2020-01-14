@@ -67,6 +67,8 @@
 
 @property (nonatomic ,assign) NSInteger currentPreviewIndex;
 
+@property (nonatomic ,strong) NSMutableDictionary <PHAsset *,DWImageAssetModel *>* assetModelMap;
+
 @end
 
 @implementation DWAlbumGridViewController
@@ -162,6 +164,7 @@
     if (![_album isEqual:model]) {
         _album = model;
         _results = model.fetchResult;
+        [self.assetModelMap removeAllObjects];
         self.title = model.name;
         _needScrollToEdge = YES;
         [self.collectionView reloadData];
@@ -236,7 +239,7 @@
     for (UICollectionViewLayoutAttributes * obj in attrs) {
         [indexPaths addObject:obj.indexPath];
     }
-    
+
     [self.collectionView reloadItemsAtIndexPaths:indexPaths];
 }
 
@@ -498,6 +501,9 @@ NS_INLINE NSArray * animateExtensions() {
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     PHAsset * asset = [self.results objectAtIndex:indexPath.row];
     DWAlbumGridCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GridCell" forIndexPath:indexPath];
+    
+    NSLog(@"DW:%@-%@",indexPath,cell);
+    
     cell.requestLocalID = asset.localIdentifier;
     
     [self configCellSelect:cell asset:asset];
@@ -513,6 +519,8 @@ NS_INLINE NSArray * animateExtensions() {
     if (self.velocity > 30 && (collectionView.isDecelerating || collectionView.isDragging) && ((collectionView.contentSize.height - collectionView.contentOffset.y > collectionView.bounds.size.height * 3) && (collectionView.contentOffset.y > collectionView.bounds.size.height * 2))) {
         thumnail = YES;
     }
+    
+    DWImageAssetModel * cachedModel = [self.assetModelMap objectForKey:asset];
     
     CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
     
@@ -614,6 +622,13 @@ NS_INLINE NSArray * animateExtensions() {
         _collectionView.showsVerticalScrollIndicator = NO;
     }
     return _collectionView;
+}
+
+-(NSMutableDictionary<NSString *,DWImageAssetModel *> *)assetModelMap {
+    if (!_assetModelMap) {
+        _assetModelMap = [NSMutableDictionary dictionaryWithCapacity:self.results.count];
+    }
+    return _assetModelMap;
 }
 
 @end
