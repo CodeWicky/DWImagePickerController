@@ -521,10 +521,17 @@ NS_INLINE NSArray * animateExtensions() {
     }
     
     DWImageAssetModel * cachedModel = [self.assetModelMap objectForKey:asset];
+    if (cachedModel) {
+        if (!cachedModel.isDegraded || thumnail) {
+            cell.model = cachedModel;
+            [cell setNeedsLayout];
+            return cell;
+        }
+    }
     
     CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
-    
     [self.albumManager fetchImageWithAlbum:self.album index:indexPath.row targetSize:targetSize shouldCache:!thumnail progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        [self.assetModelMap setObject:obj forKey:asset];
         if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 cell.model = obj;
