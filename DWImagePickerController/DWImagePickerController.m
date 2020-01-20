@@ -12,6 +12,7 @@
 #import "DWAlbumToolBar.h"
 #import "DWAlbumPreviewToolBar.h"
 #import "DWAlbumPreviewNavigationBar.h"
+#import "DWMediaPreviewCell.h"
 
 @interface DWImagePickerController ()
 
@@ -167,6 +168,7 @@
 -(DWMediaPreviewController *)previewVC {
     if (!_previewVC) {
         _previewVC = [[DWMediaPreviewController alloc] init];
+        [_previewVC registerClass:[DWVideoControlPreviewCell class] forCustomizePreviewCellWithReuseIdentifier:@"videoControlCell"];
         _previewVC.bottomToolBar = [DWAlbumPreviewToolBar toolBar];
         DWAlbumPreviewNavigationBar * topBar = [DWAlbumPreviewNavigationBar toolBar];
         __weak typeof(self) weakSelf = self;

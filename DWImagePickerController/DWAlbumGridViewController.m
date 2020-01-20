@@ -289,7 +289,7 @@
     
     [self.albumManager fetchLivePhotoWithAlbum:self.album index:index targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
-            progressHandler(progress);
+            progressHandler(progress,index);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
         if (fetchCompletion) {
@@ -301,7 +301,7 @@
 -(void)fetchVideoWithIndex:(NSUInteger)index progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
     [self.albumManager fetchVideoWithAlbum:self.album index:index shouldCache:YES progrss:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
-            progressHandler(progressNum);
+            progressHandler(progressNum,index);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWVideoAssetModel * _Nullable obj) {
         if (fetchCompletion) {
@@ -314,7 +314,7 @@
     
     [self.albumManager fetchOriginImageDataWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
-            progressHandler(progressNum);
+            progressHandler(progressNum,index);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageDataAssetModel * _Nullable obj) {
         if (fetchCompletion) {
@@ -343,7 +343,7 @@
     
     [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
-            progressHandler(progress);
+            progressHandler(progress,index);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         ///由于指定尺寸，所有亦可能有缩略图尺寸，如果是缩略图的话，不设置图片，已经有封面了
@@ -356,7 +356,7 @@
 -(void)fetchOriginImageWithIndex:(NSUInteger)index progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
     [self.albumManager fetchOriginImageWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
-            progressHandler(progressNum);
+            progressHandler(progressNum,index);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if (fetchCompletion) {
@@ -459,7 +459,14 @@ NS_INLINE NSArray * animateExtensions() {
     return [self previewTypeForAsset:asset];
 }
 
--(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index {
+-(DWMediaPreviewCell *)previewController:(DWMediaPreviewController *)previewController cellForItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
+    if (previewType != DWMediaPreviewTypeVideo) {
+        return nil;
+    }
+    return [previewController dequeueReusablePreviewCellWithReuseIdentifier:@"videoControlCell" forIndex:index];
+}
+
+-(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
     PHAsset * asset = [self.results objectAtIndex:index];
     return asset.mediaSubtypes & PHAssetMediaSubtypePhotoHDR;
 }
@@ -475,7 +482,7 @@ NS_INLINE NSArray * animateExtensions() {
     }
 }
 
--(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
+-(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
     [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if (fetchCompletion) {
             fetchCompletion(obj.media,index,[obj satisfiedSize:previewController.previewSize]);
@@ -495,7 +502,7 @@ NS_INLINE NSArray * animateExtensions() {
     }];
 }
 
--(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index {
+-(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
     self.currentPreviewIndex = index;
 }
 
