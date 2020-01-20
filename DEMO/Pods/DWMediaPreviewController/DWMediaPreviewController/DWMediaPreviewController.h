@@ -21,7 +21,7 @@ typedef NS_ENUM(NSUInteger, DWMediaPreviewType) {
 };
 
 
-typedef void(^DWMediaPreviewFetchMediaProgress)(CGFloat progressNum);
+typedef void(^DWMediaPreviewFetchMediaProgress)(CGFloat progressNum,NSUInteger index);
 typedef void(^DWMediaPreviewFetchPosterCompletion)(_Nullable id media, NSUInteger index, BOOL satisfiedSize);
 typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger index);
 
@@ -53,17 +53,11 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
  */
 -(void)hideToolBarWithAnimated:(BOOL)animated;
 
-@end
-
-@protocol DWMediaPreviewTopToolBarProtocol <DWMediaPreviewToolBarProtocol>
-
 /**
- Indicates the base line for badge in cell.The badge has more 3 pixel than base line in vertical.
- 指定Cell中的角标的基准线。角标的y值比基准线多3个像素
- 
- @return 基准线
+ Indicates the baseline for toolbar
+ 返回toolbar的基准线
  */
--(CGFloat)baseLineForBadge;
+-(CGFloat)baseline;
 
 @end
 
@@ -90,15 +84,19 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 //Return whether the media at specific index is hdr type.
 ///返回对应位置的媒体是否为HDR模式资源。
--(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index;
+-(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
 
 //Callback for fetching poster at specific index(It will be called before -previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion: to fetch an placeholder for media.If there's a cache of media,this method won't be called.).
 ///获取对应角标位置占位图的回调（发生在 -previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion: 回调之前，预先为媒体加载占位图，如果命中缓存则不回调)。
--(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion;
+-(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion;
+
+//Callback indicating whether show progress indicator when fetch media at specific index.
+///表明获取指定角标的媒体资源时是否展示进度。
+-(BOOL)previewController:(DWMediaPreviewController *)previewController shouldShowProgressIndicatorAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
 
 //Callback on the index of media is showing has been changed.
 ///当前预览的媒体角标发生改变时回调。
--(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index;
+-(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
 
 //Callback on preload media around current media.
 ///预加载附近媒体的回调
@@ -130,7 +128,7 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 //Top tool bar of previewController.
 ///当前的顶部工具栏
-@property (nonatomic ,strong) UIView <DWMediaPreviewTopToolBarProtocol>* topToolBar;
+@property (nonatomic ,strong) UIView <DWMediaPreviewToolBarProtocol>* topToolBar;
 
 //Bottom tool bar of previewController.
 ///当前的底部工具栏

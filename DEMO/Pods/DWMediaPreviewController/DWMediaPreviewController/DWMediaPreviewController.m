@@ -69,6 +69,8 @@
 
 @property (nonatomic ,assign) BOOL isHDR;
 
+@property (nonatomic ,assign) BOOL shouldShowProgressIndicator;
+
 @end
 
 @implementation DWMediaPreviewData
@@ -95,7 +97,9 @@
 
 @property (nonatomic ,assign) BOOL firstCellGotFocus;
 
-@property (nonatomic ,assign) BOOL finishFirstShowPreview;
+@property (nonatomic ,assign) NSUInteger innerMediaCount;
+
+//@property (nonatomic ,assign) BOOL finishFirstShowPreview;
 
 @end
 
@@ -137,6 +141,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- tool method ---
 -(void)showPreview {
+    [self configToolBarIfNeeded];
+    [self setFocusMode:NO];
+    
+    if (_innerMediaCount == 0) {
+        return;
+    }
+    
+    _index = [self getValidIndex:_index];
+    
     if (_indexChanged) {
         ///如果预览位置发生改变则滚动到该位置
         _indexChanged = NO;
@@ -152,24 +165,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
         [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
     }
-    
-    self.navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
-    if (self.topToolBar) {
-        
-        if (self.navigationController) {
-            [self.navigationController setNavigationBarHidden:YES animated:YES];
-        }
-        
-        if (!self.topToolBar.superview) {
-            [self.view addSubview:self.topToolBar];
-        }
-    }
-    
-    if (self.bottomToolBar && !self.bottomToolBar.superview) {
-        [self.view addSubview:self.bottomToolBar];
-    }
-    
-    [self setFocusMode:NO];
 }
 
 -(void)clearPreview {
@@ -203,6 +198,33 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+-(void)configToolBarIfNeeded {
+    self.navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
+    if (self.topToolBar) {
+
+        if (self.navigationController) {
+            [self.navigationController setNavigationBarHidden:YES animated:YES];
+        }
+        
+        if (!self.topToolBar.superview) {
+            [self.view addSubview:self.topToolBar];
+        }
+    }
+    
+    if (self.bottomToolBar && !self.bottomToolBar.superview) {
+        [self.view addSubview:self.bottomToolBar];
+    }
+}
+
+-(NSInteger)getValidIndex:(NSInteger)index {
+    if (index < 0) {
+        index = 0;
+    } else if (index >= _innerMediaCount) {
+        index = _innerMediaCount - 1;
+    }
+    return index;
+}
+
 -(DWMediaPreviewData *)dataAtIndex:(NSUInteger)index {
     ///获取数据模型，如果不存在则创建并缓存
     DWMediaPreviewData * data = [self.dataCache objectForKey:@(index)];
@@ -212,9 +234,14 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             data.previewType = [self.dataSource previewController:self previewTypeAtIndex:index];
         }
         
-        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:isHDRAtIndex:)]) {
-            data.isHDR = [self.dataSource previewController:self isHDRAtIndex:index];
+        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:isHDRAtIndex:previewType:)]) {
+            data.isHDR = [self.dataSource previewController:self isHDRAtIndex:index previewType:data.previewType];
         }
+        
+        if (self.dataSource  && [self.dataSource respondsToSelector:@selector(previewController:shouldShowProgressIndicatorAtIndex:previewType:)]) {
+            data.shouldShowProgressIndicator = [self.dataSource previewController:self shouldShowProgressIndicatorAtIndex:index previewType:data.previewType];
+        }
+        
         
         [self.dataCache setObject:data forKey:@(index)];
     }
@@ -222,10 +249,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)previewDidChangedToIndex:(UIScrollView *)scrollView {
+    if (_innerMediaCount == 0) {
+        _index = -1;
+        return;
+    }
     NSInteger page = (scrollView.contentOffset.x + _previewSize.width / 2) / _previewSize.width;
-    _index = page;
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:hasChangedToIndex:)]) {
-        [self.dataSource previewController:self hasChangedToIndex:page];
+    _index = [self getValidIndex:page];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:hasChangedToIndex:previewType:)]) {
+        DWMediaPreviewData * data = [self dataAtIndex:_index];
+        [self.dataSource previewController:self hasChangedToIndex:_index previewType:data.previewType];
     }
 }
 
@@ -262,8 +294,8 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchPosterAtIndex:fetchCompletion:)]) {
-        [self.dataSource previewController:self fetchPosterAtIndex:index fetchCompletion:fetchCompletion];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchPosterAtIndex:previewType:fetchCompletion:)]) {
+        [self.dataSource previewController:self fetchPosterAtIndex:index previewType:previewType fetchCompletion:fetchCompletion];
     } else {
         if (fetchCompletion) {
             fetchCompletion(nil,index,NO);
@@ -281,33 +313,40 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
--(void)configPosterAndFetchMediaWithCellData:(DWMediaPreviewData *)cellData cell:(DWMediaPreviewCell *)cell previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index satisfiedSize:(BOOL)satisfiedSize {
-    NSLog(@"config poster :%@ - satisfied %d - %ld",cellData.previewImage,satisfiedSize,index);
-    
+-(void)configPosterAndFetchMediaWithCellData:(DWMediaPreviewData *)cellData cell:(DWMediaPreviewCell *)cell previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index satisfiedSize:(BOOL)satisfiedSize showProgressIndicator:(BOOL)showProgressIndicator {
     cell.poster = cellData.previewImage;
     if (previewType == DWMediaPreviewTypeImage && satisfiedSize) {
         cellData.media = cellData.previewImage;
-        NSLog(@"return poster for previewImage:%@ - %ld",cellData.previewImage,index);
         return;
     }
     ///这里应根据进度来在cell上展示loading.而且Loading展示应该延时一小段时间，以防止loading闪烁的问题（此处需要一个cancelFlag）
-    NSLog(@"finish poster and fetch image - %ld",index);
-    [cell.loadingIndicator showLoading];
-    [self fetchMediaAtIndex:index previewType:previewType progressHandler:^(CGFloat progressNum) {
-        [cell.loadingIndicator updateProgress:progressNum];
-    } fetchCompletion:^(id  _Nullable media, NSUInteger index) {
-        NSLog(@"finish fetch image in poster - %ld",index);
-        [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
-            NSLog(@"finish config media for cell data - %ld",index);
+    if (showProgressIndicator) {
+        [cell.loadingIndicator showLoading];
+        [self fetchMediaAtIndex:index previewType:previewType progressHandler:^(CGFloat progressNum, NSUInteger index) {
             if (index == cell.index) {
-                NSLog(@"will config media for cell - %ld",index);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [cell.loadingIndicator hideLoading];
-                    [self configMediaForCell:cell withMedia:cellData.media];
-                });
+                [cell.loadingIndicator updateProgress:progressNum];
             }
+        } fetchCompletion:^(id  _Nullable media, NSUInteger index) {
+            [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
+                if (index == cell.index) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [cell.loadingIndicator hideLoading];
+                        [self configMediaForCell:cell withMedia:cellData.media];
+                    });
+                }
+            }];
         }];
-    }];
+    } else {
+        [self fetchMediaAtIndex:index previewType:previewType progressHandler:nil fetchCompletion:^(id  _Nullable media, NSUInteger index) {
+            [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
+                if (index == cell.index) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self configMediaForCell:cell withMedia:cellData.media];
+                    });
+                }
+            }];
+        }];
+    }
 }
 
 -(void)configMedia:(id)media forCellData:(DWMediaPreviewData *)cellData asynchronous:(BOOL)asynchronous completion:(dispatch_block_t)completion {
@@ -336,7 +375,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)configMediaForCell:(DWMediaPreviewCell *)cell withMedia:(id)media {
-    NSLog(@"config media for cell : %@ - %@ - %ld",cell,media,cell.index);
     cell.media = media;
     ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
     if (!self.firstCellGotFocus) {
@@ -350,7 +388,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         NSMutableArray * indexes = [NSMutableArray arrayWithCapacity:4];
         NSInteger count = [self collectionView:collectionView numberOfItemsInSection:0];
         NSUInteger prefetchCount = _prefetchCount;
-        for (NSInteger i = indexPath.row,step = 0,target = 0; step > - prefetchCount;) {
+        for (NSInteger i = indexPath.row,step = 0,target = 0; step > -prefetchCount;) {
             if (step > 0) {
                 step = -step;
             } else {
@@ -425,17 +463,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(countOfMediaForPreviewController:)]) {
-        return [self.dataSource countOfMediaForPreviewController:self];
+        _innerMediaCount = [self.dataSource countOfMediaForPreviewController:self];
+    } else {
+        _innerMediaCount = 0;
     }
-    return 0;
+    return _innerMediaCount;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    
     NSInteger originIndex = indexPath.item;
-    
-    NSLog(@"oh yeah come to cell for item at index:%ld",originIndex);
-    
     DWMediaPreviewData * cellData = [self dataAtIndex:originIndex];
     DWMediaPreviewType previewType = cellData.previewType;
     __kindof DWMediaPreviewCell * cell;
@@ -484,8 +520,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
         
         
-        NSLog(@"oh yeah has media:%@ - %ld",cellData.media,originIndex);
-        
         if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:usePosterAsPlaceholderForCellAtIndex:previewType:)]) {
             if ([self.dataSource previewController:self usePosterAsPlaceholderForCellAtIndex:originIndex previewType:previewType]) {
                 cell.poster = cellData.previewImage;
@@ -499,16 +533,12 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self configMediaForCell:cell withMedia:cellData.media];
         
     } else if (cellData.previewImage) {
-        NSLog(@"oh yeah has previewImage:%@ - %ld",cellData.previewImage,originIndex);
-        [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
+        [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO showProgressIndicator:cellData.shouldShowProgressIndicator];
     } else {
-        NSLog(@"oh no 啥也没有 - %ld",originIndex);
         [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
-            NSLog(@"finish fetch poster - %ld",originIndex);
             cellData.previewImage = media;
             if (index == cell.index) {
-                NSLog(@"will do like has previewImage:%ld",index);
-                [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:satisfiedSize];
+                [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:satisfiedSize showProgressIndicator:cellData.shouldShowProgressIndicator];
             }
         }];
     }

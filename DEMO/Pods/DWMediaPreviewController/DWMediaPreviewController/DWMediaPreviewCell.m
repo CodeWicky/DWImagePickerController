@@ -74,8 +74,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)clearCell {
     [self resetCellZoom];
-    _media = nil;
     _panDirection = DWImagePanDirectionTypeNone;
+    _media = nil;
     _mediaSize = CGSizeZero;
     _isHDR = NO;
     _hdrBadge.alpha = 0;
@@ -151,7 +151,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.loadingIndicator.center = CGPointMake(self.bounds.size.width * 0.5, self.bounds.size.height * 0.5);
     }
     [self.contentView bringSubviewToFront:self.loadingIndicator];
-    [self configBadgeWithAnimated:YES];
+    if (_media) {
+        [self configBadgeWithAnimated:YES];
+    }
 }
 
 -(void)beforeZooming {
@@ -250,10 +252,12 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                 break;
         }
         
+        
+        
         CGFloat minY = 0;
         ///如果有toolBar，以toolBar的baseLine做基准
         if (self.previewController.topToolBar) {
-            minY = [self.previewController.topToolBar baseLineForBadge] + spacing;
+            minY = [self.previewController.topToolBar baseline] + spacing;
         } else {
             ///如果没有已Navigation为准，如果是11以上，用safeAreaInsets更加准确
             if (@available(iOS 11.0,*)) {
@@ -327,7 +331,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.doubleClickAction(self,point);
     }
 }
-
 
 #pragma mark --- tool method ---
 -(void)configGestureTarget:(UIView *)target {
@@ -806,7 +809,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         CGFloat minY = 0;
         ///如果有toolBar，以toolBar的baseLine做基准
         if (self.previewController.topToolBar) {
-            minY = [self.previewController.topToolBar baseLineForBadge] + spacing;
+            minY = [self.previewController.topToolBar baseline] + spacing;
         } else {
             ///如果没有已Navigation为准，如果是11以上，用safeAreaInsets更加准确
             if (@available(iOS 11.0,*)) {
@@ -984,6 +987,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (self.enterFocus) {
         self.enterFocus(self,YES);
     }
+    [self setBadgeHidden:YES animated:YES];
 }
 
 -(void)pause {
@@ -1058,12 +1062,29 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 @implementation DWVideoControlPreviewCell
 
 #pragma mark --- tool method ---
--(void)hideControl {
-    self.control.hidden = YES;
+-(void)hideControlWithAnimated:(BOOL)animated {
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:^{
+            self.control.alpha = 0;
+        } completion:^(BOOL finished) {
+            self.control.hidden = YES;
+        }];
+    } else {
+        self.control.hidden = YES;
+        self.control.alpha = 0;
+    }
 }
 
--(void)showControl {
-    self.control.hidden = NO;
+-(void)showControlWithAnimated:(BOOL)animated {
+    if (animated) {
+        self.control.hidden = NO;
+        [UIView animateWithDuration:0.25 animations:^{
+            self.control.alpha = 1;
+        }];
+    } else {
+        self.control.alpha = 1;
+        self.control.hidden = NO;
+    }
 }
 
 -(void)configControlWithItem:(AVPlayerItem *)item {
@@ -1082,34 +1103,44 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)setupSubviews {
     [super setupSubviews];
     
-    UIEdgeInsets safeMargin = UIEdgeInsetsZero;
-    if (@available(iOS 11.0,*)) {
-        if ([self.previewController.view respondsToSelector:@selector(safeAreaInsets)]) {
-            safeMargin = self.previewController.view.safeAreaInsets;
+    CGFloat spacing = 10;
+    CGFloat bottomMargin = 0;
+    CGFloat leftMargin = 0;
+    CGFloat height = 40;
+    ///如果有toolBar，以toolBar的baseLine做基准
+    if (self.previewController.bottomToolBar) {
+        bottomMargin = [self.previewController.bottomToolBar baseline] + spacing;
+    } else {
+        ///如果没有已Navigation为准，如果是11以上，用safeAreaInsets更加准确
+        if (@available(iOS 11.0,*)) {
+            bottomMargin = self.safeAreaInsets.bottom + spacing;
+        } else {
+            bottomMargin = spacing;
         }
     }
     
-    if (CGPointEqualToPoint(self.control.center, CGPointMake(self.bounds.size.width, self.bounds.size.height - 10 - safeMargin.bottom - self.control.frame.size.height * 0.5)) || self.control.frame.size.width != self.bounds.size.width - 20 || self.control.frame.size.height != 40) {
-        CGRect frame = CGRectZero;
-        frame.origin.x = 10;
-        frame.size.height = 40;
-        frame.size.width = self.bounds.size.width - 20;
-        frame.origin.y = self.bounds.size.height - frame.size.height - safeMargin.bottom - 10;
-        self.control.frame = frame;
+    ///如果没有已Navigation为准，如果是11以上，用safeAreaInsets更加准确
+    if (@available(iOS 11.0,*)) {
+        leftMargin = self.safeAreaInsets.left + spacing;
+    }
+    
+    CGRect controlFrame = CGRectMake(leftMargin, self.bounds.size.height - bottomMargin - height, self.bounds.size.width - leftMargin * 2, height);
+    if (!CGRectEqualToRect(controlFrame, self.control.frame)) {
+        self.control.frame = controlFrame;
     }
 }
 
 -(void)clearCell {
     [super clearCell];
-    [self hideControl];
+    [self hideControlWithAnimated:NO];
     [self.control updateControlStatus:YES];
 }
 
 -(void)tapAction:(UITapGestureRecognizer *)tap {
     if (self.control.hidden) {
-        [self showControl];
+        [self showControlWithAnimated:YES];
     } else {
-        [self hideControl];
+        [self hideControlWithAnimated:YES];
     }
     if (self.tapAction) {
         self.tapAction(self);
@@ -1130,7 +1161,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)play {
     [super play];
     [self.control updateControlStatus:YES];
-    [self hideControl];
+    [self hideControlWithAnimated:YES];
 }
 
 -(void)pause {
