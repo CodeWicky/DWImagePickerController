@@ -156,7 +156,7 @@
     }
 }
 
--(CGFloat)baseLineForBadge {
+-(CGFloat)baseline {
     return self.frame.size.height;
 }
 

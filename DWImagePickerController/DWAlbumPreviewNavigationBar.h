@@ -12,7 +12,7 @@
 @class DWAlbumPreviewNavigationBar;
 typedef void(^DWAlbumPreviewNavigationBarAction)(DWAlbumPreviewNavigationBar * toolBar);
 
-@interface DWAlbumPreviewNavigationBar : UIView<DWMediaPreviewTopToolBarProtocol>
+@interface DWAlbumPreviewNavigationBar : UIView<DWMediaPreviewToolBarProtocol>
 
 @property (nonatomic ,copy) DWAlbumPreviewNavigationBarAction retAction;
 

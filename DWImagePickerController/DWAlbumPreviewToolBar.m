@@ -51,6 +51,10 @@
     }
 }
 
+-(CGFloat)baseline {
+    return self.frame.size.height;
+}
+
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
