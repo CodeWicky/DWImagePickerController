@@ -92,6 +92,24 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+-(void)selectAtIndex:(NSInteger)index {
+    if (index < self.gridVC.album.fetchResult.count) {
+        PHAsset * asset = self.gridVC.album.fetchResult[index];
+        NSInteger idx = [self.selectionManager indexOfSelection:asset];
+        if (idx == NSNotFound) {
+            if ([self.selectionManager addSelection:asset]) {
+                [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:self.selectionManager.selections.count];
+            } else {
+                if (self.selectionManager.reachMaxSelectCount) {
+                    self.selectionManager.reachMaxSelectCount(self.selectionManager);
+                }
+            }
+        } else {
+            [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:0];
+        }
+    }
+}
+
 #pragma mark --- setter/getter ---
 -(DWAlbumListViewController *)listVC {
     if (!_listVC) {
@@ -156,6 +174,12 @@
             __strong typeof(weakSelf) strongSelf = weakSelf;
             [strongSelf popViewControllerAnimated:YES];
         };
+        
+        topBar.selectionAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf selectAtIndex:strongSelf.previewVC.currentIndex];
+        };
+        
         _previewVC.topToolBar = topBar;
         
         _previewVC.closeOnSlidingDown = YES;

@@ -74,6 +74,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)clearCell {
     [self resetCellZoom];
+    _media = nil;
     _panDirection = DWImagePanDirectionTypeNone;
     _mediaSize = CGSizeZero;
     _isHDR = NO;

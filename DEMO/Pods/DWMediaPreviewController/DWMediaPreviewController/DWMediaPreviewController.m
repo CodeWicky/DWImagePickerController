@@ -143,10 +143,10 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
         CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
         [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
-    } else if (!_finishFirstShowPreview) {
-        ///首次展示时，系统会自动走一次reload，此时要避免同时调用reload，以防偶发性崩溃
-        _index = 0;
-        _finishFirstShowPreview = YES;
+//    } else if (!_finishFirstShowPreview) {
+//        ///首次展示时，系统会自动走一次reload，此时要避免同时调用reload，以防偶发性崩溃
+//        _index = 0;
+//        _finishFirstShowPreview = YES;
     } else {
         ///disappear时会释放当前cell的资源，故如果不改变位置的话，需要刷新当前cell
         NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
@@ -282,19 +282,25 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)configPosterAndFetchMediaWithCellData:(DWMediaPreviewData *)cellData cell:(DWMediaPreviewCell *)cell previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index satisfiedSize:(BOOL)satisfiedSize {
-    NSUInteger originIndex = index;
+    NSLog(@"config poster :%@ - satisfied %d - %ld",cellData.previewImage,satisfiedSize,index);
+    
     cell.poster = cellData.previewImage;
     if (previewType == DWMediaPreviewTypeImage && satisfiedSize) {
         cellData.media = cellData.previewImage;
+        NSLog(@"return poster for previewImage:%@ - %ld",cellData.previewImage,index);
         return;
     }
     ///这里应根据进度来在cell上展示loading.而且Loading展示应该延时一小段时间，以防止loading闪烁的问题（此处需要一个cancelFlag）
+    NSLog(@"finish poster and fetch image - %ld",index);
     [cell.loadingIndicator showLoading];
-    [self fetchMediaAtIndex:originIndex previewType:previewType progressHandler:^(CGFloat progressNum) {
+    [self fetchMediaAtIndex:index previewType:previewType progressHandler:^(CGFloat progressNum) {
         [cell.loadingIndicator updateProgress:progressNum];
     } fetchCompletion:^(id  _Nullable media, NSUInteger index) {
+        NSLog(@"finish fetch image in poster - %ld",index);
         [self configMedia:media forCellData:cellData asynchronous:YES completion:^{
+            NSLog(@"finish config media for cell data - %ld",index);
             if (index == cell.index) {
+                NSLog(@"will config media for cell - %ld",index);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [cell.loadingIndicator hideLoading];
                     [self configMediaForCell:cell withMedia:cellData.media];
@@ -330,6 +336,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)configMediaForCell:(DWMediaPreviewCell *)cell withMedia:(id)media {
+    NSLog(@"config media for cell : %@ - %@ - %ld",cell,media,cell.index);
     cell.media = media;
     ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
     if (!self.firstCellGotFocus) {
@@ -343,7 +350,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         NSMutableArray * indexes = [NSMutableArray arrayWithCapacity:4];
         NSInteger count = [self collectionView:collectionView numberOfItemsInSection:0];
         NSUInteger prefetchCount = _prefetchCount;
-        for (NSInteger i = indexPath.row,step = 0,target = 0; step > -prefetchCount;) {
+        for (NSInteger i = indexPath.row,step = 0,target = 0; step > - prefetchCount;) {
             if (step > 0) {
                 step = -step;
             } else {
@@ -424,7 +431,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    
     NSInteger originIndex = indexPath.item;
+    
+    NSLog(@"oh yeah come to cell for item at index:%ld",originIndex);
+    
     DWMediaPreviewData * cellData = [self dataAtIndex:originIndex];
     DWMediaPreviewType previewType = cellData.previewType;
     __kindof DWMediaPreviewCell * cell;
@@ -473,6 +484,8 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
         
         
+        NSLog(@"oh yeah has media:%@ - %ld",cellData.media,originIndex);
+        
         if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:usePosterAsPlaceholderForCellAtIndex:previewType:)]) {
             if ([self.dataSource previewController:self usePosterAsPlaceholderForCellAtIndex:originIndex previewType:previewType]) {
                 cell.poster = cellData.previewImage;
@@ -486,11 +499,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self configMediaForCell:cell withMedia:cellData.media];
         
     } else if (cellData.previewImage) {
+        NSLog(@"oh yeah has previewImage:%@ - %ld",cellData.previewImage,originIndex);
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO];
     } else {
+        NSLog(@"oh no 啥也没有 - %ld",originIndex);
         [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
+            NSLog(@"finish fetch poster - %ld",originIndex);
             cellData.previewImage = media;
             if (index == cell.index) {
+                NSLog(@"will do like has previewImage:%ld",index);
                 [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:satisfiedSize];
             }
         }];

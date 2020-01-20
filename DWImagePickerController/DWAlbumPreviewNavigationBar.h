@@ -7,6 +7,7 @@
 
 #import <UIKit/UIKit.h>
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
+#import "DWAlbumGridViewController.h"
 
 @class DWAlbumPreviewNavigationBar;
 typedef void(^DWAlbumPreviewNavigationBarAction)(DWAlbumPreviewNavigationBar * toolBar);
@@ -15,6 +16,10 @@ typedef void(^DWAlbumPreviewNavigationBarAction)(DWAlbumPreviewNavigationBar * t
 
 @property (nonatomic ,copy) DWAlbumPreviewNavigationBarAction retAction;
 
+@property (nonatomic ,copy) DWAlbumPreviewNavigationBarAction selectionAction;
+
 +(instancetype)toolBar;
+
+-(void)setSelectAtIndex:(NSInteger)index;
 
 @end

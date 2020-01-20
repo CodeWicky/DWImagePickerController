@@ -101,8 +101,9 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 @implementation DWAssetModel
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
+-(void)configWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize media:(id)media info:(NSDictionary *)info  {
     _asset = asset;
+    _targetSize = targetSize;
     _media = media;
     _info = info;
 }
@@ -142,8 +143,8 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 @implementation DWImageAssetModel
 @dynamic media;
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
-    [super configWithAsset:asset media:media info:info];
+-(void)configWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize media:(id)media info:(NSDictionary *)info{
+    [super configWithAsset:asset targetSize:targetSize media:media info:info];
     _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
 }
 
@@ -169,10 +170,6 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 @implementation DWImageDataAssetModel
 @dynamic media;
 
--(void)configWithTargetSize:(CGSize)targetSize {
-    _targetSize = targetSize;
-}
-
 -(BOOL)satisfiedSize:(CGSize)targetSize {
     if (CGSizeEqualToSize(self.targetSize, self.originSize)) {
         return YES;
@@ -190,8 +187,8 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 @implementation DWLivePhotoAssetModel
 @dynamic media;
 
--(void)configWithAsset:(PHAsset *)asset media:(id)media info:(NSDictionary *)info{
-    [super configWithAsset:asset media:media info:info];
+-(void)configWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize media:(id)media info:(NSDictionary *)info{
+    [super configWithAsset:asset targetSize:targetSize media:media info:info];
     if ([info.allKeys containsObject:PHImageResultIsDegradedKey]) {
         _isDegraded = [info[PHImageResultIsDegradedKey] boolValue];
     } else if ([info.allKeys containsObject:PHLivePhotoInfoIsDegradedKey]) {
@@ -444,7 +441,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             BOOL downloadFinined = (![info[PHImageCancelledKey] boolValue] && !info[PHImageErrorKey]);
             if (downloadFinined && completion) {
                 DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
-                [model configWithAsset:asset media:result info:info];
+                [model configWithAsset:asset targetSize:targetSize media:result info:info];
                 completion(self,model);
             }
         } else if (networkAccessAllowed && [info objectForKey:PHImageResultIsInCloudKey]) {
@@ -458,7 +455,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                 resultImage = [self fixOrientation:resultImage];
                 if (completion) {
                     DWImageAssetModel * model = [[DWImageAssetModel alloc] init];
-                    [model configWithAsset:asset media:resultImage info:remoteinfo];
+                    [model configWithAsset:asset targetSize:targetSize media:resultImage info:remoteinfo];
                     completion(self,model);
                 }
             }];
@@ -489,8 +486,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     return [self.phManager requestImageDataForAsset:asset options:option resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
         if (imageData) {
             DWImageDataAssetModel * model = [[DWImageDataAssetModel alloc] init];
-            [model configWithAsset:asset media:imageData info:info];
-            [model configWithTargetSize:targetSize];
+            [model configWithAsset:asset targetSize:targetSize media:imageData info:info];
             if (completion) {
                 completion(self,model);
             }
@@ -520,7 +516,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     return [self.phManager requestLivePhotoForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFit options:option resultHandler:^(PHLivePhoto * _Nullable livePhoto, NSDictionary * _Nullable info) {
         if (livePhoto) {
             DWLivePhotoAssetModel * model = [[DWLivePhotoAssetModel alloc] init];
-            [model configWithAsset:asset media:livePhoto info:info];
+            [model configWithAsset:asset targetSize:targetSize media:livePhoto info:info];
             if (completion) {
                 completion(self,model);
             }
@@ -549,7 +545,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     return [self.phManager requestPlayerItemForVideo:asset options:option resultHandler:^(AVPlayerItem *playerItem, NSDictionary *info) {
         if (completion) {
             DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
-            [model configWithAsset:asset media:playerItem info:info];
+            [model configWithAsset:asset targetSize:PHImageManagerMaximumSize media:playerItem info:info];
             completion(self,model);
         }
     }];
@@ -1037,9 +1033,9 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             }
             
             if ([media isKindOfClass:[UIImage class]]) {
-                [model configWithAsset:asset media:media info:nil];
+                [model configWithAsset:asset targetSize:CGSizeZero media:media info:nil];
             } else {
-                [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:media}];
+                [model configWithAsset:asset targetSize:CGSizeZero media:nil info:@{DWAlbumMediaSourceURL:media}];
             }
             
             if (completion) {
@@ -1132,7 +1128,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                     completion(self,NO,nil,error);
                 } else {
                     DWVideoAssetModel * model = [[DWVideoAssetModel alloc] init];
-                    [model configWithAsset:asset media:nil info:@{DWAlbumMediaSourceURL:exportPath}];
+                    [model configWithAsset:asset targetSize:CGSizeZero media:nil info:@{DWAlbumMediaSourceURL:exportPath}];
                     completion(self,YES,model,nil);
                 }
             }

@@ -67,8 +67,6 @@
 
 @property (nonatomic ,assign) NSInteger currentPreviewIndex;
 
-@property (nonatomic ,strong) NSMutableDictionary <PHAsset *,DWImageAssetModel *>* cachedAssetModel;
-
 @end
 
 @implementation DWAlbumGridViewController
@@ -164,7 +162,6 @@
     if (![_album isEqual:model]) {
         _album = model;
         _results = model.fetchResult;
-        _cachedAssetModel = nil;
         self.title = model.name;
         _needScrollToEdge = YES;
         [self.collectionView reloadData];
@@ -233,14 +230,23 @@
 }
 
 -(void)loadRealPhoto {
-    CGRect visibleRect = (CGRect){self.collectionView.contentOffset,self.collectionView.bounds.size};
-    NSArray <UICollectionViewLayoutAttributes *>* attrs = [self.collectionView.collectionViewLayout layoutAttributesForElementsInRect:visibleRect];
-    NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:attrs.count];
-    for (UICollectionViewLayoutAttributes * obj in attrs) {
-        [indexPaths addObject:obj.indexPath];
-    }
-
-    [self.collectionView reloadItemsAtIndexPaths:indexPaths];
+    
+    NSArray <DWAlbumGridCell *>* visibleCells = self.collectionView.visibleCells;
+    [visibleCells enumerateObjectsUsingBlock:^(DWAlbumGridCell * _Nonnull cell, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (CGSizeEqualToSize(self.photoSize, cell.model.targetSize)) {
+            return ;
+        }
+        PHAsset * asset = cell.model.asset;
+        NSInteger index = [self.results indexOfObject:asset];
+        [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+            if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    cell.model = obj;
+                });
+            }
+        }];
+    }];
+    
 }
 
 -(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
@@ -502,8 +508,6 @@ NS_INLINE NSArray * animateExtensions() {
     PHAsset * asset = [self.results objectAtIndex:indexPath.row];
     DWAlbumGridCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GridCell" forIndexPath:indexPath];
     
-    NSLog(@"DW:%@-%@",indexPath,cell);
-    
     cell.requestLocalID = asset.localIdentifier;
     
     [self configCellSelect:cell asset:asset];
@@ -520,18 +524,8 @@ NS_INLINE NSArray * animateExtensions() {
         thumnail = YES;
     }
     
-    DWImageAssetModel * cachedModel = [self.cachedAssetModel objectForKey:asset];
-    if (cachedModel) {
-        if (!cachedModel.isDegraded || thumnail) {
-            cell.model = cachedModel;
-            [cell setNeedsLayout];
-            return cell;
-        }
-    }
-    
     CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
     [self.albumManager fetchImageWithAlbum:self.album index:indexPath.row targetSize:targetSize shouldCache:!thumnail progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        [self.cachedAssetModel setObject:obj forKey:asset];
         if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 cell.model = obj;
@@ -629,13 +623,6 @@ NS_INLINE NSArray * animateExtensions() {
         _collectionView.showsVerticalScrollIndicator = NO;
     }
     return _collectionView;
-}
-
--(NSMutableDictionary<PHAsset *,DWImageAssetModel *> *)cachedAssetModel {
-    if (!_cachedAssetModel) {
-        _cachedAssetModel = [NSMutableDictionary dictionaryWithCapacity:self.results.count];
-    }
-    return _cachedAssetModel;
 }
 
 @end

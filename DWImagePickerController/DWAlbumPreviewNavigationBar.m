@@ -6,6 +6,7 @@
 //
 
 #import "DWAlbumPreviewNavigationBar.h"
+#import <DWKit/DWLabel.h>
 
 @interface DWAlbumPreviewReturnBarButton : UIButton
 
@@ -49,6 +50,8 @@
 
 @property (nonatomic ,strong) DWAlbumPreviewReturnBarButton * retBtn;
 
+@property (nonatomic ,strong) DWLabel * selectionLb;
+
 @end
 
 @implementation DWAlbumPreviewNavigationBar
@@ -56,6 +59,18 @@
 #pragma mark --- interface method ---
 +(instancetype)toolBar {
     return [self new];
+}
+
+-(void)setSelectAtIndex:(NSInteger)index {
+    if (index > 0 && index != NSNotFound) {
+        self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
+        self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
+    } else {
+        self.selectionLb.backgroundColor = [UIColor clearColor];
+        self.selectionLb.text = nil;
+    }
+    
+    [self refreshUI];
 }
 
 #pragma mark --- tool method ---
@@ -66,10 +81,24 @@
     blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self addSubview:blurView];
     [self addSubview:self.retBtn];
+    [self addSubview:self.selectionLb];
 }
 
 -(void)refreshUI {
-    CGRect btnFrame = self.retBtn.frame;
+    
+    [self.selectionLb sizeToFit];
+    CGRect btnFrame = self.selectionLb.frame;
+    btnFrame.origin.x = CGRectGetWidth([UIApplication sharedApplication].statusBarFrame) - CGRectGetWidth(btnFrame) - 11;//11是以44为实际响应区域后selectionLb边距与44*44的距离
+    btnFrame.origin.y = 11;
+    if (@available(iOS 11.0,*)) {
+        btnFrame.origin.y += self.safeAreaInsets.top;
+        btnFrame.origin.x -= self.safeAreaInsets.right;
+    } else {
+        btnFrame.origin.y += CGRectGetMaxY([UIApplication sharedApplication].statusBarFrame);
+    }
+    self.selectionLb.frame = btnFrame;
+    
+    btnFrame = self.retBtn.frame;
     btnFrame.origin.x = 0;
     if (@available(iOS 11.0,*)) {
         btnFrame.origin.y = self.safeAreaInsets.top;
@@ -80,9 +109,10 @@
         }
     } else {
         btnFrame.origin.y = CGRectGetMaxY([UIApplication sharedApplication].statusBarFrame);
-        NSLog(@"%f",btnFrame.origin.y);
     }
     [self.retBtn setFrame:btnFrame];
+    
+
     
     if (self.show) {
         btnFrame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, CGRectGetMaxY(btnFrame));
@@ -152,6 +182,10 @@
     [self refreshUI];
 }
 
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    
+}
+
 #pragma mark --- setter/getter ---
 -(DWAlbumPreviewReturnBarButton *)retBtn {
     if (!_retBtn) {
@@ -160,6 +194,35 @@
         [_retBtn addTarget:self action:@selector(retBtnAction:) forControlEvents:(UIControlEventTouchUpInside)];
     }
     return _retBtn;
+}
+
+-(DWLabel *)selectionLb {
+    if (!_selectionLb) {
+        _selectionLb = [[DWLabel alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
+        _selectionLb.minSize = CGSizeMake(22, 22);
+        _selectionLb.maxSize = CGSizeMake(44, 22);
+        _selectionLb.font = [UIFont systemFontOfSize:13];
+        _selectionLb.adjustsFontSizeToFitWidth = YES;
+        _selectionLb.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
+        _selectionLb.touchPaddingInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+        _selectionLb.marginInsets = UIEdgeInsetsMake(0, 5, 0, 5);
+        _selectionLb.textColor = [UIColor whiteColor];
+        _selectionLb.backgroundColor = [UIColor clearColor];
+        _selectionLb.layer.borderColor = [UIColor lightGrayColor].CGColor;;
+        _selectionLb.layer.borderWidth = 2;
+        _selectionLb.layer.cornerRadius = 11;
+        _selectionLb.layer.masksToBounds = YES;
+        _selectionLb.textAlignment = NSTextAlignmentCenter;
+        __weak typeof(self) weakSelf = self;
+        [_selectionLb addAction:^(DWLabel * _Nonnull label) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf.selectionAction) {
+                strongSelf.selectionAction(strongSelf);
+            }
+        }];
+        _selectionLb.userInteractionEnabled = YES;
+    }
+    return _selectionLb;
 }
 
 @end

@@ -344,6 +344,9 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///修改时间
 @property (nonatomic, strong, readonly) NSDate * modificationDate;
 
+///请求尺寸
+@property (nonatomic ,assign,readonly ) CGSize targetSize;
+
 ///媒体尺寸
 @property (nonatomic ,assign ,readonly) CGSize originSize;
 
@@ -376,9 +379,6 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 @interface DWImageDataAssetModel : DWAssetModel
 
 @property (nonatomic ,strong ,readonly) NSData * media;
-
-///获取data的指定尺寸
-@property (nonatomic ,assign ,readonly) CGSize targetSize;
 
 @end
 
