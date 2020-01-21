@@ -88,7 +88,7 @@
     
     [self.selectionLb sizeToFit];
     CGRect btnFrame = self.selectionLb.frame;
-    btnFrame.origin.x = CGRectGetWidth([UIApplication sharedApplication].statusBarFrame) - CGRectGetWidth(btnFrame) - 11;//11是以44为实际响应区域后selectionLb边距与44*44的距离
+    btnFrame.origin.x = CGRectGetWidth([UIScreen mainScreen].bounds) - CGRectGetWidth(btnFrame) - 11;//11是以44为实际响应区域后selectionLb边距与44*44的距离
     btnFrame.origin.y = 11;
     if (@available(iOS 11.0,*)) {
         btnFrame.origin.y += self.safeAreaInsets.top;
