@@ -106,6 +106,7 @@
                 }
             }
         } else {
+            [self.selectionManager removeSelection:asset];
             [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:0];
         }
     }
