@@ -110,6 +110,18 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///表明自定制预览类型的cell是否优先展示封面作为占位图
 -(BOOL)previewController:(DWMediaPreviewController *)previewController usePosterAsPlaceholderForCellAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
 
+//Callback before cell will be displayed
+///预览cell即将被展示的回调
+-(void)previewController:(DWMediaPreviewController *)previewController willDisplayCell:(DWMediaPreviewCell *)cell forItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
+
+//Callback on displaying cell.(It will only be called when then scrollView end scrolling.)
+///展示cell的回调（只有当scrollView停止滚动后调用。）
+-(void)previewController:(DWMediaPreviewController *)previewController beginDisplayingCell:(DWMediaPreviewCell *)cell forItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
+
+//Callback after cell end displaying
+///预览cell结束展示的回调
+-(void)previewController:(DWMediaPreviewController *)previewController didEndDisplayingCell:(DWMediaPreviewCell *)cell forItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
+
 @end
 
 @interface DWMediaPreviewController : UIViewController

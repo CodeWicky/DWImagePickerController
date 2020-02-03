@@ -254,10 +254,21 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         return;
     }
     NSInteger page = (scrollView.contentOffset.x + _previewSize.width / 2) / _previewSize.width;
+    NSUInteger targetIdx = [self getValidIndex:page];
+    if (targetIdx == _index) {
+        return;
+    }
     _index = [self getValidIndex:page];
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:hasChangedToIndex:previewType:)]) {
         DWMediaPreviewData * data = [self dataAtIndex:_index];
         [self.dataSource previewController:self hasChangedToIndex:_index previewType:data.previewType];
+    }
+}
+
+-(void)beginPreviewingAtIndex:(NSUInteger)index {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:beginDisplayingCell:forItemAtIndex:previewType:)]) {
+        DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
+        [self.dataSource previewController:self beginDisplayingCell:cell forItemAtIndex:index previewType:cell.previewType];
     }
 }
 
@@ -548,13 +559,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     return cell;
 }
 
--(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    [self previewDidChangedToIndex:scrollView];
-}
-
--(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    if (!decelerate) {
-        [self previewDidChangedToIndex:scrollView];
+-(void)collectionView:(UICollectionView *)collectionView willDisplayCell:(DWMediaPreviewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:willDisplayCell:forItemAtIndex:previewType:)]) {
+        NSUInteger index = indexPath.item;
+        DWMediaPreviewData * cellData = [self dataAtIndex:index];
+        [self.dataSource previewController:self willDisplayCell:cell forItemAtIndex:index previewType:cellData.previewType];
     }
 }
 
@@ -566,6 +575,26 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     } else {
         ///这里由于防止不在屏幕内滚动时导致无法获取visibleCells而无法获取焦点，所以在获取不到时置为NO，强制在cellForItem中获取焦点
         self.firstCellGotFocus = NO;
+    }
+    
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:didEndDisplayingCell:forItemAtIndex:previewType:)]) {
+        NSUInteger index = indexPath.item;
+        DWMediaPreviewData * cellData = [self dataAtIndex:index];
+        [self.dataSource previewController:self didEndDisplayingCell:cell forItemAtIndex:index previewType:cellData.previewType];
+    }
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    [self previewDidChangedToIndex:scrollView];
+}
+
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    [self beginPreviewingAtIndex:_index];
+}
+
+-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    if (!decelerate) {
+        [self beginPreviewingAtIndex:_index];
     }
 }
 
