@@ -8,7 +8,7 @@
 #import "DWAlbumGridViewController.h"
 #import <DWMediaPreviewController/DWFixAdjustCollectionView.h>
 #import "DWAlbumGridCell.h"
-
+#import "DWAlbumPreviewNavigationBar.h"
 
 
 @interface DWAlbumModel ()
@@ -86,6 +86,7 @@
 -(void)previewAtIndex:(NSInteger)index {
     if (index < self.album.fetchResult.count) {
         [self.previewVC previewAtIndex:index];
+        [self handleNavigationBarSelectedAtIndex:index];
         [self.navigationController pushViewController:self.previewVC animated:YES];
     }
 }
@@ -381,6 +382,18 @@
     }
 }
 
+-(void)handleNavigationBarSelectedAtIndex:(NSUInteger)index {
+    PHAsset * asset = [self.results objectAtIndex:index];
+    NSUInteger idx = [self.selectionManager indexOfSelection:asset];
+    ///调整idx。如果找不到改为0，因为navigationBar中规定0为未选中，如果找到则自加，因为规定角标从1开始
+    if (idx == NSNotFound) {
+        idx = 0;
+    } else {
+        ++ idx;
+    }
+    [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:idx];
+}
+
 #pragma mark --- tool func ---
 NS_INLINE NSArray * animateExtensions() {
     static NSArray * exts = nil;
@@ -504,6 +517,7 @@ NS_INLINE NSArray * animateExtensions() {
 
 -(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
     self.currentPreviewIndex = index;
+    [self handleNavigationBarSelectedAtIndex:index];
 }
 
 #pragma mark --- collectionView delegate ---
