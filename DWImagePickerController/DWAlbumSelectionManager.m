@@ -21,14 +21,19 @@
 
 -(BOOL)addSelection:(PHAsset *)asset {
     if (asset) {
-        if ((self.maxSelectCount > 0 && self.selections.count < self.maxSelectCount) || self.maxSelectCount <= 0) {
+        if (!self.reachMaxSelectCount) {
             DWAlbumSelectionModel * model = [DWAlbumSelectionModel new];
             model.asset = asset;
             [self.selections addObject:model];
             [self handleSetNeedsRefreshSelection];
             return YES;
         }
+        
+        if (self.reachMaxSelectCountAction) {
+            self.reachMaxSelectCountAction(self);
+        }
     }
+    
     return NO;
 }
 
@@ -99,6 +104,13 @@
         _selections = [NSMutableArray arrayWithCapacity:self.maxSelectCount];
     }
     return _selections;
+}
+
+-(BOOL)reachMaxSelectCount {
+    if (self.maxSelectCount > 0) {
+        return self.selections.count >= self.maxSelectCount;
+    }
+    return NO;
 }
 
 @end

@@ -100,10 +100,6 @@
         if (idx == NSNotFound) {
             if ([self.selectionManager addSelection:asset]) {
                 [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:self.selectionManager.selections.count];
-            } else {
-                if (self.selectionManager.reachMaxSelectCount) {
-                    self.selectionManager.reachMaxSelectCount(self.selectionManager);
-                }
             }
         } else {
             [self.selectionManager removeSelection:asset];

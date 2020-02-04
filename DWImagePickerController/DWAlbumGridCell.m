@@ -16,6 +16,8 @@
 
 @property (nonatomic ,strong) DWLabel * selectionLb;
 
+@property (nonatomic ,strong) CALayer * maskLayer;
+
 @end
 
 @implementation DWAlbumGridCell
@@ -34,7 +36,13 @@
         self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
         self.selectionLb.layer.borderColor = [UIColor whiteColor].CGColor;
         self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
+        self.maskLayer.hidden = YES;
     } else {
+        ///小于零为不可选中状态，等于零为非选中状态
+        [CATransaction begin];
+        [CATransaction setAnimationDuration:0];
+        self.maskLayer.hidden = index == 0;
+        [CATransaction commit];
         self.selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
         self.selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;
         self.selectionLb.text = nil;
@@ -46,6 +54,7 @@
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         [self.contentView addSubview:self.gridImage];
+        [self.contentView.layer addSublayer:self.maskLayer];
         [self.contentView addSubview:self.selectionLb];
     }
     return self;
@@ -55,7 +64,9 @@
     [super layoutSubviews];
     if (!CGRectEqualToRect(self.gridImage.frame, self.bounds)) {
         self.gridImage.frame = self.bounds;
+        self.maskLayer.frame = self.bounds;
     }
+    
     if (_durationLabel && !_durationLabel.hidden) {
         [self.durationLabel sizeToFit];
         CGPoint origin = CGPointMake(5, self.bounds.size.height - 5 - self.durationLabel.bounds.size.height);
@@ -151,6 +162,15 @@
         _selectionLb.hidden = YES;
     }
     return _selectionLb;
+}
+
+-(CALayer *)maskLayer {
+    if (!_maskLayer) {
+        _maskLayer = [CALayer layer];
+        _maskLayer.frame = self.bounds;
+        _maskLayer.backgroundColor = [UIColor colorWithWhite:1 alpha:0.7].CGColor;
+    }
+    return _maskLayer;
 }
 
 @end

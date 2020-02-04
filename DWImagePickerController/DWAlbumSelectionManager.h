@@ -21,9 +21,11 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 @property (nonatomic ,assign ,readonly) BOOL needsRefreshSelection;
 
+@property (nonatomic ,assign ,readonly) BOOL reachMaxSelectCount;
+
 @property (nonatomic ,assign) BOOL useOriginImage;
 
-@property (nonatomic ,copy) DWAlbumSelectionAction reachMaxSelectCount;
+@property (nonatomic ,copy) DWAlbumSelectionAction reachMaxSelectCountAction;
 
 @property (nonatomic ,copy) DWAlbumSelectionAction sendAction;
 

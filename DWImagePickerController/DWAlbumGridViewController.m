@@ -155,10 +155,10 @@
             self.currentPreviewIndex = -1;
         }
         
-//        if (self.selectionManager.needsRefreshSelection) {
-//            [self.collectionView reloadData];
-//            [self.selectionManager finishRefreshSelection];
-//        }
+        if (self.selectionManager.needsRefreshSelection) {
+            [self.collectionView reloadData];
+            [self.selectionManager finishRefreshSelection];
+        }
     }
     self.firstAppear = NO;
     self.needScrollToEdge = NO;
@@ -188,9 +188,7 @@
 -(void)configCellSelect:(DWAlbumGridCell *)cell asset:(PHAsset *)asset {
     if (self.selectionManager) {
         cell.showSelectButton = YES;
-        NSInteger idx = [self.selectionManager indexOfSelection:asset];
-        [self.selectionManager addUserInfo:cell atIndex:idx];
-        [cell setSelectAtIndex:idx + 1];
+        [self selectCell:cell withAsset:asset];
         __weak typeof(self) weakSelf = self;
         cell.onSelect = ^(DWAlbumGridCell *aCell) {
             [weakSelf handleSelectWithAsset:asset cell:aCell];
@@ -200,32 +198,66 @@
     }
 }
 
--(void)handleSelectWithAsset:(PHAsset *)asset cell:(DWAlbumGridCell *)cell {
+-(void)selectCell:(DWAlbumGridCell *)cell withAsset:(PHAsset *)asset {
     NSInteger idx = [self.selectionManager indexOfSelection:asset];
     if (idx == NSNotFound) {
-        if ([self.selectionManager addSelection:asset]) {
-            NSInteger index = self.selectionManager.selections.count;
-            [self.selectionManager addUserInfo:cell atIndex:index - 1];
-            [cell setSelectAtIndex:index];
+        if (self.selectionManager.reachMaxSelectCount) {
+            idx = -1;
         } else {
+            idx = 0;
+        }
+    } else {
+        [self.selectionManager addUserInfo:cell atIndex:idx];
+        ++idx;
+    }
+    [cell setSelectAtIndex:idx];
+}
+
+-(void)handleSelectWithAsset:(PHAsset *)asset cell:(DWAlbumGridCell *)cell {
+    NSInteger idx = [self.selectionManager indexOfSelection:asset];
+    BOOL needRefresh = NO;
+    if (idx == NSNotFound) {
+        if ([self.selectionManager addSelection:asset]) {
             if (self.selectionManager.reachMaxSelectCount) {
-                self.selectionManager.reachMaxSelectCount(self.selectionManager);
+                [self selectVisibleCells];
+            } else {
+                NSInteger index = self.selectionManager.selections.count;
+                [self.selectionManager addUserInfo:cell atIndex:index - 1];
+                [cell setSelectAtIndex:index];
             }
+            needRefresh = YES;
         }
     } else {
         if (idx < self.selectionManager.selections.count) {
-            ///两种情况，如果移除对位的话，只影响队尾，否则删除后需要更改对应idx后的序号
-            [self resetSelectionCellAtIndex:idx toIndex:0];
-            [self.selectionManager removeSelectionAtIndex:idx];
-            
-            
-            for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
-                [self resetSelectionCellAtIndex:i toIndex:i + 1];
+           
+            if (self.selectionManager.reachMaxSelectCount) {
+                [self.selectionManager removeSelectionAtIndex:idx];
+                [self selectVisibleCells];
+            } else {
+                ///两种情况，如果移除对位的话，只影响队尾，否则删除后需要更改对应idx后的序号
+                [self resetSelectionCellAtIndex:idx toIndex:0];
+                [self.selectionManager removeSelectionAtIndex:idx];
+                
+                
+                for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
+                    [self resetSelectionCellAtIndex:i toIndex:i + 1];
+                }
             }
+            needRefresh = YES;
         }
     }
-    [self.topToolBar refreshSelection];
-    [self.bottomToolBar refreshSelection];
+    
+    if (needRefresh) {
+        [self.topToolBar refreshSelection];
+        [self.bottomToolBar refreshSelection];
+    }
+}
+
+-(void)selectVisibleCells {
+    NSArray <DWAlbumGridCell *>* visibleCells = self.collectionView.visibleCells;
+    [visibleCells enumerateObjectsUsingBlock:^(DWAlbumGridCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self selectCell:obj withAsset:obj.model.asset];
+    }];
 }
 
 -(void)resetSelectionCellAtIndex:(NSInteger)index toIndex:(NSInteger)toIndex {
