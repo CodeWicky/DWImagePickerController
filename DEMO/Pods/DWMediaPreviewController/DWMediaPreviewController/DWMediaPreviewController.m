@@ -636,6 +636,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _collectionView.decelerationRate = UIScrollViewDecelerationRateFast;
         _collectionView.showsHorizontalScrollIndicator = NO;
         _collectionView.showsVerticalScrollIndicator = NO;
+        _collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return _collectionView;
 }

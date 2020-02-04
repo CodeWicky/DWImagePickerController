@@ -19,6 +19,8 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 @property (nonatomic ,assign ,readonly) NSInteger maxSelectCount;
 
+@property (nonatomic ,assign ,readonly) BOOL needsRefreshSelection;
+
 @property (nonatomic ,assign) BOOL useOriginImage;
 
 @property (nonatomic ,copy) DWAlbumSelectionAction reachMaxSelectCount;
@@ -42,6 +44,8 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 -(DWAlbumSelectionModel *)selectionModelAtIndex:(NSInteger)index;
 
 -(PHAsset *)selectionAtIndex:(NSInteger)index;
+
+-(void)finishRefreshSelection;
 
 @end
 

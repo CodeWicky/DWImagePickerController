@@ -25,6 +25,7 @@
             DWAlbumSelectionModel * model = [DWAlbumSelectionModel new];
             model.asset = asset;
             [self.selections addObject:model];
+            [self handleSetNeedsRefreshSelection];
             return YES;
         }
     }
@@ -47,6 +48,7 @@
     NSInteger idx = [self indexOfSelection:asset];
     if (idx != NSNotFound) {
         [self.selections removeObjectAtIndex:idx];
+        [self handleSetNeedsRefreshSelection];
         return YES;
     }
     return NO;
@@ -80,6 +82,15 @@
 
 -(PHAsset *)selectionAtIndex:(NSInteger)index {
     return [self selectionModelAtIndex:index].asset;
+}
+
+-(void)finishRefreshSelection {
+    _needsRefreshSelection = NO;
+}
+
+#pragma mark --- tool method ---
+-(void)handleSetNeedsRefreshSelection {
+    _needsRefreshSelection = YES;
 }
 
 #pragma mark --- setter/getter ---

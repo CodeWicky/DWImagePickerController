@@ -131,7 +131,6 @@
         self.thumnailSize = CGSizeMake(floor(itemSize.width * thumnailScale), floor(itemSize.height * thumnailScale));
     }
     
-    
     if (self.needScrollToEdge && self.results.count) {
         CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
         if (contentSize.height > self.collectionView.bounds.size.height) {
@@ -147,12 +146,19 @@
         } else {
             [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
         }
-    } else if (self.currentPreviewIndex >= 0 && self.results.count) {
-        if (self.currentPreviewIndex < self.results.count) {
-            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.currentPreviewIndex inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
+    } else {
+        if (self.currentPreviewIndex >= 0 && self.results.count) {
+            if (self.currentPreviewIndex < self.results.count) {
+                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.currentPreviewIndex inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
+            }
+            
+            self.currentPreviewIndex = -1;
         }
         
-        self.currentPreviewIndex = -1;
+//        if (self.selectionManager.needsRefreshSelection) {
+//            [self.collectionView reloadData];
+//            [self.selectionManager finishRefreshSelection];
+//        }
     }
     self.firstAppear = NO;
     self.needScrollToEdge = NO;
