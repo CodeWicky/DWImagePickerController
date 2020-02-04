@@ -27,11 +27,15 @@
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
-    DWImagePickerController * picker = [DWImagePickerController showImagePickerWithAlbumManager:nil option:nil currentVC:self];
-#pragma clang diagnostic pop
-    
+//#pragma clang diagnostic push
+//#pragma clang diagnostic ignored "-Wunused-variable"
+//    DWImagePickerController * picker = [DWImagePickerController  showImagePickerWithAlbumManager:nil option:nil currentVC:self];
+//#pragma clang diagnostic pop
+    DWImagePickerController * picker = [[DWImagePickerController alloc] initWithAlbumManager:nil option:nil columnCount:3 spacing:5];
+    picker.maxSelectCount = 9;
+    [picker fetchCameraRollWithCompletion:^{
+        [self presentViewController:picker animated:YES completion:nil];
+    }];
     
 }
 
