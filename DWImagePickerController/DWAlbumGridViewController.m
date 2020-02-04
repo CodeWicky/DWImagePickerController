@@ -61,6 +61,8 @@
 
 @property (nonatomic ,assign) BOOL needScrollToEdge;
 
+@property (nonatomic ,strong) dispatch_queue_t fetchMediaQueue;
+
 @property (nonatomic ,strong) dispatch_queue_t preloadQueue;
 
 @property (nonatomic ,strong) Class cellClazz;
@@ -289,39 +291,41 @@
 }
 
 -(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    switch (previewType) {
-        case DWMediaPreviewTypeLivePhoto:
-        {
-            [self fetchLivePhotoWithAsset:asset index:index targetSize:targetSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
-        }
-            break;
-        case DWMediaPreviewTypeVideo:
-        {
-            [self fetchVideoWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
-        }
-            break;
-        case DWMediaPreviewTypeAnimateImage:
-        {
-            [self fetchAnimateImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
-        }
-            break;
-        case DWMediaPreviewTypeNone:
-        {
-            ///do nothing
-        }
-            break;
-        default:
-        {
-            ///如果是超尺寸大图，则降级图片尺寸
-            CGFloat min_Length = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) * 1.0;
-            if (asset.pixelWidth / min_Length > 3 && asset.pixelHeight / min_Length > 3) {
-                [self fetchBigImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
-            } else {
-                [self fetchOriginImageWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+    dispatch_async(self.fetchMediaQueue, ^{
+        switch (previewType) {
+            case DWMediaPreviewTypeLivePhoto:
+            {
+                [self fetchLivePhotoWithAsset:asset index:index targetSize:targetSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
             }
+                break;
+            case DWMediaPreviewTypeVideo:
+            {
+                [self fetchVideoWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            }
+                break;
+            case DWMediaPreviewTypeAnimateImage:
+            {
+                [self fetchAnimateImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+            }
+                break;
+            case DWMediaPreviewTypeNone:
+            {
+                ///do nothing
+            }
+                break;
+            default:
+            {
+                ///如果是超尺寸大图，则降级图片尺寸
+                CGFloat min_Length = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) * 1.0;
+                if (asset.pixelWidth / min_Length > 3 && asset.pixelHeight / min_Length > 3) {
+                    [self fetchBigImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+                } else {
+                    [self fetchOriginImageWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
+                }
+            }
+                break;
         }
-            break;
-    }
+    });
 }
 
 -(void)fetchLivePhotoWithAsset:(PHAsset *)asset index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
@@ -331,7 +335,7 @@
             progressHandler(progress,index);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
-        if (fetchCompletion) {
+        if (fetchCompletion && !obj.isDegraded) {
             fetchCompletion(obj.media,index);
         }
     }];
@@ -398,7 +402,7 @@
             progressHandler(progressNum,index);
         }
     } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if (fetchCompletion) {
+        if (fetchCompletion && !obj.isDegraded) {
             fetchCompletion(obj.media,index);
         }
     }];
@@ -659,9 +663,16 @@ NS_INLINE NSArray * animateExtensions() {
 #pragma mark --- setter/getter ---
 -(dispatch_queue_t)preloadQueue {
     if (!_preloadQueue) {
-        _preloadQueue = dispatch_queue_create("com.wicky.dwimagepicker", DISPATCH_QUEUE_CONCURRENT);
+        _preloadQueue = dispatch_queue_create("com.wicky.dwimagepicker.preloadQueue", DISPATCH_QUEUE_CONCURRENT);
     }
     return _preloadQueue;
+}
+
+-(dispatch_queue_t)fetchMediaQueue {
+    if (!_fetchMediaQueue) {
+        _fetchMediaQueue = dispatch_queue_create("com.wicky.dwimagepicker.fetchMediaQueue", DISPATCH_QUEUE_CONCURRENT);
+    }
+    return _fetchMediaQueue;
 }
 
 -(DWGridFlowLayout *)collectionViewLayout {
