@@ -25,8 +25,6 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 
 @property (nonatomic ,strong) NSCache * albumLivePhotoCache;
 
-@property (nonatomic ,assign) BOOL networkAccessAllowed;
-
 @end
 
 @implementation DWAlbumModel

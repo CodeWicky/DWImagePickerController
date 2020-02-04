@@ -11,6 +11,7 @@
 #import <DWPlayer/DWPlayerView.h>
 #import "DWMediaPreviewVideoControl.h"
 #import "DWMediaPreviewLoading.h"
+#import "DWMediaPreviewImageDecoder.h"
 
 #define CGFLOATEQUAL(a,b) (fabs(a - b) <= __FLT_EPSILON__)
 
@@ -646,7 +647,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- setter/getter ---
 -(void)setMedia:(UIImage *)media {
     [super setMedia:media];
-    self.mediaView.image = media;
+    [DWMediaPreviewImageDecoder decodeImage:media completion:^(UIImage * _Nonnull image) {
+        self.mediaView.image = image;
+    }];
 }
 
 -(void)setPoster:(UIImage *)poster {

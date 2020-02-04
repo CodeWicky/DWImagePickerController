@@ -538,7 +538,23 @@ NS_INLINE NSArray * animateExtensions() {
 }
 
 -(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
-    [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+    if (index >= self.album.fetchResult.count) {
+        if (fetchCompletion) {
+            fetchCompletion(nil,index,NO);
+        }
+        return ;
+    }
+    
+    PHAsset * asset = [self.album.fetchResult objectAtIndex:index];
+    
+    if (asset.mediaType != PHAssetMediaTypeImage && asset.mediaType != PHAssetMediaTypeVideo) {
+        if (fetchCompletion) {
+            fetchCompletion(nil,index,NO);
+        }
+        return ;
+    }
+    
+    [self.albumManager fetchImageWithAsset:asset targetSize:self.photoSize networkAccessAllowed:self.album.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (fetchCompletion) {
             fetchCompletion(obj.media,index,[obj satisfiedSize:previewController.previewSize]);
         }

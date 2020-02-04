@@ -9,6 +9,7 @@
 #import "DWMediaPreviewController.h"
 #import "DWMediaPreviewCell.h"
 #import "DWFixAdjustCollectionView.h"
+#import "DWMediaPreviewImageDecoder.h"
 
 @interface DWMediaPreviewCell ()
 
@@ -398,7 +399,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:prefetchMediaAtIndexes:fetchCompletion:)]) {
         NSMutableArray * indexes = [NSMutableArray arrayWithCapacity:4];
         NSInteger count = [self collectionView:collectionView numberOfItemsInSection:0];
-        NSUInteger prefetchCount = _prefetchCount;
+        NSInteger prefetchCount = _prefetchCount;
         for (NSInteger i = indexPath.row,step = 0,target = 0; step > -prefetchCount;) {
             if (step > 0) {
                 step = -step;
@@ -528,20 +529,51 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [cell configPreviewController:self];
     }
     if (cellData.media) {
+        BOOL needConfigMedia = YES;
         ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
-        
         
         if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:usePosterAsPlaceholderForCellAtIndex:previewType:)]) {
             if ([self.dataSource previewController:self usePosterAsPlaceholderForCellAtIndex:originIndex previewType:previewType]) {
                 cell.poster = cellData.previewImage;
             }
         } else {
-            if (previewType == DWMediaPreviewTypeVideo) {
-                cell.poster = cellData.previewImage;
+            
+            switch (previewType) {
+                case DWMediaPreviewTypeVideo:
+                {
+                    cell.poster = cellData.previewImage;
+                }
+                    break;
+                case DWMediaPreviewTypeImage:
+                {
+                    ///普通图片类型，当图片尚未解码时，以poster占位
+                    if ([cellData.media isKindOfClass:[UIImage class]] && ![DWMediaPreviewImageDecoder imageDecoded:cellData.media]) {
+                        ///如果poster已经存在，则直接设置poster
+                        if (cellData.previewImage) {
+                            cell.poster = cellData.previewImage;
+                        } else {
+                            ///如果不存在，先获取poster，在poster完成时在设置media。所以这里要取消下面的主动设置media
+                            needConfigMedia = NO;
+                            [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
+                                cellData.previewImage = media;
+                                if (index == cell.index) {
+                                    cell.poster = cellData.previewImage;
+                                    [self configMediaForCell:cell withMedia:cellData.media];
+                                }
+                            }];
+                        }
+                    }
+                }
+                    break;
+                default:
+                    ///Do nothing
+                    break;
             }
         }
         
-        [self configMediaForCell:cell withMedia:cellData.media];
+        if (needConfigMedia) {
+            [self configMediaForCell:cell withMedia:cellData.media];
+        }
         
     } else if (cellData.previewImage) {
         [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO showProgressIndicator:cellData.shouldShowProgressIndicator];
@@ -663,7 +695,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(dispatch_queue_t)asyncDecodeQueue {
     if (!_asyncDecodeQueue) {
-        _asyncDecodeQueue = dispatch_queue_create("com.wicky.DWMediaPreviewcontroller", DISPATCH_QUEUE_CONCURRENT);
+        _asyncDecodeQueue = dispatch_queue_create("com.wicky.DWMediaPreviewcontroller.animateImageDecodeQueue", DISPATCH_QUEUE_CONCURRENT);
     }
     return _asyncDecodeQueue;
 }

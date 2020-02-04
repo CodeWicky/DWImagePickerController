@@ -313,6 +313,9 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 ///排序类型
 @property (nonatomic ,assign ,readonly) DWAlbumSortType sortType;
 
+///是否允许拉取远端资源
+@property (nonatomic ,assign ,readonly) BOOL networkAccessAllowed;
+
 ///相册名称
 @property (nonatomic ,copy ,readonly) NSString * name;
 
