@@ -86,16 +86,10 @@
     [self.view addSubview:self.collectionView];
     if (self.bottomToolBar) {
         [self.view addSubview:self.bottomToolBar];
-        UIEdgeInsets insets = self.collectionView.contentInset;
-        insets.bottom += self.bottomToolBar.toolBarHeight;
-        self.collectionView.contentInset = insets;
     }
     
     if (self.topToolBar) {
         [self.view addSubview:self.topToolBar];
-        UIEdgeInsets insets = self.collectionView.contentInset;
-        insets.top += self.topToolBar.toolBarHeight;
-        self.collectionView.contentInset = insets;
     }
     
     self.view.backgroundColor = [UIColor whiteColor];
@@ -151,6 +145,29 @@
 }
 
 #pragma mark --- tool method ---
+-(CGRect)gridFrame {
+    UIEdgeInsets insets = UIEdgeInsetsZero;
+    if (@available(iOS 11.0, *)) {
+        insets = self.view.safeAreaInsets;
+    } else {
+        insets.top = [UIApplication sharedApplication].statusBarFrame.size.height;
+    }
+    CGFloat top = insets.top;
+    CGFloat left = insets.left;
+    CGFloat right = insets.right;
+    CGFloat bottom = insets.bottom;
+    
+    if (self.topToolBar) {
+        top += self.topToolBar.toolBarHeight;
+    }
+    
+    if (self.bottomToolBar) {
+        bottom += self.bottomToolBar.toolBarHeight;
+    }
+    
+    return CGRectMake(left, top, self.view.bounds.size.width - left - right, self.view.bounds.size.height - top - bottom);
+}
+
 -(void)refreshAlbum:(DWAlbumModel *)model {
     _album = model;
     _results = model.fetchResult;
@@ -162,7 +179,7 @@
         _results = model.fetchResult;
         self.title = model.name;
         _needScrollToEdge = YES;
-        [self.collectionView reloadData];
+        [_collectionView reloadData];
     }
     if (![_albumManager isEqual:albumManager]) {
         _albumManager = albumManager;
@@ -367,10 +384,7 @@
 
 -(void)viewSafeAreaInsetsDidChange {
     [super viewSafeAreaInsetsDidChange];
-    UIEdgeInsets insets = self.collectionView.contentInset;
-    insets.left = self.view.safeAreaInsets.left;
-    insets.right = self.view.safeAreaInsets.right;
-    self.collectionView.contentInset = insets;
+    self.collectionView.frame = [self gridFrame];
 }
 
 #pragma mark --- override ---
@@ -391,13 +405,18 @@
 
 -(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
-        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
+        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[self gridFrame] collectionViewLayout:self.collectionViewLayout];
         Class cls = self.cellClazz?:[DWAlbumGridCell class];
         [self.collectionView registerClass:cls forCellWithReuseIdentifier:@"GridCell"];
         _collectionView.delegate = self;
         _collectionView.dataSource = self;
-        _collectionView.showsVerticalScrollIndicator = NO;
-        _collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        _collectionView.showsHorizontalScrollIndicator = NO;
+        _collectionView.clipsToBounds = NO;
+        if (@available(iOS 11.0,*)) {
+            _collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        } else {
+            self.automaticallyAdjustsScrollViewInsets = NO;
+        }
     }
     return _collectionView;
 }
