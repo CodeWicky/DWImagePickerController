@@ -22,7 +22,9 @@
 
 @end
 
-@interface DWAlbumGridViewController : UIViewController<DWMediaPreviewDataSource>
+@interface DWAlbumGridViewController : UIViewController
+
+@property (nonatomic ,strong ,readonly) UICollectionView * gridView;
 
 @property (nonatomic ,assign) CGFloat itemWidth;
 
@@ -36,14 +38,14 @@
 
 @property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
 
+@property (nonatomic ,copy) void(^gridClickAction)(NSIndexPath * indexPath);
+
 -(instancetype)initWithItemWidth:(CGFloat)width;
 
 -(void)registGridCell:(Class)cellClazz;
 
--(void)configWithPreviewVC:(DWMediaPreviewController *)previewVC;
-
 -(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager;
 
--(void)previewAtIndex:(NSInteger)index;
+-(void)configCurrentPreviewIndex:(NSInteger)index;
 
 @end

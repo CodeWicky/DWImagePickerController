@@ -14,8 +14,8 @@
 
 @property (nonatomic ,strong) DWAlbumManager * albumManager;
 
--(void)configWithAlbums:(NSArray <DWAlbumModel *>*)albums albumManager:(DWAlbumManager *)albumManager;
+@property (nonatomic ,copy) void(^albumSelectAction)(DWAlbumModel * album,NSIndexPath * indexPath);
 
--(void)configWithGridVC:(DWAlbumGridViewController *)gridVC;
+-(void)configWithAlbums:(NSArray <DWAlbumModel *>*)albums albumManager:(DWAlbumManager *)albumManager;
 
 @end

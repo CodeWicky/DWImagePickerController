@@ -9,13 +9,7 @@
 #import <DWMediaPreviewController/DWFixAdjustCollectionView.h>
 #import "DWAlbumGridCell.h"
 #import "DWAlbumPreviewNavigationBar.h"
-
-
-@interface DWAlbumModel ()
-
--(void)configWithResult:(PHFetchResult *)result;
-
-@end
+#import "DWAlbumMediaHelper.h"
 
 @interface DWGridFlowLayout : UICollectionViewFlowLayout
 
@@ -37,7 +31,7 @@
 
 @end
 
-@interface DWAlbumGridViewController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,UICollectionViewDataSourcePrefetching,PHPhotoLibraryChangeObserver>
+@interface DWAlbumGridViewController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,UICollectionViewDataSourcePrefetching>
 
 @property (nonatomic ,strong) DWFixAdjustCollectionView * collectionView;
 
@@ -46,8 +40,6 @@
 @property (nonatomic ,strong) PHFetchResult * results;
 
 @property (nonatomic ,strong) DWAlbumManager * albumManager;
-
-@property (nonatomic ,weak) DWMediaPreviewController * previewVC;
 
 @property (nonatomic ,assign) CGSize photoSize;
 
@@ -60,10 +52,6 @@
 @property (nonatomic ,assign) BOOL firstAppear;
 
 @property (nonatomic ,assign) BOOL needScrollToEdge;
-
-@property (nonatomic ,strong) dispatch_queue_t fetchMediaQueue;
-
-@property (nonatomic ,strong) dispatch_queue_t preloadQueue;
 
 @property (nonatomic ,strong) Class cellClazz;
 
@@ -85,19 +73,15 @@
     self.cellClazz = cellClazz;
 }
 
--(void)previewAtIndex:(NSInteger)index {
-    if (index < self.album.fetchResult.count) {
-        [self.previewVC previewAtIndex:index];
-        [self handleNavigationBarSelectedAtIndex:index];
-        [self.navigationController pushViewController:self.previewVC animated:YES];
+-(void)configCurrentPreviewIndex:(NSInteger)index {
+    if (index >= 0 && index < self.album.fetchResult.count) {
+        _currentPreviewIndex = index;
     }
 }
 
 #pragma mark --- life cycle ---
 -(void)viewDidLoad {
     [super viewDidLoad];
-    
-    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
     
     [self.view addSubview:self.collectionView];
     if (self.bottomToolBar) {
@@ -158,7 +142,7 @@
         }
         
         if (self.selectionManager.needsRefreshSelection) {
-            [self.collectionView reloadData];
+            [self selectVisibleCells];
             [self.selectionManager finishRefreshSelection];
         }
     }
@@ -167,6 +151,11 @@
 }
 
 #pragma mark --- tool method ---
+-(void)refreshAlbum:(DWAlbumModel *)model {
+    _album = model;
+    _results = model.fetchResult;
+}
+
 -(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager {
     if (![_album isEqual:model]) {
         _album = model;
@@ -174,16 +163,9 @@
         self.title = model.name;
         _needScrollToEdge = YES;
         [self.collectionView reloadData];
-        [_previewVC resetOnChangeDatasource];
     }
     if (![_albumManager isEqual:albumManager]) {
         _albumManager = albumManager;
-    }
-}
-
--(void)configWithPreviewVC:(DWMediaPreviewController *)previewVC {
-    if (![_previewVC isEqual:previewVC]) {
-        _previewVC = previewVC;
     }
 }
 
@@ -219,7 +201,7 @@
     NSInteger idx = [self.selectionManager indexOfSelection:asset];
     BOOL needRefresh = NO;
     if (idx == NSNotFound) {
-        if ([self.selectionManager addSelection:asset]) {
+        if ([self.selectionManager addSelection:asset mediaIndex:cell.index previewType:[DWAlbumMediaHelper previewTypeForAsset:asset]]) {
             if (self.selectionManager.reachMaxSelectCount) {
                 [self selectVisibleCells];
             } else {
@@ -264,8 +246,9 @@
 
 -(void)resetSelectionCellAtIndex:(NSInteger)index toIndex:(NSInteger)toIndex {
     DWAlbumSelectionModel * model  = [self.selectionManager selectionModelAtIndex:index];
+    NSInteger mediaIndex = [self.album.fetchResult indexOfObject:model.asset];
     DWAlbumGridCell * cellToRemove = (DWAlbumGridCell *)model.userInfo;
-    if (cellToRemove && [self.collectionView.visibleCells containsObject:cellToRemove] && [cellToRemove.requestLocalID isEqualToString:model.asset.localIdentifier]) {
+    if (cellToRemove && cellToRemove.index == mediaIndex && [self.collectionView.visibleCells containsObject:cellToRemove]) {
         [cellToRemove setSelectAtIndex:toIndex];
     }
 }
@@ -279,8 +262,9 @@
         }
         PHAsset * asset = cell.model.asset;
         NSInteger index = [self.results indexOfObject:asset];
+        cell.index = index;
         [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-            if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
+            if (cell.index == index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     cell.model = obj;
                 });
@@ -288,294 +272,6 @@
         }];
     }];
     
-}
-
--(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    dispatch_async(self.fetchMediaQueue, ^{
-        switch (previewType) {
-            case DWMediaPreviewTypeLivePhoto:
-            {
-                [self fetchLivePhotoWithAsset:asset index:index targetSize:targetSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
-            }
-                break;
-            case DWMediaPreviewTypeVideo:
-            {
-                [self fetchVideoWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
-            }
-                break;
-            case DWMediaPreviewTypeAnimateImage:
-            {
-                [self fetchAnimateImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
-            }
-                break;
-            case DWMediaPreviewTypeNone:
-            {
-                ///do nothing
-            }
-                break;
-            default:
-            {
-                ///如果是超尺寸大图，则降级图片尺寸
-                CGFloat min_Length = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) * 1.0;
-                if (asset.pixelWidth / min_Length > 3 && asset.pixelHeight / min_Length > 3) {
-                    [self fetchBigImageWithAsset:asset index:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
-                } else {
-                    [self fetchOriginImageWithIndex:index progressHandler:progressHandler fetchCompletion:fetchCompletion];
-                }
-            }
-                break;
-        }
-    });
-}
-
--(void)fetchLivePhotoWithAsset:(PHAsset *)asset index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    
-    [self.albumManager fetchLivePhotoWithAlbum:self.album index:index targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progressHandler) {
-            progressHandler(progress,index);
-        }
-    } completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
-        if (fetchCompletion && !obj.isDegraded) {
-            fetchCompletion(obj.media,index);
-        }
-    }];
-}
-
--(void)fetchVideoWithIndex:(NSUInteger)index progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    [self.albumManager fetchVideoWithAlbum:self.album index:index shouldCache:YES progrss:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progressHandler) {
-            progressHandler(progressNum,index);
-        }
-    } completion:^(DWAlbumManager * _Nullable mgr, DWVideoAssetModel * _Nullable obj) {
-        if (fetchCompletion) {
-            fetchCompletion(obj.media,index);
-        }
-    }];
-}
-
--(void)fetchAnimateImageWithAsset:(PHAsset *)asset index:(NSUInteger)index progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    
-    [self.albumManager fetchOriginImageDataWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progressHandler) {
-            progressHandler(progressNum,index);
-        }
-    } completion:^(DWAlbumManager * _Nullable mgr, DWImageDataAssetModel * _Nullable obj) {
-        if (fetchCompletion) {
-            fetchCompletion(obj.media,index);
-        }
-    }];
-}
-
--(void)fetchBigImageWithAsset:(PHAsset *)asset index:(NSUInteger)index progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    CGFloat mediaScale = asset.pixelWidth * 1.0 / asset.pixelHeight;
-    CGSize targetSize = CGSizeZero;
-    CGFloat fixScale = [UIScreen mainScreen].scale;
-    if (fixScale > 3) {
-        fixScale = 3;
-    }
-    if (mediaScale == 1) {
-        CGFloat width = _previewVC.previewSize.width * fixScale;
-        targetSize =  CGSizeMake(width, width);
-    } else if (mediaScale > 1) {
-        CGFloat height = _previewVC.previewSize.height * fixScale;
-        targetSize = CGSizeMake(height * mediaScale, height);
-    } else {
-        CGFloat width = _previewVC.previewSize.width * fixScale;
-        targetSize = CGSizeMake(width, width / mediaScale);
-    }
-    
-    [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progressHandler) {
-            progressHandler(progress,index);
-        }
-    } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        ///由于指定尺寸，所有亦可能有缩略图尺寸，如果是缩略图的话，不设置图片，已经有封面了
-        if (fetchCompletion && !obj.isDegraded) {
-            fetchCompletion(obj.media,index);
-        }
-    }];
-}
-
--(void)fetchOriginImageWithIndex:(NSUInteger)index progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    [self.albumManager fetchOriginImageWithAlbum:self.album index:index progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progressHandler) {
-            progressHandler(progressNum,index);
-        }
-    } completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if (fetchCompletion && !obj.isDegraded) {
-            fetchCompletion(obj.media,index);
-        }
-    }];
-}
-
--(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset {
-    if (asset.mediaType == PHAssetMediaTypeImage) {
-        if (asset.mediaSubtypes & PHAssetMediaSubtypePhotoLive) {
-            return DWMediaPreviewTypeLivePhoto;
-        } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
-            return DWMediaPreviewTypeAnimateImage;
-        } else {
-            return DWMediaPreviewTypeImage;
-        }
-    } else if (asset.mediaType == PHAssetMediaTypeVideo) {
-        return DWMediaPreviewTypeVideo;
-    } else {
-        return DWMediaPreviewTypeNone;
-    }
-}
-
--(void)handleNavigationBarSelectedAtIndex:(NSUInteger)index {
-    PHAsset * asset = [self.results objectAtIndex:index];
-    NSUInteger idx = [self.selectionManager indexOfSelection:asset];
-    ///调整idx。如果找不到改为0，因为navigationBar中规定0为未选中，如果找到则自加，因为规定角标从1开始
-    if (idx == NSNotFound) {
-        idx = 0;
-    } else {
-        ++ idx;
-    }
-    [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:idx];
-}
-
-#pragma mark --- tool func ---
-NS_INLINE NSArray * animateExtensions() {
-    static NSArray * exts = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        exts = @[@"webp",@"gif",@"apng"];
-    });
-    return exts;
-}
-
-#pragma mark --- observer for Photos ---
--(void)photoLibraryDidChange:(PHChange *)changeInstance {
-    PHFetchResultChangeDetails * changes = (PHFetchResultChangeDetails *)[changeInstance changeDetailsForFetchResult:self.results];
-    if (!changes) {
-        return;
-    }
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.results = changes.fetchResultAfterChanges;
-        [self.album configWithResult:self.results];
-        if (changes.hasIncrementalChanges) {
-            UICollectionView * col = self.collectionView;
-            if (col) {
-                [col performBatchUpdates:^{
-                    NSIndexSet * remove = changes.removedIndexes;
-                    if (remove.count > 0) {
-                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:remove.count];
-                        [remove enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
-                        }];
-                        
-                        [col deleteItemsAtIndexPaths:indexPaths];
-                    }
-                    
-                    NSIndexSet * insert = changes.insertedIndexes;
-                    if (insert.count > 0) {
-                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:insert.count];
-                        [insert enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
-                        }];
-                        
-                        [col insertItemsAtIndexPaths:indexPaths];
-                    }
-                    
-                    if (remove.count + insert.count > 0) {
-                        [self.previewVC photoCountHasChanged];
-                    }
-                    
-                    NSIndexSet * change = changes.changedIndexes;
-                    if (change.count > 0) {
-                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:change.count];
-                        [change enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
-                        }];
-                        
-                        [col reloadItemsAtIndexPaths:indexPaths];
-                    }
-                    
-                    [changes enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                        [col moveItemAtIndexPath:[NSIndexPath indexPathForRow:fromIndex inSection:0] toIndexPath:[NSIndexPath indexPathForRow:toIndex inSection:0]];
-                    }];
-                } completion:nil];
-            }
-        } else {
-            [self.collectionView reloadData];
-        }
-    });
-}
-
-#pragma mark --- previewController delegate ---
--(NSUInteger)countOfMediaForPreviewController:(DWMediaPreviewController *)previewController {
-    return self.results.count;
-}
-
--(DWMediaPreviewType)previewController:(DWMediaPreviewController *)previewController previewTypeAtIndex:(NSUInteger)index {
-    PHAsset * asset = [self.results objectAtIndex:index];
-    return [self previewTypeForAsset:asset];
-}
-
--(DWMediaPreviewCell *)previewController:(DWMediaPreviewController *)previewController cellForItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
-    if (previewType != DWMediaPreviewTypeVideo) {
-        return nil;
-    }
-    return [previewController dequeueReusablePreviewCellWithReuseIdentifier:@"videoControlCell" forIndex:index];
-}
-
--(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
-    PHAsset * asset = [self.results objectAtIndex:index];
-    return asset.mediaSubtypes & PHAssetMediaSubtypePhotoHDR;
-}
-
--(void)previewController:(DWMediaPreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    if (previewType == DWMediaPreviewTypeNone) {
-        if (fetchCompletion) {
-            fetchCompletion(nil,index);
-        }
-    } else {
-        PHAsset * asset = [self.results objectAtIndex:index];
-        [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
-    }
-}
-
--(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
-    if (index >= self.album.fetchResult.count) {
-        if (fetchCompletion) {
-            fetchCompletion(nil,index,NO);
-        }
-        return ;
-    }
-    
-    PHAsset * asset = [self.album.fetchResult objectAtIndex:index];
-    
-    if (asset.mediaType != PHAssetMediaTypeImage && asset.mediaType != PHAssetMediaTypeVideo) {
-        if (fetchCompletion) {
-            fetchCompletion(nil,index,NO);
-        }
-        return ;
-    }
-    
-    [self.albumManager fetchImageWithAsset:asset targetSize:self.photoSize networkAccessAllowed:self.album.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
-        if (fetchCompletion) {
-            fetchCompletion(obj.media,index,[obj satisfiedSize:previewController.previewSize]);
-        }
-    }];
-}
-
--(void)previewController:(DWMediaPreviewController *)previewController prefetchMediaAtIndexes:(NSArray *)indexes fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    [indexes enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSInteger index = [obj integerValue];
-        dispatch_async(self.preloadQueue, ^{
-            NSLog(@"start preload %ld",(long)index);
-            PHAsset * asset = [self.results objectAtIndex:index];
-            DWMediaPreviewType previewType = [self previewTypeForAsset:asset];
-            [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
-        });
-    }];
-}
-
--(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
-    self.currentPreviewIndex = index;
-    [self handleNavigationBarSelectedAtIndex:index];
 }
 
 #pragma mark --- collectionView delegate ---
@@ -586,8 +282,8 @@ NS_INLINE NSArray * animateExtensions() {
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     PHAsset * asset = [self.results objectAtIndex:indexPath.row];
     DWAlbumGridCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GridCell" forIndexPath:indexPath];
-    
-    cell.requestLocalID = asset.localIdentifier;
+    NSInteger originIndex = indexPath.item;
+    cell.index = originIndex;
     
     [self configCellSelect:cell asset:asset];
 
@@ -605,7 +301,7 @@ NS_INLINE NSArray * animateExtensions() {
     
     CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
     [self.albumManager fetchImageWithAlbum:self.album index:indexPath.row targetSize:targetSize shouldCache:!thumnail progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if ([cell.requestLocalID isEqualToString:asset.localIdentifier]) {
+        if (cell.index == originIndex) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 cell.model = obj;
             });
@@ -617,7 +313,9 @@ NS_INLINE NSArray * animateExtensions() {
 }
 
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    [self previewAtIndex:indexPath.row];
+    if (self.gridClickAction) {
+        self.gridClickAction(indexPath);
+    }
 }
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView {
@@ -663,7 +361,6 @@ NS_INLINE NSArray * animateExtensions() {
     insets.left = self.view.safeAreaInsets.left;
     insets.right = self.view.safeAreaInsets.right;
     self.collectionView.contentInset = insets;
-    self.collectionView.frame = self.view.frame;
 }
 
 #pragma mark --- override ---
@@ -672,24 +369,7 @@ NS_INLINE NSArray * animateExtensions() {
 //    self.view = self.collectionView;
 //}
 
--(void)dealloc {
-    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
-}
-
 #pragma mark --- setter/getter ---
--(dispatch_queue_t)preloadQueue {
-    if (!_preloadQueue) {
-        _preloadQueue = dispatch_queue_create("com.wicky.dwimagepicker.preloadQueue", DISPATCH_QUEUE_CONCURRENT);
-    }
-    return _preloadQueue;
-}
-
--(dispatch_queue_t)fetchMediaQueue {
-    if (!_fetchMediaQueue) {
-        _fetchMediaQueue = dispatch_queue_create("com.wicky.dwimagepicker.fetchMediaQueue", DISPATCH_QUEUE_CONCURRENT);
-    }
-    return _fetchMediaQueue;
-}
 
 -(DWGridFlowLayout *)collectionViewLayout {
     if (!_collectionViewLayout) {
@@ -707,8 +387,13 @@ NS_INLINE NSArray * animateExtensions() {
         _collectionView.delegate = self;
         _collectionView.dataSource = self;
         _collectionView.showsVerticalScrollIndicator = NO;
+        _collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return _collectionView;
+}
+
+-(UICollectionView *)gridView {
+    return self.collectionView;
 }
 
 @end

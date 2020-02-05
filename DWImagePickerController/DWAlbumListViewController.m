@@ -120,8 +120,6 @@
 
 @interface DWAlbumListViewController ()
 
-@property (nonatomic ,weak) DWAlbumGridViewController * gridVC;
-
 @property (nonatomic ,assign) CGFloat cellHeight;
 
 @property (nonatomic ,assign) CGSize photoSize;
@@ -153,12 +151,6 @@
     }
 }
 
--(void)configWithGridVC:(DWAlbumGridViewController *)gridVC {
-    if (![_gridVC isEqual:gridVC]) {
-        _gridVC = gridVC;
-    }
-}
-
 #pragma mark --- tableView delegate ---
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.albums.count;
@@ -185,8 +177,9 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     DWAlbumModel * albumModel = self.albums[indexPath.row];
-    [self.gridVC configWithAlbum:albumModel albumManager:self.albumManager];
-    [self.navigationController pushViewController:self.gridVC animated:YES];
+    if (self.albumSelectAction) {
+        self.albumSelectAction(albumModel, indexPath);
+    }
 }
 
 @end

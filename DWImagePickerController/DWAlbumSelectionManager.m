@@ -19,11 +19,13 @@
     return self;
 }
 
--(BOOL)addSelection:(PHAsset *)asset {
+-(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex previewType:(DWMediaPreviewType)previewType {
     if (asset) {
         if (!self.reachMaxSelectCount) {
             DWAlbumSelectionModel * model = [DWAlbumSelectionModel new];
             model.asset = asset;
+            model.mediaIndex = mediaIndex;
+            model.previewType = previewType;
             [self.selections addObject:model];
             [self handleSetNeedsRefreshSelection];
             return YES;

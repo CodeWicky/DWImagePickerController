@@ -16,7 +16,7 @@
 
 @property (nonatomic ,assign) BOOL canSelected;
 
-@property (nonatomic ,copy) NSString * requestLocalID;
+@property (nonatomic ,assign) NSInteger index;
 
 @property (nonatomic ,copy) void(^onSelect)(DWAlbumGridCell * cell);
 

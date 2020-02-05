@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import "DWAlbumManager.h"
+#import <DWMediaPreviewController/DWMediaPreviewController.h>
 NS_ASSUME_NONNULL_BEGIN
 
 @class DWAlbumSelectionModel;
@@ -31,7 +32,7 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 -(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount;
 
--(BOOL)addSelection:(PHAsset *)asset;
+-(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex previewType:(DWMediaPreviewType)previewType;
 
 -(void)addUserInfo:(id)userInfo forAsset:(PHAsset *)asset;
 
@@ -54,6 +55,10 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 @interface DWAlbumSelectionModel : NSObject
 
 @property (nonatomic ,strong) PHAsset * asset;
+
+@property (nonatomic ,assign) NSInteger mediaIndex;
+
+@property (nonatomic ,assign) DWMediaPreviewType previewType;
 
 @property (nonatomic ,strong) id userInfo;
 
