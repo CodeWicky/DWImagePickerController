@@ -7,6 +7,12 @@
 
 #import "DWAlbumMediaHelper.h"
 
+@interface DWAlbumMediaHelper ()
+
+@property (nonatomic ,strong) NSCache * posterCache;
+
+@end
+
 @implementation DWAlbumMediaHelper
 
 #pragma mark --- interface method ---
@@ -26,6 +32,32 @@
     }
 }
 
++(void)cachePoster:(DWImageAssetModel *)image withAsset:(PHAsset *)asset {
+    if (!asset) {
+        return;
+    }
+    DWAlbumMediaHelper * helper = [self helper];
+    [helper.posterCache setObject:image forKey:asset];
+}
+
++(DWImageAssetModel *)posterCacheForAsset:(PHAsset *)asset {
+    if (!asset) {
+        return nil;
+    }
+    DWAlbumMediaHelper * helper = [self helper];
+    return [helper.posterCache objectForKey:asset];
+}
+
+#pragma mark --- tool method ---
++(instancetype)helper {
+    static DWAlbumMediaHelper * h = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        h = [self new];
+    });
+    return h;
+}
+
 #pragma mark --- tool func ---
 NS_INLINE NSArray * animateExtensions() {
     static NSArray * exts = nil;
@@ -34,6 +66,14 @@ NS_INLINE NSArray * animateExtensions() {
         exts = @[@"webp",@"gif",@"apng"];
     });
     return exts;
+}
+
+#pragma mark --- setter/getter ---
+-(NSCache *)posterCache {
+    if (!_posterCache) {
+        _posterCache = [[NSCache alloc] init];
+    }
+    return _posterCache;
 }
 
 @end

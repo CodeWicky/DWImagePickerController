@@ -7,12 +7,16 @@
 
 #import <Foundation/Foundation.h>
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
-#import <Photos/Photos.h>
+#import "DWAlbumManager.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DWAlbumMediaHelper : NSObject
 
 +(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset;
+
++(void)cachePoster:(DWImageAssetModel *)image withAsset:(PHAsset *)asset;
+
++(DWImageAssetModel *)posterCacheForAsset:(PHAsset *)asset;
 
 @end
 

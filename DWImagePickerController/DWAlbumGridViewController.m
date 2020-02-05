@@ -299,14 +299,24 @@
         thumnail = YES;
     }
     
-    CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
-    [self.albumManager fetchImageWithAlbum:self.album index:indexPath.row targetSize:targetSize shouldCache:!thumnail progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-        if (cell.index == originIndex) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                cell.model = obj;
-            });
-        }
-    }];
+    DWImageAssetModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
+    if (media) {
+        cell.model = media;
+    } else {
+        CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
+        
+        [self.albumManager fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:self.album.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+            if (!thumnail && obj.media && obj.asset) {
+                [DWAlbumMediaHelper cachePoster:obj withAsset:obj.asset];
+            }
+            if (cell.index == originIndex) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    cell.model = obj;
+                });
+            }
+        }];
+    }
+    
     [cell setNeedsLayout];
     
     return cell;

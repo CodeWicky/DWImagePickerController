@@ -328,7 +328,18 @@
         return ;
     }
     
+    DWImageAssetModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
+    if (media) {
+        if (fetchCompletion) {
+            fetchCompletion(media.media,index,NO);
+        }
+        return;
+    }
+    
     [self.albumManager fetchImageWithAsset:asset targetSize:self.gridPhotoSize networkAccessAllowed:self.currentGridAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+        if (obj.asset && obj.media) {
+            [DWAlbumMediaHelper cachePoster:obj withAsset:obj.asset];
+        }
         if (fetchCompletion) {
             fetchCompletion(obj.media,index,[obj satisfiedSize:previewController.previewSize]);
         }
