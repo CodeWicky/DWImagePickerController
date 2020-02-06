@@ -86,6 +86,12 @@
 
 @property (nonatomic ,assign) NSInteger index;
 
+@property (nonatomic ,assign) CGRect oriRect;
+
+@property (nonatomic ,assign) BOOL beingShown;
+
+@property (nonatomic ,assign) BOOL previewSizeResized;
+
 @property (nonatomic ,assign) BOOL indexChanged;
 
 @property (nonatomic ,assign) BOOL sourceInteractivePopGestureEnabled;
@@ -142,36 +148,79 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- tool method ---
 -(void)showPreview {
+    self.beingShown = YES;
     [self configToolBarIfNeeded];
     [self setFocusMode:NO];
-    
+    [self resizePreviewSizeIfNeeded];
     if (_innerMediaCount == 0) {
         return;
     }
     
     _index = [self getValidIndex:_index];
     
-    if (_indexChanged) {
-        ///如果预览位置发生改变则滚动到该位置
+    if (_previewSizeResized) {
+        _previewSizeResized = NO;
+        _indexChanged = NO;
+        DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
+        CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
+        ///如果滚动距离小于1屏宽度说明本身就在屏幕里，这时滚动也无法加载资源，应该刷新
+        [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
+        NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
+        DWMediaPreviewData * cellData = [self dataAtIndex:indexPath.item];
+        DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+        [self configCell:cell withCellData:cellData atIndexPath:indexPath];
+    } else if (_indexChanged) {
         _indexChanged = NO;
         DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
         CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
         [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
-//    } else if (!_finishFirstShowPreview) {
-//        ///首次展示时，系统会自动走一次reload，此时要避免同时调用reload，以防偶发性崩溃
-//        _index = 0;
-//        _finishFirstShowPreview = YES;
     } else {
         ///disappear时会释放当前cell的资源，故如果不改变位置的话，需要刷新当前cell
         NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
-        [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+        DWMediaPreviewData * cellData = [self dataAtIndex:indexPath.item];
+        DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+        [self configCell:cell withCellData:cellData atIndexPath:indexPath];
     }
+    
+//    if (_indexChanged) {
+//        ///如果预览位置发生改变则滚动到该位置
+//        _indexChanged = NO;
+//        DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
+//        CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
+//
+//
+//        if (ABS(offset_x - self.collectionView.contentOffset.x) < self.view.bounds.size.width) {
+//            ///如果滚动距离小于1屏宽度说明本身就在屏幕里，这时滚动也无法加载资源，应该刷新
+//            NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
+//            [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+//        } else {
+//            [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
+//        }
+//    } else if (_previewSizeResized) {
+//        _previewSizeResized = NO;
+//        DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
+//        CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
+//            ///如果滚动距离小于1屏宽度说明本身就在屏幕里，这时滚动也无法加载资源，应该刷新
+//            [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
+//            NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
+//            [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+////    } else if (!_finishFirstShowPreview) {
+////        ///首次展示时，系统会自动走一次reload，此时要避免同时调用reload，以防偶发性崩溃
+////        _index = 0;
+////        _finishFirstShowPreview = YES;
+//    } else {
+//        ///disappear时会释放当前cell的资源，故如果不改变位置的话，需要刷新当前cell
+//        NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
+//        [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+//    }
 }
 
 -(void)clearPreview {
+    self.oriRect = self.collectionView.frame;
     DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
     [cell clearCell];
     [self turnToDarkBackground:NO];
+    self.beingShown = NO;
 }
 
 -(void)setFocusMode:(BOOL)hidden {
@@ -217,6 +266,19 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+-(void)resizePreviewSizeIfNeeded {
+    if (!CGRectEqualToRect(self.view.bounds, self.collectionView.frame)) {
+        self.collectionView.frame = self.view.bounds;
+    }
+    if (!CGSizeEqualToSize(((UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout).itemSize, self.view.bounds.size)) {
+        [self.collectionView.collectionViewLayout prepareLayout];
+    }
+    if (!CGRectEqualToRect(self.oriRect, self.collectionView.frame)) {
+        _previewSize = self.view.bounds.size;
+        _previewSizeResized = YES;
+    }
+}
+
 -(NSInteger)getValidIndex:(NSInteger)index {
     if (index < 0) {
         index = 0;
@@ -250,6 +312,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)previewDidChangedToIndex:(UIScrollView *)scrollView {
+    
+    if (!self.beingShown) {
+        return;
+    }
+    
     if (_innerMediaCount == 0) {
         _index = -1;
         return;
@@ -259,6 +326,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (targetIdx == _index) {
         return;
     }
+    
     _index = [self getValidIndex:page];
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:hasChangedToIndex:previewType:)]) {
         DWMediaPreviewData * data = [self dataAtIndex:_index];
@@ -322,6 +390,114 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         if (fetchCompletion) {
             fetchCompletion(nil,NO);
         }
+    }
+}
+
+-(DWMediaPreviewCell *)cellForCollectionView:(UICollectionView *)collectionView cellData:(DWMediaPreviewData *)cellData atIndexPath:(NSIndexPath *)indexPath {
+    NSInteger originIndex = indexPath.item;
+    DWMediaPreviewType previewType = cellData.previewType;
+    DWMediaPreviewCell * cell = nil;
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:cellForItemAtIndex:previewType:)]) {
+        cell = [self.dataSource previewController:self cellForItemAtIndex:originIndex previewType:previewType];
+    }
+    
+    if (!cell) {
+        switch (previewType) {
+            case DWMediaPreviewTypeAnimateImage:
+            {
+                cell = [collectionView dequeueReusableCellWithReuseIdentifier:animateImageID forIndexPath:indexPath];
+            }
+                break;
+            case DWMediaPreviewTypeLivePhoto:
+            {
+                cell = [collectionView dequeueReusableCellWithReuseIdentifier:livePhotoID forIndexPath:indexPath];
+            }
+                break;
+            case DWMediaPreviewTypeVideo:
+            {
+                cell = [collectionView dequeueReusableCellWithReuseIdentifier:videoImageID forIndexPath:indexPath];
+            }
+                break;
+            case DWMediaPreviewTypeCustomize:
+            {
+                NSAssert(NO, @"You has use a DWMediaPreviewTypeCustomize media so that you must implement the protocol method: -previewController:cellForItemAtIndex:");
+            }
+                break;
+            default:
+            {
+                cell = [collectionView dequeueReusableCellWithReuseIdentifier:normalImageID forIndexPath:indexPath];
+            }
+                break;
+        }
+    }
+    return cell;
+}
+
+-(void)configCell:(DWMediaPreviewCell *)cell withCellData:(DWMediaPreviewData *)cellData atIndexPath:(NSIndexPath *)indexPath {
+    NSInteger originIndex = indexPath.item;
+    DWMediaPreviewType previewType = cellData.previewType;
+    cell.isHDR = cellData.isHDR;
+    [cell configIndex:originIndex];
+    if (previewType != DWMediaPreviewTypeNone) {
+        [self configActionForCell:cell indexPath:indexPath];
+        [cell configPreviewController:self];
+    }
+    if (cellData.media) {
+        BOOL needConfigMedia = YES;
+        ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
+        
+        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:usePosterAsPlaceholderForCellAtIndex:previewType:)]) {
+            if ([self.dataSource previewController:self usePosterAsPlaceholderForCellAtIndex:originIndex previewType:previewType]) {
+                cell.poster = cellData.previewImage;
+            }
+        } else {
+            
+            switch (previewType) {
+                case DWMediaPreviewTypeVideo:
+                {
+                    cell.poster = cellData.previewImage;
+                }
+                    break;
+                case DWMediaPreviewTypeImage:
+                {
+                    ///普通图片类型，当图片尚未解码时，以poster占位
+                    if ([cellData.media isKindOfClass:[UIImage class]] && ![DWMediaPreviewImageDecoder imageDecoded:cellData.media]) {
+                        ///如果poster已经存在，则直接设置poster
+                        if (cellData.previewImage) {
+                            cell.poster = cellData.previewImage;
+                        } else {
+                            ///如果不存在，先获取poster，在poster完成时在设置media。所以这里要取消下面的主动设置media
+                            needConfigMedia = NO;
+                            [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
+                                cellData.previewImage = media;
+                                if (index == cell.index) {
+                                    cell.poster = cellData.previewImage;
+                                    [self configMediaForCell:cell withMedia:cellData.media];
+                                }
+                            }];
+                        }
+                    }
+                }
+                    break;
+                default:
+                    ///Do nothing
+                    break;
+            }
+        }
+        
+        if (needConfigMedia) {
+            [self configMediaForCell:cell withMedia:cellData.media];
+        }
+        
+    } else if (cellData.previewImage) {
+        [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO showProgressIndicator:cellData.shouldShowProgressIndicator];
+    } else {
+        [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
+            cellData.previewImage = media;
+            if (index == cell.index) {
+                [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:satisfiedSize showProgressIndicator:cellData.shouldShowProgressIndicator];
+            }
+        }];
     }
 }
 
@@ -483,109 +659,13 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    NSInteger originIndex = indexPath.item;
-    DWMediaPreviewData * cellData = [self dataAtIndex:originIndex];
-    DWMediaPreviewType previewType = cellData.previewType;
-    __kindof DWMediaPreviewCell * cell;
-    
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:cellForItemAtIndex:previewType:)]) {
-        cell = [self.dataSource previewController:self cellForItemAtIndex:originIndex previewType:previewType];
-    }
-    
-    if (!cell) {
-        switch (previewType) {
-            case DWMediaPreviewTypeAnimateImage:
-            {
-                cell = [collectionView dequeueReusableCellWithReuseIdentifier:animateImageID forIndexPath:indexPath];
-            }
-                break;
-            case DWMediaPreviewTypeLivePhoto:
-            {
-                cell = [collectionView dequeueReusableCellWithReuseIdentifier:livePhotoID forIndexPath:indexPath];
-            }
-                break;
-            case DWMediaPreviewTypeVideo:
-            {
-                cell = [collectionView dequeueReusableCellWithReuseIdentifier:videoImageID forIndexPath:indexPath];
-            }
-                break;
-            case DWMediaPreviewTypeCustomize:
-            {
-                NSAssert(NO, @"You has use a DWMediaPreviewTypeCustomize media so that you must implement the protocol method: -previewController:cellForItemAtIndex:");
-            }
-                break;
-            default:
-            {
-                cell = [collectionView dequeueReusableCellWithReuseIdentifier:normalImageID forIndexPath:indexPath];
-            }
-                break;
-        }
-    }
-    
-    cell.isHDR = cellData.isHDR;
-    [cell configIndex:originIndex];
-    if (previewType != DWMediaPreviewTypeNone) {
-        [self configActionForCell:cell indexPath:indexPath];
-        [cell configPreviewController:self];
-    }
-    if (cellData.media) {
-        BOOL needConfigMedia = YES;
-        ///这里如果是视频的话要即使媒体已经获取完成也要先赋值封面，因为视频要等解析完首帧后才会展现
-        
-        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:usePosterAsPlaceholderForCellAtIndex:previewType:)]) {
-            if ([self.dataSource previewController:self usePosterAsPlaceholderForCellAtIndex:originIndex previewType:previewType]) {
-                cell.poster = cellData.previewImage;
-            }
-        } else {
-            
-            switch (previewType) {
-                case DWMediaPreviewTypeVideo:
-                {
-                    cell.poster = cellData.previewImage;
-                }
-                    break;
-                case DWMediaPreviewTypeImage:
-                {
-                    ///普通图片类型，当图片尚未解码时，以poster占位
-                    if ([cellData.media isKindOfClass:[UIImage class]] && ![DWMediaPreviewImageDecoder imageDecoded:cellData.media]) {
-                        ///如果poster已经存在，则直接设置poster
-                        if (cellData.previewImage) {
-                            cell.poster = cellData.previewImage;
-                        } else {
-                            ///如果不存在，先获取poster，在poster完成时在设置media。所以这里要取消下面的主动设置media
-                            needConfigMedia = NO;
-                            [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
-                                cellData.previewImage = media;
-                                if (index == cell.index) {
-                                    cell.poster = cellData.previewImage;
-                                    [self configMediaForCell:cell withMedia:cellData.media];
-                                }
-                            }];
-                        }
-                    }
-                }
-                    break;
-                default:
-                    ///Do nothing
-                    break;
-            }
-        }
-        
-        if (needConfigMedia) {
-            [self configMediaForCell:cell withMedia:cellData.media];
-        }
-        
-    } else if (cellData.previewImage) {
-        [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:NO showProgressIndicator:cellData.shouldShowProgressIndicator];
-    } else {
-        [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
-            cellData.previewImage = media;
-            if (index == cell.index) {
-                [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:satisfiedSize showProgressIndicator:cellData.shouldShowProgressIndicator];
-            }
-        }];
-    }
-    
+    ///取出cell相关数据
+    DWMediaPreviewData * cellData = [self dataAtIndex:indexPath.item];
+    ///取出对应cell
+    DWMediaPreviewCell * cell = [self cellForCollectionView:collectionView cellData:cellData atIndexPath:indexPath];
+    ///配置cell动作、资源等
+    [self configCell:cell withCellData:cellData atIndexPath:indexPath];
+    ///预加载周围4个资源
     [self prefetchMediaForCollection:collectionView indexPath:indexPath];
     
     return cell;
@@ -633,7 +713,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 #pragma mark --- screen rotate ---
 -(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-    _previewSize = size;
     self.collectionView.dw_autoFixContentOffset = YES;
 }
 
@@ -642,8 +721,8 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (self = [super init]) {
         _index = -1;
         _cacheCount = 10;
-        _prefetchCount = 2;
         _previewSize = [UIScreen mainScreen].bounds.size;
+        _prefetchCount = 2;
         _closeOnSlidingDown = YES;
         _closeThreshold = 100;
         if (@available(iOS 11.0,*)) {
@@ -662,6 +741,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
         _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
+        self.oriRect = _collectionView.frame;
         _collectionView.delegate = self;
         _collectionView.dataSource = self;
         _collectionView.pagingEnabled = YES;
