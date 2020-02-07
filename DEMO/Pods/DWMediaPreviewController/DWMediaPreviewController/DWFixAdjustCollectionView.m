@@ -44,6 +44,8 @@
     ///是的，今天第三天。后续要改成按照visibleCells计算，首先就要取到之前的第一个cell，然后保证旋屏之后还是第一个即可。所以这里要获取旋屏后指定indexPath的cell的frame信息，故要求先调用super，再修正contentOffset。所以这里做了改造，修改了dw_autoFixContentOffset置NO的时机及index计算的方式。总算调节完了。
     
     ///最后一改，去掉不必要约束，pagingEnabled。
+    
+    ///某一天，我又来了，这次改动主要应对的是应对在collectionView加载出来之前旋屏 此处会导致visibleCell获取为空，或者不在屏幕内旋屏然后push进屏幕时会先设置一遍frame，此时由于还没有展示故当前visibleCell其实不是该frame对应的正确的visibleCell，但是还没有来得及更新。所以这里通过layout获取原frame应该展示的cell的属性，以此来寻找第一个cell。
     NSIndexPath * oriFirstIdp = nil;
     if (self.dw_autoFixContentOffset) {
         NSArray <UICollectionViewLayoutAttributes *>* attrsInRect = [self.collectionViewLayout layoutAttributesForElementsInRect:(CGRect){self.contentOffset,self.frame.size}];
@@ -55,7 +57,6 @@
         }];
         oriFirstIdp = tmp;
     }
-    
     [super setFrame:frame];
     if (self.dw_autoFixContentOffset) {
         self.dw_autoFixContentOffset = NO;
@@ -77,10 +78,6 @@
         }
         [self setContentOffset:fixContentOffset];
     }
-}
-
--(void)setContentOffset:(CGPoint)contentOffset {
-    [super setContentOffset:contentOffset];
 }
 
 @end

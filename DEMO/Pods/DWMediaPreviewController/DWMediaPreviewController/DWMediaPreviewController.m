@@ -88,7 +88,7 @@
 
 @property (nonatomic ,assign) CGRect oriRect;
 
-@property (nonatomic ,assign) BOOL beingShown;
+@property (nonatomic ,assign) BOOL isShowing;
 
 @property (nonatomic ,assign) BOOL previewSizeResized;
 
@@ -148,10 +148,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- tool method ---
 -(void)showPreview {
-    self.beingShown = YES;
+    _isShowing = YES;
     [self configToolBarIfNeeded];
     [self setFocusMode:NO];
     [self resizePreviewSizeIfNeeded];
+    
     if (_innerMediaCount == 0) {
         return;
     }
@@ -161,66 +162,23 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (_previewSizeResized) {
         _previewSizeResized = NO;
         _indexChanged = NO;
-        DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
-        CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
-        ///如果滚动距离小于1屏宽度说明本身就在屏幕里，这时滚动也无法加载资源，应该刷新
-        [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
-        NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
-        DWMediaPreviewData * cellData = [self dataAtIndex:indexPath.item];
-        DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-        [self configCell:cell withCellData:cellData atIndexPath:indexPath];
+        [self setContentOffsetToCurrentIndex];
+        [self reloadCellForCurrentIndex];
     } else if (_indexChanged) {
         _indexChanged = NO;
-        DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
-        CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
-        [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
+        [self setContentOffsetToCurrentIndex];
     } else {
         ///disappear时会释放当前cell的资源，故如果不改变位置的话，需要刷新当前cell
-        NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
-        DWMediaPreviewData * cellData = [self dataAtIndex:indexPath.item];
-        DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-        [self configCell:cell withCellData:cellData atIndexPath:indexPath];
+        [self reloadCellForCurrentIndex];
     }
-    
-//    if (_indexChanged) {
-//        ///如果预览位置发生改变则滚动到该位置
-//        _indexChanged = NO;
-//        DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
-//        CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
-//
-//
-//        if (ABS(offset_x - self.collectionView.contentOffset.x) < self.view.bounds.size.width) {
-//            ///如果滚动距离小于1屏宽度说明本身就在屏幕里，这时滚动也无法加载资源，应该刷新
-//            NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
-//            [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
-//        } else {
-//            [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
-//        }
-//    } else if (_previewSizeResized) {
-//        _previewSizeResized = NO;
-//        DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
-//        CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
-//            ///如果滚动距离小于1屏宽度说明本身就在屏幕里，这时滚动也无法加载资源，应该刷新
-//            [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
-//            NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
-//            [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
-////    } else if (!_finishFirstShowPreview) {
-////        ///首次展示时，系统会自动走一次reload，此时要避免同时调用reload，以防偶发性崩溃
-////        _index = 0;
-////        _finishFirstShowPreview = YES;
-//    } else {
-//        ///disappear时会释放当前cell的资源，故如果不改变位置的话，需要刷新当前cell
-//        NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
-//        [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
-//    }
 }
 
 -(void)clearPreview {
-    self.oriRect = self.collectionView.frame;
     DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
     [cell clearCell];
     [self turnToDarkBackground:NO];
-    self.beingShown = NO;
+    self.oriRect = self.collectionView.frame;
+    self.isShowing = NO;
 }
 
 -(void)setFocusMode:(BOOL)hidden {
@@ -279,6 +237,19 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+-(void)setContentOffsetToCurrentIndex {
+    DWMediaPreviewLayout * layout = (DWMediaPreviewLayout *)self.collectionViewLayout;
+    CGFloat offset_x = _index * (layout.itemSize.width + layout.minimumLineSpacing);
+    [self.collectionView setContentOffset:CGPointMake(offset_x, 0)];
+}
+
+-(void)reloadCellForCurrentIndex {
+    NSIndexPath * indexPath = [NSIndexPath indexPathForItem:_index inSection:0];
+    DWMediaPreviewData * cellData = [self dataAtIndex:indexPath.item];
+    DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+    [self configCell:cell withCellData:cellData atIndexPath:indexPath];
+}
+
 -(NSInteger)getValidIndex:(NSInteger)index {
     if (index < 0) {
         index = 0;
@@ -313,7 +284,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)previewDidChangedToIndex:(UIScrollView *)scrollView {
     
-    if (!self.beingShown) {
+    if (!self.isShowing) {
         return;
     }
     
@@ -326,7 +297,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (targetIdx == _index) {
         return;
     }
-    
     _index = [self getValidIndex:page];
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:hasChangedToIndex:previewType:)]) {
         DWMediaPreviewData * data = [self dataAtIndex:_index];
@@ -338,58 +308,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:beginDisplayingCell:forItemAtIndex:previewType:)]) {
         DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
         [self.dataSource previewController:self beginDisplayingCell:cell forItemAtIndex:index previewType:cell.previewType];
-    }
-}
-
--(void)configActionForCell:(DWMediaPreviewCell *)cell indexPath:(NSIndexPath *)indexPath {
-    __weak typeof(self)weakSelf = self;
-    cell.tapAction = ^(DWMediaPreviewCell * _Nonnull cell) {
-        __strong typeof(weakSelf)StrongSelf = weakSelf;
-        [StrongSelf setFocusMode:!StrongSelf.isFocusOnMedia];
-    };
-    
-    cell.doubleClickAction = ^(DWMediaPreviewCell * _Nonnull cell ,CGPoint point) {
-        __strong typeof(weakSelf)StrongSelf = weakSelf;
-        if (!StrongSelf.isFocusOnMedia) {
-            [StrongSelf setFocusMode:YES];
-        }
-        [cell zoomMediaView:!cell.zooming point:point];
-    };
-    
-    cell.enterFocus = ^(DWMediaPreviewCell * _Nonnull cell ,BOOL hide) {
-        __strong typeof(weakSelf)StrongSelf = weakSelf;
-        [StrongSelf setFocusMode:hide];
-    };
-    
-    cell.onSlideCloseAction = ^(DWMediaPreviewCell * _Nonnull cell) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        [strongSelf setFocusMode:NO];
-    };
-}
-
--(void)turnToDarkBackground:(BOOL)dark {
-    [UIView animateWithDuration:0.2 animations:^{
-        self.collectionView.backgroundColor = [UIColor colorWithWhite:dark?0:1 alpha:1];
-    }];
-}
-
--(void)fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchPosterAtIndex:previewType:fetchCompletion:)]) {
-        [self.dataSource previewController:self fetchPosterAtIndex:index previewType:previewType fetchCompletion:fetchCompletion];
-    } else {
-        if (fetchCompletion) {
-            fetchCompletion(nil,index,NO);
-        }
-    }
-}
-
--(void)fetchMediaAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion:)]) {
-        [self.dataSource previewController:self fetchMediaAtIndex:index previewType:previewType progressHandler:progressHandler fetchCompletion:fetchCompletion];
-    } else {
-        if (fetchCompletion) {
-            fetchCompletion(nil,NO);
-        }
     }
 }
 
@@ -498,6 +416,58 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
                 [self configPosterAndFetchMediaWithCellData:cellData cell:cell previewType:previewType index:originIndex satisfiedSize:satisfiedSize showProgressIndicator:cellData.shouldShowProgressIndicator];
             }
         }];
+    }
+}
+
+-(void)configActionForCell:(DWMediaPreviewCell *)cell indexPath:(NSIndexPath *)indexPath {
+    __weak typeof(self)weakSelf = self;
+    cell.tapAction = ^(DWMediaPreviewCell * _Nonnull cell) {
+        __strong typeof(weakSelf)StrongSelf = weakSelf;
+        [StrongSelf setFocusMode:!StrongSelf.isFocusOnMedia];
+    };
+    
+    cell.doubleClickAction = ^(DWMediaPreviewCell * _Nonnull cell ,CGPoint point) {
+        __strong typeof(weakSelf)StrongSelf = weakSelf;
+        if (!StrongSelf.isFocusOnMedia) {
+            [StrongSelf setFocusMode:YES];
+        }
+        [cell zoomMediaView:!cell.zooming point:point];
+    };
+    
+    cell.enterFocus = ^(DWMediaPreviewCell * _Nonnull cell ,BOOL hide) {
+        __strong typeof(weakSelf)StrongSelf = weakSelf;
+        [StrongSelf setFocusMode:hide];
+    };
+    
+    cell.onSlideCloseAction = ^(DWMediaPreviewCell * _Nonnull cell) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        [strongSelf setFocusMode:NO];
+    };
+}
+
+-(void)turnToDarkBackground:(BOOL)dark {
+    [UIView animateWithDuration:0.2 animations:^{
+        self.collectionView.backgroundColor = [UIColor colorWithWhite:dark?0:1 alpha:1];
+    }];
+}
+
+-(void)fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchPosterAtIndex:previewType:fetchCompletion:)]) {
+        [self.dataSource previewController:self fetchPosterAtIndex:index previewType:previewType fetchCompletion:fetchCompletion];
+    } else {
+        if (fetchCompletion) {
+            fetchCompletion(nil,index,NO);
+        }
+    }
+}
+
+-(void)fetchMediaAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion:)]) {
+        [self.dataSource previewController:self fetchMediaAtIndex:index previewType:previewType progressHandler:progressHandler fetchCompletion:fetchCompletion];
+    } else {
+        if (fetchCompletion) {
+            fetchCompletion(nil,NO);
+        }
     }
 }
 
@@ -713,6 +683,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 #pragma mark --- screen rotate ---
 -(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    _previewSize = size;
     self.collectionView.dw_autoFixContentOffset = YES;
 }
 
@@ -721,8 +692,8 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (self = [super init]) {
         _index = -1;
         _cacheCount = 10;
-        _previewSize = [UIScreen mainScreen].bounds.size;
         _prefetchCount = 2;
+        _previewSize = [UIScreen mainScreen].bounds.size;
         _closeOnSlidingDown = YES;
         _closeThreshold = 100;
         if (@available(iOS 11.0,*)) {
