@@ -38,7 +38,7 @@
     [super prepareLayout];
     self.minimumLineSpacing = 0;
     self.minimumInteritemSpacing = 0;
-    self.itemSize = [UIScreen mainScreen].bounds.size;
+    self.itemSize = self.collectionView.bounds.size;
 }
 
 ///重写attr来在miniLineSpacing为0的情况下cell之间也有间距（如果设置miniLineSpacing不为0的时候，即使在全屏cell的情况下，滚动一次，collectionView也会加载两个cell）
@@ -578,7 +578,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [super viewDidLoad];
     ///本次添加了toolBar后要将toolbar添加在self.view中，所以底部视图不能是collectionView，否则toolbar跟随滚动。故将collectionView缩放模式改为跟self.view等大，保证旋屏自动改变布局
     [self.view addSubview:self.collectionView];
-    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWNormalImagePreviewCell class] forCellWithReuseIdentifier:normalImageID];
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];

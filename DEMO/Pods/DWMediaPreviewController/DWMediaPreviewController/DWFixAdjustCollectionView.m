@@ -46,38 +46,78 @@
     ///最后一改，去掉不必要约束，pagingEnabled。
     
     ///某一天，我又来了，这次改动主要应对的是应对在collectionView加载出来之前旋屏 此处会导致visibleCell获取为空，或者不在屏幕内旋屏然后push进屏幕时会先设置一遍frame，此时由于还没有展示故当前visibleCell其实不是该frame对应的正确的visibleCell，但是还没有来得及更新。所以这里通过layout获取原frame应该展示的cell的属性，以此来寻找第一个cell。
-    NSIndexPath * oriFirstIdp = nil;
+    
+    ///某某一天，改为寻找中间的cell。并且这里发现有两种正确的使用方式。
+    //第一种方式
+    //当collectionView的adjustedContentInset始终为UIEdgeInsetsZero且collectionView使用autoLayout或autoresizingMask不为None时：
+    //1.仅需在将要旋屏代理中设置dw_autoFixContentOffset为YES
+    
+    //第二种方式
+    //当collectionView的adjustedContentInset有值且非0或者collectionView使用frame布局时：
+    //1.在将要旋屏代理中设置dw_autoFixContentOffset为YES
+    //2.在将要旋屏代理中设置dw_useAutoFixAdjustedContentInset为YES
+    //3.在将要旋屏代理中设置dw_autoFixAdjustedContentInset为旋屏前collectionView的adjustedContentInset。
+    //4.在safeArea改变完成或者旋屏完成代理中，设置frame
+    
+    //除了以上方式，都无法生效或略有瑕疵。比如不使用autoLayout且autoresizingMask为None且adjustedContentInset始终为0，即使先将dw_autoFixContentOffset设置为YES，在将要旋屏代理中设置frame，这样最终位置正确，但是能看到明显的滚动过程。故这种情况，建议采用第二种方式进行处理。
+    
+    NSIndexPath * oriCenterIdp = nil;
     if (self.dw_autoFixContentOffset) {
-        NSArray <UICollectionViewLayoutAttributes *>* attrsInRect = [self.collectionViewLayout layoutAttributesForElementsInRect:(CGRect){self.contentOffset,self.frame.size}];
-        __block NSIndexPath * tmp = attrsInRect.firstObject.indexPath;
-        [attrsInRect enumerateObjectsUsingBlock:^(UICollectionViewLayoutAttributes * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (obj.indexPath.row < tmp.row) {
-                tmp = obj.indexPath;
-            }
-        }];
-        oriFirstIdp = tmp;
+        
+        CGRect visibleFrame = (CGRect){self.contentOffset,self.frame.size};
+        UIEdgeInsets adjustedContentInset = UIEdgeInsetsZero;
+        if (self.dw_useAutoFixAdjustedContentInset) {
+            adjustedContentInset = self.dw_autoFixAdjustedContentInset;
+            self.dw_useAutoFixAdjustedContentInset = NO;
+        } else if (@available(iOS 11.0,*)) {
+            adjustedContentInset = self.adjustedContentInset;
+        }
+        
+        visibleFrame = UIEdgeInsetsInsetRect(visibleFrame, adjustedContentInset);
+        
+        NSArray <UICollectionViewLayoutAttributes *>* attrsInRect = [self.collectionViewLayout layoutAttributesForElementsInRect:visibleFrame];
+        
+        if (attrsInRect.count > 0) {
+            NSInteger centerIdx = (attrsInRect.count - 1) / 2;
+            oriCenterIdp = attrsInRect[centerIdx].indexPath;
+        }
     }
     [super setFrame:frame];
     if (self.dw_autoFixContentOffset) {
         self.dw_autoFixContentOffset = NO;
-        if (!oriFirstIdp) {
+        if (!oriCenterIdp) {
             return;
         }
-        UICollectionViewLayoutAttributes * attr = [self layoutAttributesForItemAtIndexPath:oriFirstIdp];
+        UICollectionViewLayoutAttributes * attr = [self.collectionViewLayout layoutAttributesForItemAtIndexPath:oriCenterIdp];
         CGPoint fixContentOffset = CGPointZero;
+        UIEdgeInsets adjustedContentInset = UIEdgeInsetsZero;
+        if (@available(iOS 11.0 ,*)) {
+            adjustedContentInset = self.adjustedContentInset;
+        }
         if (((UICollectionViewFlowLayout *)self.collectionViewLayout).scrollDirection == UICollectionViewScrollDirectionHorizontal) {
             fixContentOffset.x = attr.frame.origin.x;
             if (@available(iOS 11.0,*)) {
-                fixContentOffset.x -= self.adjustedContentInset.left;
+                //这里的偏移量是当前cell距离可见区域顶部的距离
+                CGFloat centerOffset = (frame.size.width - adjustedContentInset.left - adjustedContentInset.right - attr.frame.size.width) * 0.5;
+                fixContentOffset.x -= centerOffset;
+                //然后还要补出safeArea的远点距离
+                fixContentOffset.x -= adjustedContentInset.left;
+                fixContentOffset.y -= adjustedContentInset.top;
             }
         } else {
             fixContentOffset.y = attr.frame.origin.y;
             if (@available(iOS 11.0,*)) {
-                fixContentOffset.y -= self.adjustedContentInset.top;
+                CGFloat centerOffset = (frame.size.height - adjustedContentInset.top - adjustedContentInset.bottom - attr.frame.size.height) * 0.5;
+                fixContentOffset.y -= centerOffset;
+                fixContentOffset.x -= adjustedContentInset.left;
+                fixContentOffset.y -= adjustedContentInset.top;
             }
         }
         [self setContentOffset:fixContentOffset];
     }
+}
+-(void)setContentOffset:(CGPoint)contentOffset {
+    [super setContentOffset:contentOffset];
 }
 
 @end

@@ -1011,7 +1011,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 #pragma mark --- videoView delegate ---
 -(void)playerManager:(DWPlayerManager *)manager readyToPlayForAsset:(AVAsset *)asset {
     ///清除poster，否则缩放有底图。更改时机为ready以后，防止 -setMedia: 时移除导致的视频尚未ready导致无法展示首帧，中间的等待时间为空白
-    self.posterView.image = nil;
+    ///还得延时0.1s，这个代理走的时候首帧也不一定能解析出来，稍微延迟一点
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.posterView.image = nil;
+    });
 }
 
 -(void)playerManager:(DWPlayerManager *)manager finishPlayingAsset:(AVAsset *)asset {
