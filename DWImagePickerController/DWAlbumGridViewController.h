@@ -46,6 +46,6 @@
 
 -(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager;
 
--(void)configCurrentPreviewIndex:(NSInteger)index;
+-(void)notifyPreviewIndexChangeTo:(NSInteger)index;
 
 @end

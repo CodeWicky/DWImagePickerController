@@ -19,7 +19,7 @@
 
 -(void)prepareLayout {
     [super prepareLayout];
-    CGFloat viewWidth = [UIScreen mainScreen].bounds.size.width;
+    CGFloat viewWidth = self.collectionView.bounds.size.width;
     CGFloat sizeWidth = self.itemSize.width;
     NSInteger column = (NSInteger)(viewWidth / sizeWidth);
     if (column == 1) {
@@ -32,6 +32,14 @@
 @end
 
 @interface DWAlbumGridViewController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,UICollectionViewDataSourcePrefetching>
+{
+    NSInteger _innerNotifyChangeIndex;
+    BOOL _firstAppear;
+    BOOL _needScrollToEdge;
+    BOOL _isShowing;
+    BOOL _screenRotateNeedsResetPreviewIndex;
+    CGSize _oriSize;
+}
 
 @property (nonatomic ,strong) DWFixAdjustCollectionView * collectionView;
 
@@ -49,13 +57,7 @@
 
 @property (nonatomic ,assign) CGFloat lastOffsetY;
 
-@property (nonatomic ,assign) BOOL firstAppear;
-
-@property (nonatomic ,assign) BOOL needScrollToEdge;
-
 @property (nonatomic ,strong) Class cellClazz;
-
-@property (nonatomic ,assign) NSInteger currentPreviewIndex;
 
 @end
 
@@ -73,9 +75,9 @@
     self.cellClazz = cellClazz;
 }
 
--(void)configCurrentPreviewIndex:(NSInteger)index {
+-(void)notifyPreviewIndexChangeTo:(NSInteger)index {
     if (index >= 0 && index < self.album.fetchResult.count) {
-        _currentPreviewIndex = index;
+        _innerNotifyChangeIndex = index;
     }
 }
 
@@ -86,10 +88,16 @@
     [self.view addSubview:self.collectionView];
     if (self.bottomToolBar) {
         [self.view addSubview:self.bottomToolBar];
+        UIEdgeInsets insets = self.collectionView.contentInset;
+        insets.bottom += self.bottomToolBar.toolBarHeight;
+        self.collectionView.contentInset = insets;
     }
     
     if (self.topToolBar) {
         [self.view addSubview:self.topToolBar];
+        UIEdgeInsets insets = self.collectionView.contentInset;
+        insets.top += self.topToolBar.toolBarHeight;
+        self.collectionView.contentInset = insets;
     }
     
     self.view.backgroundColor = [UIColor whiteColor];
@@ -97,75 +105,146 @@
     if (@available(iOS 10.0,*)) {
         self.collectionView.prefetchDataSource = self;
     }
-    self.firstAppear = YES;
-    self.currentPreviewIndex = -1;
+    _firstAppear = YES;
+    _innerNotifyChangeIndex = -1;
 }
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    if (self.firstAppear) {
+    [self showGrid];
+    _firstAppear = NO;
+}
+
+-(void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self leaveGrid];
+}
+    
+
+#pragma mark --- tool method ---
+-(void)showGrid {
+    _isShowing = YES;
+    [self configItemSizeIfNeeded];
+    [self handleScreenRotateBackgroundIfNeeded];
+    [self handleAutoScrollIfNeeded];
+}
+
+-(void)leaveGrid {
+    _oriSize = self.collectionView.frame.size;
+    _isShowing = NO;
+}
+
+-(void)configItemSizeIfNeeded {
+    if (_firstAppear) {
         CGSize itemSize = ((UICollectionViewFlowLayout *)self.collectionViewLayout).itemSize;
         CGFloat scale = 2;
         CGFloat thumnailScale = 0.5;
         self.photoSize = CGSizeMake(floor(itemSize.width * scale), floor(itemSize.height * scale));
         self.thumnailSize = CGSizeMake(floor(itemSize.width * thumnailScale), floor(itemSize.height * thumnailScale));
     }
-    
-    if (self.needScrollToEdge && self.results.count) {
-        CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
-        if (contentSize.height > self.collectionView.bounds.size.height) {
-            [self.collectionView setContentOffset:CGPointMake(0, contentSize.height - self.collectionView.bounds.size.height)];
-            if (self.firstAppear) {
-                ///防止第一次进入时，无法滚动至底部（差20px）
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
-                });
-            } else {
-                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
-            }
-        } else {
-            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
-        }
-    } else {
-        if (self.currentPreviewIndex >= 0 && self.results.count) {
-            if (self.currentPreviewIndex < self.results.count) {
-                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.currentPreviewIndex inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
-            }
-            
-            self.currentPreviewIndex = -1;
-        }
-        
-        if (self.selectionManager.needsRefreshSelection) {
-            [self selectVisibleCells];
-            [self.selectionManager finishRefreshSelection];
-        }
-    }
-    self.firstAppear = NO;
-    self.needScrollToEdge = NO;
 }
 
-#pragma mark --- tool method ---
--(CGRect)gridFrame {
-    UIEdgeInsets insets = UIEdgeInsetsZero;
-    if (@available(iOS 11.0, *)) {
-        insets = self.view.safeAreaInsets;
+-(void)handleScreenRotateBackgroundIfNeeded {
+    ///这里如果背后旋屏了，要在safeArea更改之前配置dw_autoFixAdjustedContentInset，以方便collectionView过后调整中间展示区域不变
+    if (!CGSizeEqualToSize(_oriSize, self.view.bounds.size)) {
+        _screenRotateNeedsResetPreviewIndex = YES;
+        [self autoFixAdjustedContentInset];
+    }
+}
+
+-(void)autoFixAdjustedContentInset {
+    self.collectionView.dw_autoFixContentOffset = YES;
+    self.collectionView.dw_useAutoFixAdjustedContentInset = YES;
+    if (@available(iOS 11.0,*)) {
+        self.collectionView.dw_autoFixAdjustedContentInset = self.collectionView.adjustedContentInset;
+    }
+}
+
+-(void)handleAutoScrollIfNeeded {
+    if (self.results.count) {
+        if (_needScrollToEdge) {
+            [self handleAutoScrollToEdge];
+        } else {
+            [self handleAutoScrollToCurrentPreviewIndex];
+            [self handleCellSelectionRefreshIfNeeded];
+        }
+    }
+    _needScrollToEdge = NO;
+}
+
+-(void)handleAutoScrollToEdge {
+    CGSize contentSize = [self.collectionView.collectionViewLayout collectionViewContentSize];
+    if (contentSize.height > self.collectionView.bounds.size.height) {
+        //            [self.collectionView setContentOffset:CGPointMake(0, contentSize.height - self.collectionView.bounds.size.height)];
+        if (_firstAppear) {
+            ///防止第一次进入时，无法滚动至底部（差20px）
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+            });
+        } else {
+            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+        }
     } else {
-        insets.top = [UIApplication sharedApplication].statusBarFrame.size.height;
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
     }
-    CGFloat top = insets.top;
-    CGFloat left = insets.left;
-    CGFloat right = insets.right;
-    CGFloat bottom = insets.bottom;
-    
-    if (self.topToolBar) {
-        top += self.topToolBar.toolBarHeight;
+    _innerNotifyChangeIndex = -1;
+}
+
+-(void)handleAutoScrollToCurrentPreviewIndex {
+    ///这里如果没有旋屏，才考虑直接滚动，如果旋屏了，应该在safeArea改变之后再滚动
+    if (!_screenRotateNeedsResetPreviewIndex) {
+        if (_innerNotifyChangeIndex >= 0) {
+            if (_innerNotifyChangeIndex < self.results.count) {
+                ///此处应该不在可见范围内才滚动，在可见范围内不动
+                [self scrollIndexToCenterIfNeeded:_innerNotifyChangeIndex];
+            }
+            _innerNotifyChangeIndex = -1;
+        }
+    }
+}
+
+-(void)handleAutoScrollToCurrentPreviewIndexAfterRotate {
+    if (_screenRotateNeedsResetPreviewIndex) {
+        _screenRotateNeedsResetPreviewIndex = NO;
+        if (_innerNotifyChangeIndex >= 0) {
+            if (_innerNotifyChangeIndex < self.results.count) {
+                ///这里无论在不在可见范围内都滚动至中间。因为屏幕发生了转动，即使转动之前在屏幕中不需要滚动，可能旋屏后就不在屏幕中了。所以强制改到屏幕中。
+                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_innerNotifyChangeIndex inSection:0] atScrollPosition:(UICollectionViewScrollPositionCenteredVertically) animated:NO];
+            }
+            _innerNotifyChangeIndex = -1;
+        } else {
+            ///如果角标没有变，则找到之前屏幕中间位置的角标
+            NSArray <UICollectionViewLayoutAttributes *>* attr = [self visibleAttributes];
+            if (attr.count) {
+                NSInteger centerIdx = (attr.count - 1) / 2;
+                [self.collectionView scrollToItemAtIndexPath:attr[centerIdx].indexPath atScrollPosition:(UICollectionViewScrollPositionCenteredVertically) animated:NO];
+            }
+        }
+    }
+}
+
+-(void)scrollIndexToCenterIfNeeded:(NSInteger)index {
+    ///此处应该不在可见范围内才滚动，在可见范围内不动
+    NSArray <UICollectionViewLayoutAttributes *>* attr = [self visibleAttributes];
+    if (attr.count == 0 || index < attr.firstObject.indexPath.item || index > attr.lastObject.indexPath.item) {
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0] atScrollPosition:(UICollectionViewScrollPositionCenteredVertically) animated:NO];
+    }
+}
+
+-(NSArray <UICollectionViewLayoutAttributes *>*)visibleAttributes {
+    CGRect visibleFrame = (CGRect){self.collectionView.contentOffset,self.collectionView.bounds.size};
+    if (@available(iOS 11.0,*)) {
+        visibleFrame = UIEdgeInsetsInsetRect(visibleFrame, self.collectionView.adjustedContentInset);
     }
     
-    if (self.bottomToolBar) {
-        bottom += self.bottomToolBar.toolBarHeight;
+    return [self.collectionView.collectionViewLayout layoutAttributesForElementsInRect:visibleFrame];
+}
+
+-(void)handleCellSelectionRefreshIfNeeded {
+    if (self.selectionManager.needsRefreshSelection) {
+        [self selectVisibleCells];
+        [self.selectionManager finishRefreshSelection];
     }
-    
-    return CGRectMake(left, top, self.view.bounds.size.width - left - right, self.view.bounds.size.height - top - bottom);
 }
 
 -(void)refreshAlbum:(DWAlbumModel *)model {
@@ -238,7 +317,6 @@
                 ///两种情况，如果移除对位的话，只影响队尾，否则删除后需要更改对应idx后的序号
                 [self resetSelectionCellAtIndex:idx toIndex:0];
                 [self.selectionManager removeSelectionAtIndex:idx];
-                
                 
                 for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
                     [self resetSelectionCellAtIndex:i toIndex:i + 1];
@@ -380,11 +458,17 @@
 -(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     self.collectionView.dw_autoFixContentOffset = YES;
+    ///这里要区分是不是在屏幕内进行旋屏
+    if (_isShowing) {
+        [self autoFixAdjustedContentInset];
+    }
 }
 
 -(void)viewSafeAreaInsetsDidChange {
     [super viewSafeAreaInsetsDidChange];
-    self.collectionView.frame = [self gridFrame];
+    ///这里如果是在屏幕外旋屏后进来才走的这里，要先恢复至指定角标的位置后，再设置frame。
+    [self handleAutoScrollToCurrentPreviewIndexAfterRotate];
+    self.collectionView.frame = self.view.bounds;
 }
 
 #pragma mark --- override ---
@@ -405,7 +489,7 @@
 
 -(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
-        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[self gridFrame] collectionViewLayout:self.collectionViewLayout];
+        _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:self.collectionViewLayout];
         Class cls = self.cellClazz?:[DWAlbumGridCell class];
         [self.collectionView registerClass:cls forCellWithReuseIdentifier:@"GridCell"];
         _collectionView.delegate = self;
@@ -413,7 +497,7 @@
         _collectionView.showsHorizontalScrollIndicator = NO;
         _collectionView.clipsToBounds = NO;
         if (@available(iOS 11.0,*)) {
-            _collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+            _collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentAlways;
         } else {
             self.automaticallyAdjustsScrollViewInsets = NO;
         }

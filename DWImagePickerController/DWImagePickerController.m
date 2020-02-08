@@ -359,7 +359,7 @@
 }
 
 -(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
-    [self.gridVC configCurrentPreviewIndex:index];
+    [self.gridVC notifyPreviewIndexChangeTo:index];
     [self handleNavigationBarSelectedAtIndex:index];
 }
 
