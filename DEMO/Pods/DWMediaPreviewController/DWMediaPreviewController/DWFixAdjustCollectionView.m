@@ -81,6 +81,7 @@
             NSInteger centerIdx = (attrsInRect.count - 1) / 2;
             oriCenterIdp = attrsInRect[centerIdx].indexPath;
         }
+        
     }
     [super setFrame:frame];
     if (self.dw_autoFixContentOffset) {
@@ -115,9 +116,6 @@
         }
         [self setContentOffset:fixContentOffset];
     }
-}
--(void)setContentOffset:(CGPoint)contentOffset {
-    [super setContentOffset:contentOffset];
 }
 
 @end
