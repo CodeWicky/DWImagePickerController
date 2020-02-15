@@ -1217,6 +1217,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (!_control) {
         _control = [[DWMediaPreviewVideoControl alloc] initWithFrame:CGRectZero];
         _control.hidden = YES;
+        _control.alpha = 0;
         __weak typeof(self)weakSelf = self;
         _control.playBtnClicked = ^(BOOL toPlay) {
             if (toPlay) {
