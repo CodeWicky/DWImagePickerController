@@ -1173,7 +1173,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             [self hideControlWithAnimated:YES];
         }
     }
-    
     if (self.tapAction) {
         self.tapAction(self);
     }
