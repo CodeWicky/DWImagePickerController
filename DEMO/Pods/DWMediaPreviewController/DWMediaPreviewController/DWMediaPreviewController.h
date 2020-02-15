@@ -138,6 +138,10 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 ///预览尺寸。
 @property (nonatomic ,assign ,readonly) CGSize previewSize;
 
+//Indicates whether the previewController is showing.
+///当前预览控制器是否正在展示的标志位
+@property (nonatomic ,assign ,readonly) BOOL isShowing;
+
 //Top tool bar of previewController.
 ///当前的顶部工具栏
 @property (nonatomic ,strong) UIView <DWMediaPreviewToolBarProtocol>* topToolBar;
@@ -175,6 +179,15 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
  注：在展示预览控制器前调用，用来通知预览控制器从该角标开始展示。展示中调用无效。
  */
 -(void)previewAtIndex:(NSUInteger)index;
+
+
+/**
+ Refresh the current preview cell's layout.
+ 刷新当前正在预览的cell的布局。
+ 
+ @param animated 是否需要动画
+ */
+-(void)refreshCurrentPreviewLayoutWithAnimated:(BOOL)animated;
 
 /**
  To notice the previewController that the total count of media to preview has been changed.

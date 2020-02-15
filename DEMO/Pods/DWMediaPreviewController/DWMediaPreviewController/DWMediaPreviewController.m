@@ -88,8 +88,6 @@
 
 @property (nonatomic ,assign) CGRect oriRect;
 
-@property (nonatomic ,assign) BOOL isShowing;
-
 @property (nonatomic ,assign) BOOL previewSizeResized;
 
 @property (nonatomic ,assign) BOOL indexChanged;
@@ -123,6 +121,17 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _index = index;
         _indexChanged = YES;
     }
+}
+
+-(void)refreshCurrentPreviewLayoutWithAnimated:(BOOL)animated {
+    if (_index < 0) {
+        return;
+    } else if (_index >= _innerMediaCount) {
+        return;
+    }
+    
+    DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
+    [cell refreshCellWithAnimated:animated];
 }
 
 -(void)photoCountHasChanged {
@@ -178,7 +187,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [cell clearCell];
     [self turnToDarkBackground:NO];
     self.oriRect = self.collectionView.frame;
-    self.isShowing = NO;
+    _isShowing = NO;
 }
 
 -(void)setFocusMode:(BOOL)hidden {

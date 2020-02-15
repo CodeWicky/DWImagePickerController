@@ -82,6 +82,10 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     _hdrBadge.alpha = 0;
 }
 
+-(void)refreshCellWithAnimated:(BOOL)animated {
+    [self configBadgeWithAnimated:animated];
+}
+
 -(void)zoomMediaView:(BOOL)zoomIn point:(CGPoint)point {
     if (self.zoomable) {
         UIScrollView *scrollView = (UIScrollView *)self.containerView;
@@ -288,6 +292,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     CGFloat alpha = 1;
     if (hidden) {
         alpha = 0;
+    }
+    if (self.hdrBadge.alpha == alpha) {
+        return;
     }
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
@@ -1099,16 +1106,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self.control updateCurrentTime:0];
 }
 
-#pragma mark --- override ---
--(void)initializingSubviews {
-    [super initializingSubviews];
-    [self.contentView addSubview:self.control];
-    self.mediaView.playerManager.timeIntervalForPlayerTimeObserver = 0.1;
-}
-
--(void)setupSubviews {
-    [super setupSubviews];
-    
+-(void)configControlFrameWithAnimated:(BOOL)animated {
     CGFloat spacing = 10;
     CGFloat bottomMargin = 0;
     CGFloat leftMargin = 0;
@@ -1124,7 +1122,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             bottomMargin = spacing;
         }
     }
-    
     ///如果没有已Navigation为准，如果是11以上，用safeAreaInsets更加准确
     if (@available(iOS 11.0,*)) {
         leftMargin = self.safeAreaInsets.left + spacing;
@@ -1132,8 +1129,26 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     
     CGRect controlFrame = CGRectMake(leftMargin, self.bounds.size.height - bottomMargin - height, self.bounds.size.width - leftMargin * 2, height);
     if (!CGRectEqualToRect(controlFrame, self.control.frame)) {
-        self.control.frame = controlFrame;
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:^{
+                self.control.frame = controlFrame;
+            }];
+        } else {
+            self.control.frame = controlFrame;
+        }
     }
+}
+
+#pragma mark --- override ---
+-(void)initializingSubviews {
+    [super initializingSubviews];
+    [self.contentView addSubview:self.control];
+    self.mediaView.playerManager.timeIntervalForPlayerTimeObserver = 0.1;
+}
+
+-(void)setupSubviews {
+    [super setupSubviews];
+    [self configControlFrameWithAnimated:NO];
 }
 
 -(void)clearCell {
@@ -1142,12 +1157,23 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self.control updateControlStatus:YES];
 }
 
+-(void)refreshCellWithAnimated:(BOOL)animated {
+    [super refreshCellWithAnimated:animated];
+    [self configControlFrameWithAnimated:animated];
+}
+
 -(void)tapAction:(UITapGestureRecognizer *)tap {
-    if (self.control.hidden) {
-        [self showControlWithAnimated:YES];
+    if (self.previewController.isFocusOnMedia) {
+        //将要进入非专注模式，所以此处应该展示control
+        if (self.control.hidden) {
+            [self showControlWithAnimated:YES];
+        }
     } else {
-        [self hideControlWithAnimated:YES];
+        if (!self.control.hidden) {
+            [self hideControlWithAnimated:YES];
+        }
     }
+    
     if (self.tapAction) {
         self.tapAction(self);
     }
@@ -1162,6 +1188,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)setMedia:(AVPlayerItem *)media {
     [super setMedia:media];
     [self configControlWithItem:media];
+    [self configControlFrameWithAnimated:NO];
 }
 
 -(void)play {

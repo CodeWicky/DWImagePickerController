@@ -97,6 +97,10 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 ///清除cell当前状态及相关展示的方法。你可以随时调用他，同时系统将会在 -prepareForReuse 时自动调用他。
 -(void)clearCell NS_REQUIRES_SUPER;
 
+//Force cell to relayout subviews.
+///强制cell刷新子控件布局。
+-(void)refreshCellWithAnimated:(BOOL)animated;
+
 //Zoom the preview view for media at specific point.
 ///以指定点为中心缩放当前媒体。
 -(void)zoomMediaView:(BOOL)zoomIn point:(CGPoint)point;
@@ -134,8 +138,8 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 ///当需要计算缩放比例时会自动调用，其中mediaSize即为当前展示的资源的实际尺寸。在-setMedia: 时会调用此方法。此外，如果当前cell是可缩放的且他的frame发生改变时，在下一次 -setupSubviews 中也会调用此方法。
 -(void)configScaleFactorWithMediaSize:(CGSize)mediaSize;
 
-//Config the badge such as HDR and livephoto for cell.It will be called on -setMedia: and -setupSubviews.
-///配置当前资源的角标视图。在 -setMedia: 及 -setupSubviews 中会调用此方法。
+//Config the badge such as HDR and livephoto for cell.It will be called on -setMedia:, -refreshCellWithAnimated: and -setupSubviews.
+///配置当前资源的角标视图。在 -setMedia: 、-refreshCellWithAnimated:及 -setupSubviews 中会调用此方法。
 -(void)configBadgeWithAnimated:(BOOL)animated;
 
 //Set badge hidden.It will be called on -configBadgeWithAnimated: and -beforeZooming.
