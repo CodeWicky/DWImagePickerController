@@ -124,11 +124,20 @@
             if ([self.selectionManager addSelection:asset mediaIndex:index previewType:[DWAlbumMediaHelper previewTypeForAsset:asset]]) {
                 [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:self.selectionManager.selections.count];
                 [((DWAlbumPreviewToolBar *)self.previewVC.bottomToolBar) refreshUI];
+                ///代表是0~1，代表bottomToolBar高度改变了，要刷新cell
+                if (self.previewVC.isShowing && self.selectionManager.selections.count == 1) {
+                    [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
+                }
             }
         } else {
-            [self.selectionManager removeSelection:asset];
-            [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:0];
-            [((DWAlbumPreviewToolBar *)self.previewVC.bottomToolBar) refreshUI];
+            if ([self.selectionManager removeSelection:asset]) {
+                [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:0];
+                [((DWAlbumPreviewToolBar *)self.previewVC.bottomToolBar) refreshUI];
+                ///代表是1~0，代表bottomToolBar高度改变了，要刷新cell
+                if (self.previewVC.isShowing && self.selectionManager.selections.count == 0) {
+                    [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
+                }
+            }
         }
     }
 }

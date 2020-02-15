@@ -235,7 +235,19 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         case DWAlbumExportPresetTypeHighestQuality:
             return AVAssetExportPresetHighestQuality;
         case DWAlbumExportPresetTypeHEVCHighestQuality:
-            return AVAssetExportPresetHEVCHighestQuality;
+        {
+            if (@available(iOS 11.0,*)) {
+                return AVAssetExportPresetHEVCHighestQuality;
+            }
+            return AVAssetExportPresetHighestQuality;
+        }
+        case DWAlbumExportPresetTypeHEVCHighestQualityWithAlpha:
+        {
+            if (@available(iOS 13.0,*)) {
+                return AVAssetExportPresetHEVCHighestQualityWithAlpha;
+            }
+            return AVAssetExportPresetHighestQuality;
+        }
         case DWAlbumExportPresetType640x480:
             return AVAssetExportPreset640x480;
         case DWAlbumExportPresetType960x540:
@@ -247,9 +259,33 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         case DWAlbumExportPresetType3840x2160:
             return AVAssetExportPreset3840x2160;
         case DWAlbumExportPresetTypeHEVC1920x1080:
-            return AVAssetExportPresetHEVC1920x1080;
+        {
+            if (@available(iOS 11.0,*)) {
+                return AVAssetExportPresetHEVC1920x1080;
+            }
+            return AVAssetExportPreset1920x1080;
+        }
+        case DWAlbumExportPresetTypeHEVC1920x1080WithAlpha:
+        {
+            if (@available(iOS 13.0,*)) {
+                return AVAssetExportPresetHEVC1920x1080WithAlpha;
+            }
+            return AVAssetExportPreset1920x1080;
+        }
         case DWAlbumExportPresetTypeHEVC3840x2160:
-            return AVAssetExportPresetHEVC3840x2160;
+        {
+            if (@available(iOS 11.0,*)) {
+                return AVAssetExportPresetHEVC3840x2160;
+            }
+            return AVAssetExportPreset3840x2160;
+        }
+        case DWAlbumExportPresetTypeHEVC3840x2160WithAlpha:
+        {
+            if (@available(iOS 13.0,*)) {
+                return AVAssetExportPresetHEVC3840x2160WithAlpha;
+            }
+            return AVAssetExportPreset3840x2160;
+        }
         case DWAlbumExportPresetTypeAppleM4A:
             return AVAssetExportPresetAppleM4A;
         case DWAlbumExportPresetTypePassthrough:

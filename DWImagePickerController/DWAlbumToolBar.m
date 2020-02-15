@@ -88,7 +88,7 @@
     self.originLb.frame = btnFrame;
     
     if (self.selectionManager.selections.count) {
-        self.sendButton.text = [NSString stringWithFormat:@"发送(%ld)",self.selectionManager.selections.count];
+        self.sendButton.text = [NSString stringWithFormat:@"发送(%lu)",(unsigned long)self.selectionManager.selections.count];
         self.sendButton.userInteractionEnabled = YES;
         self.sendButton.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
     } else {
