@@ -9,9 +9,13 @@
 #import "ViewController.h"
 #import "DWAlbumManager.h"
 #import "DWImagePickerController.h"
-#import <DWImagePickerController/DWAlbumToolBar.h>
+#import <DWImagePickerController/DWAlbumPreviewToolBar.h>
 
 @interface ViewController ()
+
+@property (nonatomic ,strong) DWAlbumPreviewToolBar * toolBar;
+
+@property (nonatomic ,strong) DWAlbumSelectionManager * mgr;
 
 @end
 
@@ -21,7 +25,7 @@
     [super viewDidLoad];
     
     self.view.backgroundColor = [UIColor greenColor];
-    
+//    [self.view addSubview:self.toolBar];
     
 }
 
@@ -37,7 +41,32 @@
         [self presentViewController:picker animated:YES completion:nil];
     }];
     
+//    if (self.mgr.selections.count == 0) {
+//        PHAsset * asset = [PHAsset new];
+//        if ([self.mgr addSelection:asset mediaIndex:0 previewType:(DWMediaPreviewTypeImage)]) {
+//            [self.toolBar refreshUI];
+//        }
+//    } else {
+//        if ([self.mgr removeSelectionAtIndex:0]) {
+//            [self.toolBar refreshUI];
+//        }
+//    }
+    
 }
 
+-(DWAlbumPreviewToolBar *)toolBar {
+    if (!_toolBar) {
+        _toolBar = [DWAlbumPreviewToolBar toolBar];
+        [_toolBar configWithSelectionManager:self.mgr];
+    }
+    return _toolBar;
+}
+
+-(DWAlbumSelectionManager *)mgr {
+    if (!_mgr) {
+        _mgr = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:9];
+    }
+    return _mgr;
+}
 
 @end

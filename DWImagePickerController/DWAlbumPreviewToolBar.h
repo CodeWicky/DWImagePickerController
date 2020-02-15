@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DWAlbumPreviewToolBar : DWAlbumToolBar<DWMediaPreviewToolBarProtocol>
 
+-(void)configWithAlbumManager:(DWAlbumManager *)albumManager networkAccessAllowed:(BOOL)networkAccessAllowed;
+
 @end
 
 NS_ASSUME_NONNULL_END

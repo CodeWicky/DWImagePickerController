@@ -123,10 +123,12 @@
         if (idx == NSNotFound) {
             if ([self.selectionManager addSelection:asset mediaIndex:index previewType:[DWAlbumMediaHelper previewTypeForAsset:asset]]) {
                 [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:self.selectionManager.selections.count];
+                [((DWAlbumPreviewToolBar *)self.previewVC.bottomToolBar) refreshUI];
             }
         } else {
             [self.selectionManager removeSelection:asset];
             [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:0];
+            [((DWAlbumPreviewToolBar *)self.previewVC.bottomToolBar) refreshUI];
         }
     }
 }
@@ -506,6 +508,11 @@
         };
         
         _previewVC.topToolBar = topBar;
+        
+        DWAlbumPreviewToolBar * bottomBar = [DWAlbumPreviewToolBar toolBar];
+        [bottomBar configWithAlbumManager:self.albumManager networkAccessAllowed:self.fetchOption?self.fetchOption.networkAccessAllowed:YES];
+        [bottomBar configWithSelectionManager:self.selectionManager];
+        _previewVC.bottomToolBar = bottomBar;
         
         _previewVC.closeOnSlidingDown = YES;
     }

@@ -133,7 +133,7 @@
     CGRect frame = self.frame;
     frame.origin.y = 0;
     if (animated) {
-        [UIView animateWithDuration:0.2 animations:^{
+        [UIView animateWithDuration:0.25 animations:^{
             self.frame = frame;
         }];
     } else {
@@ -145,7 +145,7 @@
     CGRect frame = self.frame;
     frame.origin.y = - frame.size.height;
     if (animated) {
-        [UIView animateWithDuration:0.2 animations:^{
+        [UIView animateWithDuration:0.25 animations:^{
             self.frame = frame;
         } completion:^(BOOL finished) {
             self.show = NO;

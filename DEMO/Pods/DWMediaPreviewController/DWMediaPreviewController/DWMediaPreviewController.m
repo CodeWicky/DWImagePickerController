@@ -446,7 +446,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 -(void)turnToDarkBackground:(BOOL)dark {
-    [UIView animateWithDuration:0.2 animations:^{
+    [UIView animateWithDuration:0.25 animations:^{
         self.collectionView.backgroundColor = [UIColor colorWithWhite:dark?0:1 alpha:1];
     }];
 }

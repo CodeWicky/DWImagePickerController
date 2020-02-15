@@ -44,7 +44,7 @@
 
 -(void)registGridCell:(Class)cellClazz;
 
--(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager;
+-(void)configWithAlbum:(DWAlbumModel *)album albumManager:(DWAlbumManager *)albumManager;
 
 -(void)notifyPreviewIndexChangeTo:(NSInteger)index;
 

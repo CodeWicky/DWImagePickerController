@@ -71,6 +71,19 @@
     return self;
 }
 
+-(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager {
+    if (![_album isEqual:model]) {
+        _album = model;
+        _results = model.fetchResult;
+        self.title = model.name;
+        _needScrollToEdge = YES;
+        [_collectionView reloadData];
+    }
+    if (![_albumManager isEqual:albumManager]) {
+        _albumManager = albumManager;
+    }
+}
+
 -(void)registGridCell:(Class)cellClazz {
     self.cellClazz = cellClazz;
 }
@@ -250,19 +263,6 @@
 -(void)refreshAlbum:(DWAlbumModel *)model {
     _album = model;
     _results = model.fetchResult;
-}
-
--(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager {
-    if (![_album isEqual:model]) {
-        _album = model;
-        _results = model.fetchResult;
-        self.title = model.name;
-        _needScrollToEdge = YES;
-        [_collectionView reloadData];
-    }
-    if (![_albumManager isEqual:albumManager]) {
-        _albumManager = albumManager;
-    }
 }
 
 -(void)configCellSelect:(DWAlbumGridCell *)cell asset:(PHAsset *)asset {

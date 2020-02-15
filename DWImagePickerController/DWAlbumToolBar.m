@@ -10,6 +10,8 @@
 
 @interface DWAlbumToolBar ()
 
+@property (nonatomic ,strong) UIVisualEffectView * blurView;
+
 @property (nonatomic ,strong) DWLabel * previewButton;
 
 @property (nonatomic ,strong) UIView * originCircle;
@@ -37,11 +39,7 @@
 }
 
 -(void)setupUI {
-    UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
-    UIVisualEffectView * blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-    blurView.frame = self.bounds;
-    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self addSubview:blurView];
+    [self addSubview:self.blurView];
     [self addSubview:self.previewButton];
     [self addSubview:self.originCircle];
     [self.originCircle addSubview:self.originIndicator];
@@ -148,6 +146,16 @@
 }
 
 #pragma mark --- setter/getter ---
+-(UIVisualEffectView *)blurView {
+    if (!_blurView) {
+        UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
+        _blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+        _blurView.frame = self.bounds;
+        _blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    }
+    return _blurView;
+}
+
 -(DWLabel *)previewButton {
     if (!_previewButton) {
         _previewButton = [DWLabel new];
