@@ -14,6 +14,8 @@
 
 @property (nonatomic ,strong) DWLabel * previewButton;
 
+@property (nonatomic ,strong) UIView * originCtn;
+
 @property (nonatomic ,strong) UIView * originCircle;
 
 @property (nonatomic ,strong) UIView * originIndicator;
@@ -41,9 +43,10 @@
 -(void)setupUI {
     [self addSubview:self.blurView];
     [self addSubview:self.previewButton];
-    [self addSubview:self.originCircle];
+    [self addSubview:self.originCtn];
+    [self.originCtn addSubview:self.originCircle];
     [self.originCircle addSubview:self.originIndicator];
-    [self addSubview:self.originLb];
+    [self.originCtn addSubview:self.originLb];
     [self addSubview:self.sendButton];
 }
 
@@ -76,16 +79,23 @@
     }
     btnFrame = self.originCircle.frame;
     btnSize = btnFrame.size;
-    btnFrame.origin.x = self.superview.bounds.size.width * 0.5 - 1 - btnSize.width;
+    btnFrame.origin.x = 0;
     btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     self.originCircle.frame = btnFrame;
     
     [self.originLb sizeToFit];
     btnFrame = self.originLb.frame;
     btnSize = btnFrame.size;
-    btnFrame.origin.x = self.superview.bounds.size.width * 0.5 + 1;
+    btnFrame.origin.x = self.originCircle.frame.size.width + 2;
     btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
     self.originLb.frame = btnFrame;
+    
+    btnFrame.size.width = CGRectGetMaxX(btnFrame);
+    btnFrame.size.height = self.toolBarHeight;
+    btnFrame.origin.x = (self.superview.bounds.size.width - btnFrame.size.width) * 0.5;
+    btnFrame.origin.y = 0;
+    self.originCtn.frame = btnFrame;
+    
     
     if (self.selectionManager.selections.count) {
         self.sendButton.text = [NSString stringWithFormat:@"发送(%lu)",(unsigned long)self.selectionManager.selections.count];
@@ -116,6 +126,13 @@
     }
     
     self.frame = btnFrame;
+}
+
+#pragma mark --- btn action ---
+-(void)originBtnAction:(UITapGestureRecognizer *)sender {
+    if (self.originImageAction) {
+        self.originImageAction(self);
+    }
 }
 
 #pragma mark --- override ---
@@ -172,12 +189,22 @@
     return _previewButton;
 }
 
+-(UIView *)originCtn {
+    if (!_originCtn) {
+        _originCtn = [UIView new];
+        UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(originBtnAction:)];
+        [_originCtn addGestureRecognizer:tap];
+    }
+    return _originCtn;
+}
+
 -(UIView *)originCircle {
     if (!_originCircle) {
         _originCircle = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 18, 18)];
         _originCircle.layer.cornerRadius = 9;
         _originCircle.layer.borderWidth = 2;
         _originCircle.layer.borderColor = [UIColor lightGrayColor].CGColor;
+        _originCircle.userInteractionEnabled = NO;
     }
     return _originCircle;
 }
@@ -199,14 +226,7 @@
         _originLb.font = [UIFont systemFontOfSize:17];
         _originLb.text = @"原图";
         _originLb.textColor = [UIColor blackColor];
-        _originLb.userInteractionEnabled  = YES;
-        _originLb.touchPaddingInsets = UIEdgeInsetsMake(0, 2 + 18, 0, 0);
-        __weak typeof(self)weakSelf = self;
-        [_originLb addAction:^(DWLabel * _Nonnull label) {
-            if (weakSelf.originImageAction) {
-                weakSelf.originImageAction(weakSelf);
-            }
-        }];
+        _originLb.userInteractionEnabled = NO;
     }
     return _originLb;
 }
