@@ -301,7 +301,7 @@
     DWAlbumSelectionModel * selectionModel = [self.selectionManager selectionModelAtIndex:index];
     if ([self.currentGridAlbumResult containsObject:selectionModel.asset]) {
         [self.previewBottomToolBar focusOnIndex:index];
-        [self.previewVC showPreviewAtIndex:selectionModel.mediaIndex];
+        [self.previewVC previewAtIndex:selectionModel.mediaIndex];
         [self handleNavigationBarSelectedAtIndex:selectionModel.mediaIndex];
     }
 }

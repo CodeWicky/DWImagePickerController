@@ -5,7 +5,7 @@ PODS:
   - DWKit/DWCategory/DWArrayUtils (0.0.0.10)
   - DWKit/DWComponent/DWLabel (0.0.0.10)
   - DWKit/DWUtils/DWOperationCancelFlag (0.0.0.10)
-  - DWMediaPreviewController (0.0.0.31):
+  - DWMediaPreviewController (0.0.0.32):
     - DWKit/DWCategory/DWArrayUtils (~> 0.0.0.10)
     - DWKit/DWUtils/DWOperationCancelFlag (~> 0.0.0.8)
     - DWPlayer (~> 0.0.0.3)
@@ -32,7 +32,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   DWImagePickerController: c45b48679e9bf2a75acb6d6e59b4d2205884bcbd
   DWKit: d0b857eaee0941b634953bf805c27465352fca92
-  DWMediaPreviewController: ee7f0df1959730c7362309de46bf5d5e14e40189
+  DWMediaPreviewController: 0cfae7ccf8f93b588edf629577f604e08f1485a5
   DWPlayer: c371dd6dce09ead6f9045cc8a84a4fcb2a7c58dd
   YYImage: 1e1b62a9997399593e4b9c4ecfbbabbf1d3f3b54
 

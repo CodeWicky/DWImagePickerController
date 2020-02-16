@@ -117,17 +117,19 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 #pragma mark --- interface method ---
 -(void)previewAtIndex:(NSUInteger)index {
-    if (index != _index && index < [self collectionView:self.collectionView numberOfItemsInSection:0]) {
-        _index = index;
-        _indexChanged = YES;
-    }
-}
-
--(void)showPreviewAtIndex:(NSUInteger)index {
-    index = [self getValidIndex:index];
-    if (index != _index) {
-        _index = index;
-        [self setContentOffsetToCurrentIndex];
+    if (_isShowing) {
+        ///如果展示中，调用这里说明要切换至指定角标，直接无动画切换
+        index = [self getValidIndex:index];
+        if (index != _index) {
+            _index = index;
+            [self setContentOffsetToCurrentIndex];
+        }
+    } else {
+        ///如果不在展示中，调用这里说明要配置一会展示时的位置，所以改变角标后，记录需要改变的标志位
+        if (index != _index && index < [self collectionView:self.collectionView numberOfItemsInSection:0]) {
+            _index = index;
+            _indexChanged = YES;
+        }
     }
 }
 

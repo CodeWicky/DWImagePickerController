@@ -115,7 +115,7 @@
 -(NSString *)convertTimeToString:(NSTimeInterval)time {
     NSInteger min = time / 60;
     NSInteger sec = ((NSInteger)time) % 60;
-    return [NSString stringWithFormat:@"%02ld:%02ld",min,sec];
+    return [NSString stringWithFormat:@"%02ld:%02ld",(long)min,(long)sec];
 }
 
 #pragma mark --- btn action ---

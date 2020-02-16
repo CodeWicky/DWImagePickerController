@@ -175,12 +175,9 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
  配置当前应该展示的角标。
 
  @param index 应该展示的角标
- 
- 注：在展示预览控制器前调用，用来通知预览控制器从该角标开始展示。展示中调用无效。
  */
 -(void)previewAtIndex:(NSUInteger)index;
 
--(void)showPreviewAtIndex:(NSUInteger)index;
 /**
  Refresh the current preview cell's layout.
  刷新当前正在预览的cell的布局。

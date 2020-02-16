@@ -49,7 +49,7 @@
         return NO;
     }
     DWMediaPreviewImageDecoder * d = [self decoder];
-    return [d.decodedImageCache objectForKey:image];
+    return ([d.decodedImageCache objectForKey:image] != nil);
 }
 
 #pragma mark --- tool method ---
