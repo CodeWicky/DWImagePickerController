@@ -180,7 +180,7 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
  */
 -(void)previewAtIndex:(NSUInteger)index;
 
-
+-(void)showPreviewAtIndex:(NSUInteger)index;
 /**
  Refresh the current preview cell's layout.
  刷新当前正在预览的cell的布局。

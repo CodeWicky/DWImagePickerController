@@ -123,6 +123,14 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     }
 }
 
+-(void)showPreviewAtIndex:(NSUInteger)index {
+    index = [self getValidIndex:index];
+    if (index != _index) {
+        _index = index;
+        [self setContentOffsetToCurrentIndex];
+    }
+}
+
 -(void)refreshCurrentPreviewLayoutWithAnimated:(BOOL)animated {
     if (_index < 0) {
         return;
