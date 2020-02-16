@@ -87,6 +87,17 @@
     return nil;
 }
 
+-(DWAlbumSelectionModel *)selectionModelForSelection:(PHAsset *)asset {
+    if (!asset) {
+        return nil;
+    }
+    NSInteger index = [self indexOfSelection:asset];
+    if (index == NSNotFound) {
+        return nil;
+    }
+    return [self selectionModelAtIndex:index];
+}
+
 -(PHAsset *)selectionAtIndex:(NSInteger)index {
     return [self selectionModelAtIndex:index].asset;
 }

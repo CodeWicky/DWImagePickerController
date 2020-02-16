@@ -10,10 +10,15 @@
 #import "DWAlbumToolBar.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
+@class DWAlbumPreviewToolBar;
+typedef void(^PreviewToolBarAction)(DWAlbumPreviewToolBar * toolBar,NSInteger index);
 @interface DWAlbumPreviewToolBar : DWAlbumToolBar<DWMediaPreviewToolBarProtocol>
 
+@property (nonatomic ,copy) PreviewToolBarAction selectAction;
+
 -(void)configWithAlbumManager:(DWAlbumManager *)albumManager networkAccessAllowed:(BOOL)networkAccessAllowed;
+
+-(void)focusOnIndex:(NSInteger)index;
 
 @end
 

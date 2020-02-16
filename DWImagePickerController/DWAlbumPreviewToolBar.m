@@ -17,19 +17,32 @@
 
 @property (nonatomic ,assign) NSInteger index;
 
+-(void)setNeedsFocus:(BOOL)focus;
+
 @end
 
 @implementation DWAlbumPreviewToolBarCell
 
+#pragma mark --- interface method ---
+-(void)setNeedsFocus:(BOOL)focus {
+    if (focus) {
+        self.previewImageView.layer.borderWidth = 2;
+    } else {
+        self.previewImageView.layer.borderWidth = 0;
+    }
+}
+
+#pragma mark --- tool method ---
+-(void)setupUI {
+    [self.contentView addSubview:self.previewImageView];
+}
+
+#pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         [self setupUI];
     }
     return self;
-}
-
--(void)setupUI {
-    [self.contentView addSubview:self.previewImageView];
 }
 
 #pragma mark --- setter/getter ---
@@ -44,15 +57,6 @@
         _previewImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return _previewImageView;
-}
-
--(void)setSelected:(BOOL)selected {
-    [super setSelected:selected];
-    if (selected) {
-        self.previewImageView.layer.borderWidth = 2;
-    } else {
-        self.previewImageView.layer.borderWidth = 0;
-    }
 }
 
 -(void)setModel:(DWImageAssetModel *)model {
@@ -92,6 +96,8 @@
 
 @property (nonatomic ,strong) UIView * mask;
 
+@property (nonatomic ,assign) NSInteger originFocusIndex;
+
 @end
 
 @implementation DWAlbumPreviewToolBar
@@ -100,6 +106,19 @@
 -(void)configWithAlbumManager:(DWAlbumManager *)albumManager networkAccessAllowed:(BOOL)networkAccessAllowed {
     _albumManager = albumManager;
     _networkAccessAllowed = networkAccessAllowed;
+}
+
+-(void)focusOnIndex:(NSInteger)index {
+    if (_originFocusIndex != index) {
+        _originFocusIndex = index;
+        [self.previewCol reloadData];
+        if (index >= 0 && index < [self collectionView:self.previewCol numberOfItemsInSection:0]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.previewCol scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0] atScrollPosition:(UICollectionViewScrollPositionCenteredHorizontally) animated:YES];
+            });
+        }
+        
+    }
 }
 
 #pragma mark --- DWMediaPreviewToolBarProtocol method ---
@@ -147,26 +166,35 @@
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     DWAlbumPreviewToolBarCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
     NSInteger originIndex = indexPath.item;
+    cell.index = originIndex;
     PHAsset * asset = [self.selectionManager selectionAtIndex:originIndex];
     DWImageAssetModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
     if (media) {
         cell.model = media;
     } else {
         [self.albumManager fetchImageWithAsset:asset targetSize:self.previewSize networkAccessAllowed:self.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-            if (cell.index == originIndex) {
+            if (cell.index == originIndex && !obj.isDegraded) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     cell.model = obj;
                 });
             }
         }];
     }
+    [cell setNeedsFocus:(originIndex == self.originFocusIndex)];
     return cell;
+}
+
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (self.selectAction) {
+        self.selectAction(self, indexPath.item);
+    }
 }
 
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         _show = YES;
+        _originFocusIndex = NSNotFound;
     }
     return self;
 }

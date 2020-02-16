@@ -45,6 +45,12 @@
 
 @property (nonatomic ,strong) dispatch_queue_t preloadQueue;
 
+@property (nonatomic ,strong) DWAlbumToolBar * gridBottomToolBar;
+
+@property (nonatomic ,strong) DWAlbumPreviewNavigationBar * previewTopToolBar;
+
+@property (nonatomic ,strong) DWAlbumPreviewToolBar * previewBottomToolBar;
+
 @end
 
 @implementation DWImagePickerController
@@ -122,8 +128,9 @@
         NSInteger idx = [self.selectionManager indexOfSelection:asset];
         if (idx == NSNotFound) {
             if ([self.selectionManager addSelection:asset mediaIndex:index previewType:[DWAlbumMediaHelper previewTypeForAsset:asset]]) {
-                [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:self.selectionManager.selections.count];
-                [((DWAlbumPreviewToolBar *)self.previewVC.bottomToolBar) refreshUI];
+                [self.previewTopToolBar setSelectAtIndex:self.selectionManager.selections.count];
+                [self.previewBottomToolBar refreshUI];
+                [self.previewBottomToolBar focusOnIndex:self.selectionManager.selections.count - 1];
                 ///代表是0~1，代表bottomToolBar高度改变了，要刷新cell
                 if (self.previewVC.isShowing && self.selectionManager.selections.count == 1) {
                     [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
@@ -131,8 +138,9 @@
             }
         } else {
             if ([self.selectionManager removeSelection:asset]) {
-                [((DWAlbumPreviewNavigationBar *)self.previewVC.topToolBar) setSelectAtIndex:0];
-                [((DWAlbumPreviewToolBar *)self.previewVC.bottomToolBar) refreshUI];
+                [self.previewTopToolBar setSelectAtIndex:0];
+                [self.previewBottomToolBar refreshUI];
+                [self.previewBottomToolBar focusOnIndex:NSNotFound];
                 ///代表是1~0，代表bottomToolBar高度改变了，要刷新cell
                 if (self.previewVC.isShowing && self.selectionManager.selections.count == 0) {
                     [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
@@ -289,6 +297,25 @@
     }
 }
 
+-(void)onPreviewBottomToolBarClick:(DWAlbumPreviewToolBar *)toolBar atIndex:(NSInteger)index {
+    DWAlbumSelectionModel * selectionModel = [self.selectionManager selectionModelAtIndex:index];
+    if ([self.currentGridAlbumResult containsObject:selectionModel.asset]) {
+        [self.previewBottomToolBar focusOnIndex:index];
+        [self.previewVC showPreviewAtIndex:selectionModel.mediaIndex];
+        [self handleNavigationBarSelectedAtIndex:selectionModel.mediaIndex];
+    }
+}
+
+-(void)handlePreviewBottomToolFocusAtIndex:(NSUInteger)index {
+    if (index >= self.currentGridAlbumResult.count) {
+        [self.previewBottomToolBar focusOnIndex:NSNotFound];
+    } else {
+        PHAsset * asset = self.currentGridAlbumResult[index];
+        index = [self.selectionManager indexOfSelection:asset];
+        [self.previewBottomToolBar focusOnIndex:index];
+    }
+}
+
 #pragma mark --- previewController dataSource ---
 -(NSUInteger)countOfMediaForPreviewController:(DWMediaPreviewController *)previewController {
     return self.currentGridAlbumResult.count;
@@ -372,6 +399,7 @@
 -(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
     [self.gridVC notifyPreviewIndexChangeTo:index];
     [self handleNavigationBarSelectedAtIndex:index];
+    [self handlePreviewBottomToolFocusAtIndex:index];
 }
 
 #pragma mark --- observer for Photos ---
@@ -463,33 +491,11 @@
         _gridVC = [[DWAlbumGridViewController alloc] initWithItemWidth:width];
         _gridPhotoSize = CGSizeMake(width * 2, width * 2);
         _gridVC.selectionManager = self.selectionManager;
+        _gridVC.bottomToolBar = self.gridBottomToolBar;
         __weak typeof(self) weakSelf = self;
         _gridVC.gridClickAction = ^(NSIndexPath *indexPath) {
             [weakSelf previewAtIndex:indexPath.item];
         };
-        DWAlbumToolBar * toolBar = [DWAlbumToolBar toolBar];
-        toolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if (strongSelf.selectionManager.sendAction) {
-                strongSelf.selectionManager.sendAction(strongSelf.selectionManager);
-            }
-        };
-        
-        toolBar.previewAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            PHAsset * asset = strongSelf.selectionManager.selections.firstObject.asset;
-            NSInteger idx = [strongSelf.gridVC.album.fetchResult indexOfObject:asset];
-            [strongSelf previewAtIndex:idx];
-        };
-        
-        toolBar.originImageAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
-           __strong typeof(weakSelf) strongSelf = weakSelf;
-           strongSelf.selectionManager.useOriginImage = !strongSelf.selectionManager.useOriginImage;
-           [toolBar refreshSelection];
-        };
-        [toolBar configWithSelectionManager:self.selectionManager];
-        
-        _gridVC.bottomToolBar = toolBar;
         _gridVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismiss)];
         _gridVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];
         _gridVC.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:nil];
@@ -503,26 +509,8 @@
         _previewVC = [[DWMediaPreviewController alloc] init];
         _previewVC.dataSource = self;
         [_previewVC registerClass:[DWVideoControlPreviewCell class] forCustomizePreviewCellWithReuseIdentifier:@"videoControlCell"];
-        _previewVC.bottomToolBar = [DWAlbumPreviewToolBar toolBar];
-        DWAlbumPreviewNavigationBar * topBar = [DWAlbumPreviewNavigationBar toolBar];
-        __weak typeof(self) weakSelf = self;
-        topBar.retAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            [strongSelf popViewControllerAnimated:YES];
-        };
-        
-        topBar.selectionAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            [strongSelf selectAtIndex:strongSelf.previewVC.currentIndex];
-        };
-        
-        _previewVC.topToolBar = topBar;
-        
-        DWAlbumPreviewToolBar * bottomBar = [DWAlbumPreviewToolBar toolBar];
-        [bottomBar configWithAlbumManager:self.albumManager networkAccessAllowed:self.fetchOption?self.fetchOption.networkAccessAllowed:YES];
-        [bottomBar configWithSelectionManager:self.selectionManager];
-        _previewVC.bottomToolBar = bottomBar;
-        
+        _previewVC.topToolBar = self.previewTopToolBar;
+        _previewVC.bottomToolBar = self.previewBottomToolBar;
         _previewVC.closeOnSlidingDown = YES;
     }
     return _previewVC;
@@ -554,6 +542,62 @@
         _preloadQueue = dispatch_queue_create("com.wicky.dwimagepicker.preloadQueue", DISPATCH_QUEUE_CONCURRENT);
     }
     return _preloadQueue;
+}
+
+-(DWAlbumToolBar *)gridBottomToolBar {
+    if (!_gridBottomToolBar) {
+        _gridBottomToolBar = [DWAlbumToolBar toolBar];
+        __weak typeof(self) weakSelf = self;
+        _gridBottomToolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf.selectionManager.sendAction) {
+                strongSelf.selectionManager.sendAction(strongSelf.selectionManager);
+            }
+        };
+        _gridBottomToolBar.previewAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            PHAsset * asset = strongSelf.selectionManager.selections.firstObject.asset;
+            NSInteger idx = [strongSelf.gridVC.album.fetchResult indexOfObject:asset];
+            [strongSelf previewAtIndex:idx];
+        };
+        _gridBottomToolBar.originImageAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
+           __strong typeof(weakSelf) strongSelf = weakSelf;
+           strongSelf.selectionManager.useOriginImage = !strongSelf.selectionManager.useOriginImage;
+           [toolBar refreshSelection];
+        };
+        [_gridBottomToolBar configWithSelectionManager:self.selectionManager];
+    }
+    return _gridBottomToolBar;
+}
+
+-(DWAlbumPreviewNavigationBar *)previewTopToolBar {
+    if (!_previewTopToolBar) {
+        _previewTopToolBar = [DWAlbumPreviewNavigationBar toolBar];
+        __weak typeof(self) weakSelf = self;
+        _previewTopToolBar.retAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf popViewControllerAnimated:YES];
+        };
+        _previewTopToolBar.selectionAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf selectAtIndex:strongSelf.previewVC.currentIndex];
+        };
+    }
+    return _previewTopToolBar;
+}
+
+-(DWAlbumPreviewToolBar *)previewBottomToolBar {
+    if (!_previewBottomToolBar) {
+        _previewBottomToolBar = [DWAlbumPreviewToolBar toolBar];
+        [_previewBottomToolBar configWithAlbumManager:self.albumManager networkAccessAllowed:self.fetchOption?self.fetchOption.networkAccessAllowed:YES];
+        [_previewBottomToolBar configWithSelectionManager:self.selectionManager];
+        __weak typeof(self) weakSelf = self;
+        _previewBottomToolBar.selectAction = ^(DWAlbumPreviewToolBar * _Nonnull toolBar, NSInteger index) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf onPreviewBottomToolBarClick:toolBar atIndex:index];
+        };
+    }
+    return _previewBottomToolBar;
 }
 
 @end

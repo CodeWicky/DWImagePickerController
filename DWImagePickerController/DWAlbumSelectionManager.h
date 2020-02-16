@@ -46,6 +46,8 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 -(DWAlbumSelectionModel *)selectionModelAtIndex:(NSInteger)index;
 
+-(DWAlbumSelectionModel *)selectionModelForSelection:(PHAsset *)asset;
+
 -(PHAsset *)selectionAtIndex:(NSInteger)index;
 
 -(void)finishRefreshSelection;
