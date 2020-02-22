@@ -15,6 +15,29 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_OPTIONS(NSUInteger, DWImagePickerMediaOption) {
+    DWImagePickerMediaOptionUndefine = 0,
+    DWImagePickerMediaOptionImage = 1 << 0,
+    DWImagePickerMediaOptionAnimateImage = 1 << 1,
+    DWImagePickerMediaOptionLivePhoto = 1 << 2,
+    DWImagePickerMediaOptionVideo = 1 << 3,
+    
+    ///聚合类型
+    DWImagePickerOptionAll = DWImagePickerMediaOptionImage | DWImagePickerMediaOptionAnimateImage | DWImagePickerMediaOptionLivePhoto | DWImagePickerMediaOptionVideo,
+    
+    ///Mask
+    DWImagePickerOptionImageMask = DWImagePickerMediaOptionImage | DWImagePickerMediaOptionAnimateImage | DWImagePickerMediaOptionLivePhoto,
+    DWImagePickerOptionVideoMask = DWImagePickerMediaOptionLivePhoto | DWImagePickerMediaOptionVideo,
+};
+
+@interface DWImagePickerConfiguration : NSObject
+
+@property (nonatomic ,assign) DWImagePickerMediaOption displayMediaOption;
+
+@property (nonatomic ,assign) DWImagePickerMediaOption selectMediaOption;
+
+@end
+
 @interface DWImagePickerController : UINavigationController
 
 @property (nonatomic ,strong ,readonly) DWAlbumManager * albumManager;
@@ -29,13 +52,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic ,assign ,readonly) DWAlbumFetchOption * fetchOption;
 
+@property (nonatomic ,strong ,readonly) DWImagePickerConfiguration * pickerConf;
+
 @property (nonatomic ,assign ,readonly) NSUInteger columnCount;
 
 @property (nonatomic ,assign ,readonly) CGFloat spacing;
 
 @property (nonatomic ,assign ) NSInteger maxSelectCount;
 
--(instancetype)initWithAlbumManager:(nullable DWAlbumManager *)albumManager option:(nullable DWAlbumFetchOption *)opt columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing;
+-(instancetype)initWithAlbumManager:(nullable DWAlbumManager *)albumManager fetchOption:(nullable DWAlbumFetchOption *)fetchOption pickerConfiguration:(nullable DWImagePickerConfiguration *)pickerConfiguration columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing;
 
 -(void)configSelectionManager:(DWAlbumSelectionManager *)selectionManager;
 
@@ -47,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void)fetchCameraRollWithCompletion:(dispatch_block_t)completion;
 
-+(instancetype)showImagePickerWithAlbumManager:(nullable DWAlbumManager *)albumManager option:(nullable DWAlbumFetchOption *)opt currentVC:(UIViewController *)currentVC;
++(instancetype)showImagePickerWithAlbumManager:(nullable DWAlbumManager *)albumManager fetchOption:(nullable DWAlbumFetchOption *)fetchOption pickerConfiguration:(nullable DWImagePickerConfiguration *)pickerConf currentVC:(UIViewController *)currentVC;
 
 @end
 

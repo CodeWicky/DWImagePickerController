@@ -27,7 +27,7 @@ typedef void(^DWAlbumFetchImageDataCompletion)(DWAlbumManager * _Nullable mgr ,D
 typedef void(^DWAlbumFetchLivePhotoCompletion)(DWAlbumManager * _Nullable mgr ,DWLivePhotoAssetModel * _Nullable obj);
 typedef void(^DWAlbumFetchVideoCompletion)(DWAlbumManager * _Nullable mgr ,DWVideoAssetModel * _Nullable obj);
 typedef void(^DWAlbumSaveMediaCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,__kindof DWAssetModel * _Nullable obj ,NSError * _Nullable error);
-
+typedef void(^DWAlbumExportLivePhotoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,DWImageAssetModel * _Nullable image ,DWVideoAssetModel * _Nullable video ,NSError * _Nullable error);
 typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL success ,DWVideoAssetModel * _Nullable obj ,NSError * _Nullable error);
 
 @interface DWAlbumManager : NSObject
@@ -186,8 +186,25 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
  注：
  若albumName为空，则保存至系统相册cameraRoll
  */
--(void)saveImage:(UIImage *)image toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc  createIfNotExist:(BOOL)createIfNotExist completion:(nullable DWAlbumSaveMediaCompletion)completion;
+-(void)saveImage:(UIImage *)image toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(nullable DWAlbumSaveMediaCompletion)completion;
 -(void)saveImageToCameraRoll:(UIImage *)image completion:(nullable DWAlbumSaveMediaCompletion)completion;
+
+
+/**
+ 保存livePhoto至相册
+ 
+ @param image 图片数据
+ @param videoURL livePhoto中的视频地址
+ @param albumName 相册名称
+ @param loc 地理位置信息
+ @param createIfNotExist 如果相册不存在，是否创建
+ @param completion 完成回调
+ 
+ 注：
+ 若albumName为空，则保存至系统相册cameraRoll
+ */
+-(void)saveLivePhotoWithImage:(UIImage *)image video:(NSURL *)videoURL toAlbum:(nullable NSString *)albumName location:(nullable CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(nullable DWAlbumSaveMediaCompletion)completion;
+-(void)saveLivePhotoToCameraRoll:(UIImage *)image video:(NSURL *)videoURL completion:(nullable DWAlbumSaveMediaCompletion)completion;
 
 
 /**
@@ -207,7 +224,17 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 
 
 /**
- 要导出的视频asset对象
+ 导出LivePhoto对象
+ 
+ @param asset asset对象
+ @param opt 导出livePhoto中视频的配置信息
+ @param completion 完成回调
+ */
+-(void)exportLivePhoto:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportLivePhotoCompletion)completion;
+
+
+/**
+ 导出视频asset对象
 
  @param asset asset对象
  @param opt 导出配置信息

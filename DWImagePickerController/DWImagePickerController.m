@@ -23,11 +23,11 @@
 
 @interface DWAlbumGridViewController ()
 
--(void)refreshAlbum:(DWAlbumModel *)model;
+-(void)refreshGrid:(DWAlbumGridModel *)model;
 
 @end
 
-@interface DWImagePickerController ()<DWMediaPreviewDataSource,PHPhotoLibraryChangeObserver>
+@interface DWImagePickerController ()<DWMediaPreviewDataSource,DWAlbumGridDataSource,PHPhotoLibraryChangeObserver>
 
 @property (nonatomic ,strong) DWAlbumGridViewController * gridVC;
 
@@ -62,11 +62,12 @@
 }
 
 #pragma mark --- interface method ---
--(instancetype)initWithAlbumManager:(DWAlbumManager *)albumManager option:(DWAlbumFetchOption *)opt columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing {
+-(instancetype)initWithAlbumManager:(DWAlbumManager *)albumManager fetchOption:(DWAlbumFetchOption *)fetchOption pickerConfiguration:(DWImagePickerConfiguration *)pickerConf columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing {
     if (self = [super init]) {
         [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
         _albumManager = albumManager;
-        _fetchOption = opt;
+        _fetchOption = fetchOption;
+        _pickerConf = pickerConf;
         _columnCount = columnCount;
         _spacing = spacing;
         self.modalPresentationStyle = UIModalPresentationFullScreen;
@@ -105,11 +106,11 @@
     });
 }
 
-+(instancetype)showImagePickerWithAlbumManager:(DWAlbumManager *)albumManager option:(DWAlbumFetchOption *)opt currentVC:(UIViewController *)currentVC {
++(instancetype)showImagePickerWithAlbumManager:(DWAlbumManager *)albumManager fetchOption:(DWAlbumFetchOption *)fetchOption pickerConfiguration:(DWImagePickerConfiguration *)pickerConf currentVC:(UIViewController *)currentVC {
     if (!currentVC) {
         return nil;
     }
-    DWImagePickerController * imagePicker = [((DWImagePickerController *)[self alloc]) initWithAlbumManager:albumManager option:opt columnCount:4 spacing:0.5];
+    DWImagePickerController * imagePicker = [((DWImagePickerController *)[self alloc]) initWithAlbumManager:albumManager fetchOption:fetchOption pickerConfiguration:pickerConf columnCount:4 spacing:0.5];
     imagePicker.modalPresentationStyle = UIModalPresentationFullScreen;
     [imagePicker fetchCameraRollWithCompletion:^{
         [currentVC presentViewController:imagePicker animated:YES completion:nil];
@@ -293,7 +294,8 @@
     if (![self.currentGridAlbum isEqual:album]) {
         self.currentGridAlbumResult = album.fetchResult;
         self.currentGridAlbum = album;
-        [self.gridVC configWithAlbum:album albumManager:self.albumManager];
+        DWAlbumGridModel * gridModel = [self gridModelFromAlbumModel:album];
+        [self.gridVC configWithGridModel:gridModel];
         [self.previewVC resetOnChangeDatasource];
     }
 }
@@ -320,6 +322,70 @@
 -(void)refreshToolBar {
     [self.gridBottomToolBar refreshSelection];
     [self.previewBottomToolBar refreshSelection];
+}
+
+-(DWImagePickerMediaOption)mediaOptionFromPreviewType:(DWMediaPreviewType)previewType {
+    switch (previewType) {
+        case DWMediaPreviewTypeImage:
+            return DWImagePickerMediaOptionImage;
+        case DWMediaPreviewTypeAnimateImage:
+            return DWImagePickerMediaOptionAnimateImage;
+        case DWMediaPreviewTypeVideo:
+            return DWImagePickerMediaOptionVideo;
+        case DWMediaPreviewTypeLivePhoto:
+            return DWImagePickerMediaOptionLivePhoto;
+        default:
+            return DWImagePickerMediaOptionUndefine;
+    }
+}
+
+-(DWAlbumGridModel *)gridModelFromAlbumModel:(DWAlbumModel *)album {
+    DWAlbumGridModel * gridModel = [DWAlbumGridModel new];
+    NSMutableArray * tmp = [NSMutableArray arrayWithCapacity:album.count];
+    DWImagePickerMediaOption displayOption = self.pickerConf ? self.pickerConf.displayMediaOption : DWImagePickerOptionAll;
+    if (displayOption == DWImagePickerOptionAll) {
+        [album.fetchResult enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [tmp addObject:obj];
+        }];
+    } else {
+        [album.fetchResult enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            DWMediaPreviewType previewType = [DWAlbumMediaHelper previewTypeForAsset:obj];
+            DWImagePickerMediaOption mediaOption = [self mediaOptionFromPreviewType:previewType];
+            if (displayOption & mediaOption) {
+                [tmp addObject:obj];
+            }
+        }];
+    }
+    
+    gridModel.results = [tmp copy];
+    gridModel.name = album.name;
+    return gridModel;
+}
+
+#pragma mark --- gridViewController dataSource ---
+-(void)gridViewController:(DWAlbumGridViewController *)gridViewController fetchMediaForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion {
+    if (thumnail) {
+        [self.albumManager fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:self.currentGridAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+            if (completion) {
+                completion(obj);
+            }
+        }];
+    } else {
+        NSInteger index = [self.currentGridAlbumResult indexOfObject:asset];
+        [self.albumManager fetchImageWithAlbum:self.currentGridAlbum index:index targetSize:targetSize shouldCache:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+            if (completion) {
+                completion(obj);
+            }
+        }];
+    }
+}
+
+-(void)gridViewController:(DWAlbumGridViewController *)gridViewController startCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize {
+    [self.albumManager startCachingImagesForAlbum:self.currentGridAlbum indexes:indexes targetSize:targetSize];
+}
+
+-(void)gridViewController:(DWAlbumGridViewController *)gridViewController stopCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize {
+    [self.albumManager stopCachingImagesForAlbum:self.currentGridAlbum indexes:indexes targetSize:targetSize];
 }
 
 #pragma mark --- previewController dataSource ---
@@ -414,11 +480,13 @@
     if (!changes) {
         return;
     }
+    self.currentGridAlbumResult = changes.fetchResultAfterChanges;
+    [self.currentGridAlbum configWithResult:self.currentGridAlbumResult];
+    DWAlbumGridModel * newGrid = [self gridModelFromAlbumModel:self.currentGridAlbum];
+    [self.gridVC refreshGrid:newGrid];
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.currentGridAlbumResult = changes.fetchResultAfterChanges;
-        [self.currentGridAlbum configWithResult:self.currentGridAlbumResult];
-        [self.gridVC refreshAlbum:self.currentGridAlbum];
-        if (changes.hasIncrementalChanges) {
+        ///因为只有在全展示的情况下，changes中的角标变化与实际展示的变化才是一一对应的，可以用update。否则只能reload解决
+        if (changes.hasIncrementalChanges && self.pickerConf.displayMediaOption == DWImagePickerOptionAll) {
             UICollectionView * col = self.gridVC.gridView;
             if (col) {
                 [col performBatchUpdates:^{
@@ -456,9 +524,11 @@
                         [col reloadItemsAtIndexPaths:indexPaths];
                     }
                     
-                    [changes enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                        [col moveItemAtIndexPath:[NSIndexPath indexPathForRow:fromIndex inSection:0] toIndexPath:[NSIndexPath indexPathForRow:toIndex inSection:0]];
-                    }];
+                    if (changes.hasMoves) {
+                        [changes enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                            [col moveItemAtIndexPath:[NSIndexPath indexPathForRow:fromIndex inSection:0] toIndexPath:[NSIndexPath indexPathForRow:toIndex inSection:0]];
+                        }];
+                    }
                 } completion:nil];
             }
         } else {
@@ -495,6 +565,7 @@
         CGFloat shortSide = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
         CGFloat width = (shortSide - (_columnCount - 1) * _spacing) / _columnCount;
         _gridVC = [[DWAlbumGridViewController alloc] initWithItemWidth:width];
+        _gridVC.dataSource = self;
         _gridPhotoSize = CGSizeMake(width * 2, width * 2);
         _gridVC.selectionManager = self.selectionManager;
         _gridVC.bottomToolBar = self.gridBottomToolBar;
@@ -563,7 +634,7 @@
         _gridBottomToolBar.previewAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             PHAsset * asset = strongSelf.selectionManager.selections.firstObject.asset;
-            NSInteger idx = [strongSelf.gridVC.album.fetchResult indexOfObject:asset];
+            NSInteger idx = [strongSelf.gridVC.gridModel.results indexOfObject:asset];
             [strongSelf previewAtIndex:idx];
         };
         _gridBottomToolBar.originImageAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
@@ -616,5 +687,9 @@
     }
     return _previewBottomToolBar;
 }
+
+@end
+
+@implementation DWImagePickerConfiguration
 
 @end

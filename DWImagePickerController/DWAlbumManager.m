@@ -810,19 +810,50 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(void)saveImage:(UIImage *)image toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
-    [self saveMedia:image isPhoto:YES toAlbum:albumName location:loc createIfNotExist:createIfNotExist completion:completion];
+    [self saveMedia:image url:nil mediaType:(DWAlbumMediaTypeImage) toAlbum:albumName location:loc createIfNotExist:createIfNotExist completion:completion];
 }
 
 -(void)saveImageToCameraRoll:(UIImage *)image completion:(DWAlbumSaveMediaCompletion)completion {
     [self saveImage:image toAlbum:nil location:nil createIfNotExist:NO completion:completion];
 }
 
+-(void)saveLivePhotoWithImage:(UIImage *)image video:(NSURL *)videoURL toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
+    [self saveMedia:image url:videoURL mediaType:(DWAlbumMediaTypeAll) toAlbum:albumName location:loc createIfNotExist:createIfNotExist completion:completion];
+}
+
+-(void)saveLivePhotoToCameraRoll:(UIImage *)image video:(NSURL *)videoURL completion:(DWAlbumSaveMediaCompletion)completion {
+    [self saveLivePhotoWithImage:image video:videoURL toAlbum:nil location:nil createIfNotExist:NO completion:completion];
+}
+
 -(void)saveVideo:(NSURL *)videoURL toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
-    [self saveMedia:videoURL isPhoto:NO toAlbum:albumName location:loc createIfNotExist:createIfNotExist completion:completion];
+    [self saveMedia:nil url:videoURL mediaType:(DWAlbumMediaTypeVideo) toAlbum:albumName location:loc createIfNotExist:createIfNotExist completion:completion];
 }
 
 -(void)saveVideoToCameraRoll:(NSURL *)videoURL completion:(DWAlbumSaveMediaCompletion)completion {
     [self saveVideo:videoURL toAlbum:nil location:nil createIfNotExist:NO completion:completion];
+}
+
+-(void)exportLivePhoto:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportLivePhotoCompletion)completion {
+    if (!asset) {
+        if (completion) {
+            completion(self,NO,nil,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumNilObjectErrorCode userInfo:@{@"errMsg":@"Invalid asset who is nil."}]);
+        }
+        return;
+    }
+    
+    [self exportVideo:asset option:opt completion:^(DWAlbumManager * _Nullable mgr, BOOL success, DWVideoAssetModel * _Nullable video, NSError * _Nullable error) {
+        if (success) {
+            [self fetchOriginImageWithAsset:asset networkAccessAllowed:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable image) {
+                if (!image.isDegraded && completion) {
+                    completion(self,((image != nil) && (video != nil)),image,video,error);
+                }
+            }];
+        } else {
+            if (completion) {
+                completion(self,NO,nil,nil,error);
+            }
+        }
+    }];
 }
 
 -(void)exportVideo:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportVideoCompletion)completion {
@@ -980,25 +1011,86 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     return img;
 }
 
--(void)saveMedia:(id)media isPhoto:(BOOL)isPhoto toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
+///
+-(void)saveMedia:(id)media url:(NSURL *)url mediaType:(DWAlbumMediaType)mediaType toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
     
-    if (!media) {
+    ///状态码，0 合法，1 空参数，2 错误类型参数，3 不支持的存储类型，4 降级为图片，5 降级为视频
+    NSInteger validCode = 0;
+    
+    switch (mediaType) {
+        case DWAlbumMediaTypeImage:
+        {
+            if (!media && !url) {
+                validCode = 1;
+            } else if (!media) {
+                ///如果media为空，将url给过去，图片类型后续统一使用media
+                media = url;
+            }
+            
+            if (![media isKindOfClass:[UIImage class]] && ![media isKindOfClass:[NSURL class]]) {
+                validCode = 2;
+            }
+        }
+            break;
+        case DWAlbumMediaTypeVideo:
+        {
+            if (!url) {
+                validCode = 1;
+            }
+            
+            if (![url isKindOfClass:[NSURL class]]) {
+                validCode = 2;
+            }
+        }
+            break;
+        ///这个类型是livePhoto
+        case DWAlbumMediaTypeAll:
+        {
+            if (!media && !url) {
+                validCode = 1;
+            } else if (!media) {
+                ///降级视频逻辑
+                if (![url isKindOfClass:[NSURL class]]) {
+                    validCode = 2;
+                } else {
+                    validCode = 5;
+                    mediaType = DWAlbumMediaTypeVideo;
+                }
+            } else if (!url) {
+                ///降级为图片逻辑
+                if (![media isKindOfClass:[UIImage class]] && ![media isKindOfClass:[NSURL class]]) {
+                    validCode = 2;
+                } else {
+                    validCode = 4;
+                    mediaType = DWAlbumMediaTypeImage;
+                }
+            }
+        }
+            break;
+        default:
+        {
+            validCode = 3;
+        }
+            break;
+    }
+    
+    if (validCode == 1) {
         if (completion) {
             completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumNilObjectErrorCode userInfo:@{@"errMsg":@"Invalid media which is nil."}]);
         }
         return;
     }
     
-    if (![media isKindOfClass:[UIImage class]] && ![media isKindOfClass:[NSURL class]]) {
+    if (validCode == 2) {
         if (completion) {
             completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumInvalidTypeErrorCode userInfo:@{@"errMsg":@"Invalid media which should be UIImage or NSURL."}]);
         }
         return;
     }
     
-    if ([media isKindOfClass:[UIImage class]] && !isPhoto) {
+    if (validCode == 3) {
         if (completion) {
-            completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumInvalidTypeErrorCode userInfo:@{@"errMsg":@"Invalid media which should be NSURL."}]);
+            completion(self,NO,nil,[NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumInvalidTypeErrorCode userInfo:@{@"errMsg":@"Invalid media type which is not supported to save."}]);
         }
         return;
     }
@@ -1021,7 +1113,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                 [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
                     [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
                 } completionHandler:^(BOOL success, NSError * _Nullable error) {
-                    [self saveMedia:media isPhoto:isPhoto toAlbum:albumName location:loc createIfNotExist:NO completion:completion];
+                    [self saveMedia:media url:url mediaType:mediaType toAlbum:albumName location:loc createIfNotExist:NO completion:completion];
                 }];
             } else {
                 if (completion) {
@@ -1034,16 +1126,35 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     __block NSString *localIdentifier = nil;
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
         PHAssetChangeRequest *requestToCameraRoll = nil;
-        if (isPhoto) {
-            if ([media isKindOfClass:[NSURL class]]) {
-                requestToCameraRoll = [PHAssetCreationRequest creationRequestForAssetFromImageAtFileURL:media];
-            } else if ([media isKindOfClass:[UIImage class]]) {
-                requestToCameraRoll = [PHAssetChangeRequest creationRequestForAssetFromImage:media];
+        switch (mediaType) {
+            case DWAlbumMediaTypeImage:
+            {
+                if ([media isKindOfClass:[NSURL class]]) {
+                    requestToCameraRoll = [PHAssetCreationRequest creationRequestForAssetFromImageAtFileURL:media];
+                } else if ([media isKindOfClass:[UIImage class]]) {
+                    requestToCameraRoll = [PHAssetChangeRequest creationRequestForAssetFromImage:media];
+                }
             }
-        } else {
-            if ([media isKindOfClass:[NSURL class]]) {
+                break;
+            case DWAlbumMediaTypeVideo:
+            {
                 requestToCameraRoll = [PHAssetCreationRequest creationRequestForAssetFromVideoAtFileURL:media];
             }
+                break;
+            case DWAlbumMediaTypeAll:
+            {
+                PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
+                if ([media isKindOfClass:[NSURL class]]) {
+                    [request addResourceWithType:PHAssetResourceTypePhoto fileURL:media options:nil];
+                } else if ([media isKindOfClass:[UIImage class]]) {
+                    [request addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(media, 1) options:nil];
+                }
+                [request addResourceWithType:PHAssetResourceTypePairedVideo fileURL:url options:nil];
+                requestToCameraRoll = request;
+            }
+                break;
+            default:
+                break;
         }
         
         localIdentifier = requestToCameraRoll.placeholderForCreatedAsset.localIdentifier;
@@ -1059,28 +1170,72 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     } completionHandler:^(BOOL success, NSError * _Nullable error) {
         if (success) {
             PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil] firstObject];
-            DWAssetModel * model = nil;
-            if (isPhoto) {
-                model = [[DWImageAssetModel alloc] init];
-            } else {
-                model = [[DWVideoAssetModel alloc] init];
+            switch (mediaType) {
+                case DWAlbumMediaTypeImage:
+                {
+//                    model = [[DWImageAssetModel alloc] init];
+//                    if ([media isKindOfClass:[UIImage class]]) {
+//                        [model configWithAsset:asset targetSize:CGSizeZero media:media info:nil];
+//                    } else {
+//                        [model configWithAsset:asset targetSize:CGSizeZero media:[UIImage imageWithContentsOfFile:((NSURL *)media).path] info:@{DWAlbumMediaSourceURL:media}];
+//                    }
+                    [self fetchOriginImageWithAsset:asset networkAccessAllowed:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+                        if (!obj.isDegraded) {
+                            if (completion) {
+                                NSError * degradeError = nil;
+                                if (validCode == 4) {
+                                    //降级为图片的
+                                    degradeError = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumSaveErrorCode userInfo:@{@"errMsg":@"Save error for target video is not exist and save operation is degraded to save image."}];
+                                }
+                                completion(self,YES,obj, degradeError);
+                            }
+                        }
+                    }];
+                }
+                    break;
+                case DWAlbumMediaTypeVideo:
+                {
+                    //                    model = [[DWVideoAssetModel alloc] init];
+                    //                    [model configWithAsset:asset targetSize:CGSizeZero media:[[AVPlayerItem alloc] initWithURL:url] info:@{DWAlbumMediaSourceURL:url}];
+                    [self fetchVideoWithAsset:asset networkAccessAllowed:NO
+                                     progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWVideoAssetModel * _Nullable obj) {
+                        if (completion) {
+                            NSError * degradeError = nil;
+                            if (validCode == 5) {
+                                //降级为视频的
+                                degradeError = [NSError errorWithDomain:DWAlbumErrorDomain code:DWAlbumSaveErrorCode userInfo:@{@"errMsg":@"Save error for target image is not exist and save operation is degraded to save video."}];
+                            }
+                            completion(self,YES,obj, degradeError);
+                        }
+                    }];
+                }
+                    break;
+                case DWAlbumMediaTypeAll:
+                {
+                    [self fetchOriginLivePhotoWithAsset:asset networkAccessAllowed:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
+                        if (!obj.isDegraded) {
+                            if (completion) {
+                                completion(self,YES,obj, nil);
+                            }
+                        }
+                    }];
+                }
+                    break;
+                default:
+                    break;
             }
             
-            if ([media isKindOfClass:[UIImage class]]) {
-                [model configWithAsset:asset targetSize:CGSizeZero media:media info:nil];
-            } else {
-                [model configWithAsset:asset targetSize:CGSizeZero media:nil info:@{DWAlbumMediaSourceURL:media}];
-            }
             
-            if (completion) {
-                completion(self,YES,model, nil);
-            }
         } else {
             if (completion) {
                 completion(self,NO,nil, error);
             }
         }
     }];
+}
+
+-(void)saveLivePhotoWithImage:(UIImage *)media videoURL:(NSURL *)videoURL toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
+    
 }
 
 -(void)exportVideoWithAVAsset:(AVURLAsset *)avasset asset:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportVideoCompletion)completion {

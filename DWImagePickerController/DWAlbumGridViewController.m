@@ -45,9 +45,7 @@
 
 @property (nonatomic ,strong) DWGridFlowLayout * collectionViewLayout;
 
-@property (nonatomic ,strong) PHFetchResult * results;
-
-@property (nonatomic ,strong) DWAlbumManager * albumManager;
+@property (nonatomic ,strong) NSArray <PHAsset *>* results;
 
 @property (nonatomic ,assign) CGSize photoSize;
 
@@ -71,16 +69,13 @@
     return self;
 }
 
--(void)configWithAlbum:(DWAlbumModel *)model albumManager:(DWAlbumManager *)albumManager {
-    if (![_album isEqual:model]) {
-        _album = model;
-        _results = model.fetchResult;
-        self.title = model.name;
+-(void)configWithGridModel:(DWAlbumGridModel *)gridModel {
+    if (![_gridModel isEqual:gridModel]) {
+        _gridModel = gridModel;
+        _results = gridModel.results;
+        self.title = gridModel.name;
         _needScrollToEdge = YES;
         [_collectionView reloadData];
-    }
-    if (![_albumManager isEqual:albumManager]) {
-        _albumManager = albumManager;
     }
 }
 
@@ -89,7 +84,7 @@
 }
 
 -(void)notifyPreviewIndexChangeTo:(NSInteger)index {
-    if (index >= 0 && index < self.album.fetchResult.count) {
+    if (index >= 0 && index < self.results.count) {
         _innerNotifyChangeIndex = index;
     }
 }
@@ -260,9 +255,9 @@
     }
 }
 
--(void)refreshAlbum:(DWAlbumModel *)model {
-    _album = model;
-    _results = model.fetchResult;
+-(void)refreshGrid:(DWAlbumGridModel *)model {
+    _gridModel = model;
+    _results = model.results;
 }
 
 -(void)configCellSelect:(DWAlbumGridCell *)cell asset:(PHAsset *)asset {
@@ -341,7 +336,7 @@
 
 -(void)resetSelectionCellAtIndex:(NSInteger)index toIndex:(NSInteger)toIndex {
     DWAlbumSelectionModel * model  = [self.selectionManager selectionModelAtIndex:index];
-    NSInteger mediaIndex = [self.album.fetchResult indexOfObject:model.asset];
+    NSInteger mediaIndex = [self.results indexOfObject:model.asset];
     DWAlbumGridCell * cellToRemove = (DWAlbumGridCell *)model.userInfo;
     if (cellToRemove && cellToRemove.index == mediaIndex && [self.collectionView.visibleCells containsObject:cellToRemove]) {
         [cellToRemove setSelectAtIndex:toIndex];
@@ -358,15 +353,21 @@
         PHAsset * asset = cell.model.asset;
         NSInteger index = [self.results indexOfObject:asset];
         cell.index = index;
-        [self.albumManager fetchImageWithAlbum:self.album index:index targetSize:self.photoSize shouldCache:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        [self loadImageForAsset:asset targetSize:self.photoSize thumnail:NO completion:^(DWImageAssetModel *model) {
             if (cell.index == index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.model = obj;
+                    cell.model = model;
                 });
             }
         }];
     }];
     
+}
+
+-(void)loadImageForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:fetchMediaForAsset:targetSize:thumnail:completion:)]) {
+        [self.dataSource gridViewController:self fetchMediaForAsset:asset targetSize:targetSize thumnail:thumnail completion:completion];
+    }
 }
 
 #pragma mark --- collectionView delegate ---
@@ -399,14 +400,13 @@
         cell.model = media;
     } else {
         CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
-        
-        [self.albumManager fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:self.album.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
-            if (!thumnail && obj.media && obj.asset) {
-                [DWAlbumMediaHelper cachePoster:obj withAsset:obj.asset];
+        [self loadImageForAsset:asset targetSize:targetSize thumnail:YES completion:^(DWImageAssetModel *model) {
+            if (!thumnail && model.media && model.asset) {
+                [DWAlbumMediaHelper cachePoster:model withAsset:model.asset];
             }
             if (cell.index == originIndex) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.model = obj;
+                    cell.model = model;
                 });
             }
         }];
@@ -439,19 +439,24 @@
 }
 
 -(void)collectionView:(UICollectionView *)collectionView prefetchItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths {
-    NSMutableIndexSet * indexes = [NSMutableIndexSet indexSet];
-    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [indexes addIndex:obj.row];
-    }];
-    [self.albumManager startCachingImagesForAlbum:self.album indexes:indexes targetSize:self.photoSize];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:startCachingMediaForIndexes:targetSize:)]) {
+        NSMutableIndexSet * indexes = [NSMutableIndexSet indexSet];
+        [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [indexes addIndex:obj.row];
+        }];
+        [self.dataSource gridViewController:self startCachingMediaForIndexes:indexes targetSize:self.photoSize];
+    }
+    
 }
 
 -(void)collectionView:(UICollectionView *)collectionView cancelPrefetchingForItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths {
-    NSMutableIndexSet * indexes = [NSMutableIndexSet indexSet];
-    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [indexes addIndex:obj.row];
-    }];
-    [self.albumManager stopCachingImagesForAlbum:self.album indexes:indexes targetSize:self.photoSize];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:stopCachingMediaForIndexes:targetSize:)]) {
+        NSMutableIndexSet * indexes = [NSMutableIndexSet indexSet];
+        [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [indexes addIndex:obj.row];
+        }];
+        [self.dataSource gridViewController:self stopCachingMediaForIndexes:indexes targetSize:self.photoSize];
+    }
 }
 
 #pragma mark --- rotate delegate ---
@@ -508,5 +513,9 @@
 -(UICollectionView *)gridView {
     return self.collectionView;
 }
+
+@end
+
+@implementation DWAlbumGridModel
 
 @end

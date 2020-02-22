@@ -22,7 +22,31 @@
 
 @end
 
+typedef void(^DWGridViewControllerFetchCompletion)(DWImageAssetModel * model);
+@class DWAlbumGridViewController;
+@protocol DWAlbumGridDataSource <NSObject>
+
+@required
+-(void)gridViewController:(DWAlbumGridViewController *)gridViewController fetchMediaForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion;
+
+@optional
+-(void)gridViewController:(DWAlbumGridViewController *)gridViewController startCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
+
+-(void)gridViewController:(DWAlbumGridViewController *)gridViewController stopCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
+
+@end
+
+@interface DWAlbumGridModel : NSObject
+
+@property (nonatomic ,strong) NSArray <PHAsset *>* results;
+
+@property (nonatomic ,copy) NSString * name;
+
+@end
+
 @interface DWAlbumGridViewController : UIViewController
+
+@property (nonatomic ,weak) id<DWAlbumGridDataSource> dataSource;
 
 @property (nonatomic ,strong ,readonly) UICollectionView * gridView;
 
@@ -30,7 +54,7 @@
 
 @property (nonatomic ,assign) NSInteger maxSelectCount;
 
-@property (nonatomic ,strong ,readonly) DWAlbumModel * album;
+@property (nonatomic ,strong ,readonly) DWAlbumGridModel * gridModel;
 
 @property (nonatomic ,strong) UIView <DWAlbumGridToolBarProtocol>* topToolBar;
 
@@ -44,7 +68,7 @@
 
 -(void)registGridCell:(Class)cellClazz;
 
--(void)configWithAlbum:(DWAlbumModel *)album albumManager:(DWAlbumManager *)albumManager;
+-(void)configWithGridModel:(DWAlbumGridModel *)gridModel;
 
 -(void)notifyPreviewIndexChangeTo:(NSInteger)index;
 
