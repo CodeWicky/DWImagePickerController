@@ -1,5 +1,6 @@
 target 'DWImagePickerController' do
 pod 'DWImagePickerController', :path => '../'
+pod 'DWKit/DWComponent/DWFixAdjustCollectionView'
 end 
 
 

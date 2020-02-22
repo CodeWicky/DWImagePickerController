@@ -8,7 +8,7 @@
 
 #import "DWMediaPreviewController.h"
 #import "DWMediaPreviewCell.h"
-#import "DWFixAdjustCollectionView.h"
+#import <DWKit/DWFixAdjustCollectionView.h>
 #import "DWMediaPreviewImageDecoder.h"
 
 @interface DWMediaPreviewCell ()
@@ -68,6 +68,8 @@
 
 @property (nonatomic ,assign) DWMediaPreviewType previewType;
 
+@property (nonatomic ,assign) BOOL shouldShowBadge;
+
 @property (nonatomic ,assign) BOOL isHDR;
 
 @property (nonatomic ,assign) BOOL shouldShowProgressIndicator;
@@ -104,7 +106,11 @@
 
 @property (nonatomic ,assign) NSUInteger innerMediaCount;
 
-//@property (nonatomic ,assign) BOOL finishFirstShowPreview;
+@property (nonatomic ,copy) DWMediaPreviewCellAction tapAction;
+
+@property (nonatomic ,copy) DWMediaPreviewCellAction doubleClickAction;
+
+@property (nonatomic ,strong) UIColor * backgroundColorBeforeFocusMode;
 
 @end
 
@@ -165,11 +171,44 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     return [self.collectionView dequeueReusableCellWithReuseIdentifier:reuseIndentifier forIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
+-(void)setFocusMode:(BOOL)focusMode animated:(BOOL)animated {
+    if (_isFocusOnMedia != focusMode) {
+        if (self.topToolBar) {
+            if (focusMode) {
+                [self.topToolBar hideToolBarWithAnimated:animated];
+            } else {
+                [self.topToolBar showToolBarWithAnimated:animated];
+            }
+        } else {
+            [self.navigationController setNavigationBarHidden:focusMode animated:animated];
+        }
+        
+        if (self.bottomToolBar) {
+            if (focusMode) {
+                [self.bottomToolBar hideToolBarWithAnimated:animated];
+            } else {
+                [self.bottomToolBar showToolBarWithAnimated:animated];
+            }
+        }
+        
+        [self turnToDarkBackground:focusMode animated:animated];
+        _isFocusOnMedia = focusMode;
+    }
+}
+
+-(void)configTapOnCellAction:(DWMediaPreviewCellAction)tapAction {
+    _tapAction = tapAction;
+}
+
+-(void)configDoubleClickOnCellAction:(DWMediaPreviewCellAction)doubleClickAction {
+    _doubleClickAction = doubleClickAction;
+}
+
 #pragma mark --- tool method ---
 -(void)showPreview {
     _isShowing = YES;
     [self configToolBarIfNeeded];
-    [self setFocusMode:NO];
+    [self setFocusMode:NO animated:NO];
     [self resizePreviewSizeIfNeeded];
     
     if (_innerMediaCount == 0) {
@@ -195,34 +234,11 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(void)clearPreview {
     DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
     [cell clearCell];
-    [self turnToDarkBackground:NO];
+    if (self.isFocusOnMedia) {
+        [self turnToDarkBackground:NO animated:NO];
+    }
     self.oriRect = self.collectionView.frame;
     _isShowing = NO;
-}
-
--(void)setFocusMode:(BOOL)hidden {
-    if (_isFocusOnMedia != hidden) {
-        if (self.topToolBar) {
-            if (hidden) {
-                [self.topToolBar hideToolBarWithAnimated:YES];
-            } else {
-                [self.topToolBar showToolBarWithAnimated:YES];
-            }
-        } else {
-            [self.navigationController setNavigationBarHidden:hidden animated:YES];
-        }
-        
-        if (self.bottomToolBar) {
-            if (hidden) {
-                [self.bottomToolBar hideToolBarWithAnimated:YES];
-            } else {
-                [self.bottomToolBar showToolBarWithAnimated:YES];
-            }
-        }
-        
-        [self turnToDarkBackground:hidden];
-        _isFocusOnMedia = hidden;
-    }
 }
 
 -(void)configToolBarIfNeeded {
@@ -287,14 +303,19 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             data.previewType = [self.dataSource previewController:self previewTypeAtIndex:index];
         }
         
-        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:isHDRAtIndex:previewType:)]) {
+        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:shouldShowBadgeAtIndex:previewType:)]) {
+            data.shouldShowBadge = [self.dataSource previewController:self shouldShowBadgeAtIndex:index previewType:data.previewType];
+        } else {
+            data.shouldShowBadge = YES;
+        }
+        
+        if (data.shouldShowBadge && self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:isHDRAtIndex:previewType:)]) {
             data.isHDR = [self.dataSource previewController:self isHDRAtIndex:index previewType:data.previewType];
         }
         
         if (self.dataSource  && [self.dataSource respondsToSelector:@selector(previewController:shouldShowProgressIndicatorAtIndex:previewType:)]) {
             data.shouldShowProgressIndicator = [self.dataSource previewController:self shouldShowProgressIndicatorAtIndex:index previewType:data.previewType];
         }
-        
         
         [self.dataCache setObject:data forKey:@(index)];
     }
@@ -373,6 +394,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(void)configCell:(DWMediaPreviewCell *)cell withCellData:(DWMediaPreviewData *)cellData atIndexPath:(NSIndexPath *)indexPath {
     NSInteger originIndex = indexPath.item;
     DWMediaPreviewType previewType = cellData.previewType;
+    cell.shouldShowBadge = cellData.shouldShowBadge;
     cell.isHDR = cellData.isHDR;
     [cell configIndex:originIndex];
     if (previewType != DWMediaPreviewTypeNone) {
@@ -440,34 +462,54 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)configActionForCell:(DWMediaPreviewCell *)cell indexPath:(NSIndexPath *)indexPath {
     __weak typeof(self)weakSelf = self;
-    cell.tapAction = ^(DWMediaPreviewCell * _Nonnull cell) {
-        __strong typeof(weakSelf)StrongSelf = weakSelf;
-        [StrongSelf setFocusMode:!StrongSelf.isFocusOnMedia];
+    
+    cell.tapAction = ^(DWMediaPreviewCell * _Nonnull cell, CGPoint touchLocationOnMedia) {
+        __strong typeof(weakSelf)strongSelf = weakSelf;
+        if (strongSelf.tapAction) {
+            strongSelf.tapAction(strongSelf, cell, indexPath.item, touchLocationOnMedia);
+        }
     };
     
-    cell.doubleClickAction = ^(DWMediaPreviewCell * _Nonnull cell ,CGPoint point) {
-        __strong typeof(weakSelf)StrongSelf = weakSelf;
-        if (!StrongSelf.isFocusOnMedia) {
-            [StrongSelf setFocusMode:YES];
+    cell.doubleClickAction = ^(DWMediaPreviewCell * _Nonnull cell, CGPoint touchLocationOnMedia) {
+        __strong typeof(weakSelf)strongSelf = weakSelf;
+        if (strongSelf.doubleClickAction) {
+            strongSelf.doubleClickAction(strongSelf, cell, indexPath.item, touchLocationOnMedia);
         }
-        [cell zoomMediaView:!cell.zooming point:point];
     };
     
     cell.enterFocus = ^(DWMediaPreviewCell * _Nonnull cell ,BOOL hide) {
-        __strong typeof(weakSelf)StrongSelf = weakSelf;
-        [StrongSelf setFocusMode:hide];
+        __strong typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf setFocusMode:hide animated:YES];
     };
     
     cell.onSlideCloseAction = ^(DWMediaPreviewCell * _Nonnull cell) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        [strongSelf setFocusMode:NO];
+        [strongSelf setFocusMode:NO animated:NO];
     };
 }
 
+-(void)turnToDarkBackground:(BOOL)dark animated:(BOOL)animated {
+    if (dark) {
+        self.backgroundColorBeforeFocusMode = self.view.backgroundColor;
+    }
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:^{
+            [self turnToDarkBackground:dark];
+        }];
+    } else {
+        [self turnToDarkBackground:dark];
+    }
+    if (!dark) {
+        self.backgroundColorBeforeFocusMode = nil;
+    }
+}
+
 -(void)turnToDarkBackground:(BOOL)dark {
-    [UIView animateWithDuration:0.25 animations:^{
-        self.collectionView.backgroundColor = [UIColor colorWithWhite:dark?0:1 alpha:1];
-    }];
+    if (dark) {
+        self.view.backgroundColor = [UIColor blackColor];
+    } else {
+        self.view.backgroundColor = self.backgroundColorBeforeFocusMode;
+    }
 }
 
 -(void)fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
@@ -597,10 +639,23 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [super viewDidLoad];
     ///本次添加了toolBar后要将toolbar添加在self.view中，所以底部视图不能是collectionView，否则toolbar跟随滚动。故将collectionView缩放模式改为跟self.view等大，保证旋屏自动改变布局
     [self.view addSubview:self.collectionView];
-    self.collectionView.backgroundColor = [UIColor whiteColor];
+    if (@available(iOS 11.0,*)) {
+        self.collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        self.automaticallyAdjustsScrollViewInsets = NO;
+#pragma clang diagnostic pop
+    }
+    self.view.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[DWNormalImagePreviewCell class] forCellWithReuseIdentifier:normalImageID];
     [self.collectionView registerClass:[DWAnimateImagePreviewCell class] forCellWithReuseIdentifier:animateImageID];
-    [self.collectionView registerClass:[DWLivePhotoPreviewCell class] forCellWithReuseIdentifier:livePhotoID];
+    
+    
+    if (@available(iOS 9.1,macOS 10.15,tvOS 10, *)) {
+        [self.collectionView registerClass:[DWLivePhotoPreviewCell class] forCellWithReuseIdentifier:livePhotoID];
+    }
+    
     [self.collectionView registerClass:[DWVideoPreviewCell class] forCellWithReuseIdentifier:videoImageID];
 }
 
@@ -714,14 +769,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _previewSize = [UIScreen mainScreen].bounds.size;
         _closeOnSlidingDown = YES;
         _closeThreshold = 100;
-        if (@available(iOS 11.0,*)) {
-            self.collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-        } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            self.automaticallyAdjustsScrollViewInsets = NO;
-#pragma clang diagnostic pop
-        }
     }
     return self;
 }
@@ -731,6 +778,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (!_collectionView) {
         _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
         self.oriRect = _collectionView.frame;
+        _collectionView.backgroundColor = [UIColor clearColor];
         _collectionView.delegate = self;
         _collectionView.dataSource = self;
         _collectionView.pagingEnabled = YES;
@@ -771,6 +819,34 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(NSUInteger)currentIndex {
     return _index;
+}
+
+-(DWMediaPreviewCellAction)tapAction {
+    if (!_tapAction) {
+        __weak typeof(self) weakSelf = self;
+        _tapAction = ^(DWMediaPreviewController * _Nonnull previewController, __kindof DWMediaPreviewCell * _Nonnull cell, NSInteger index, CGPoint touchLocationOnMedia) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf setFocusMode:!strongSelf.isFocusOnMedia animated:YES];
+            [cell configBadgeIfNeeded];
+        };
+    }
+    return _tapAction;
+}
+
+-(DWMediaPreviewCellAction)doubleClickAction {
+    if (!_doubleClickAction) {
+        __weak typeof(self) weakSelf = self;
+        _doubleClickAction = ^(DWMediaPreviewController * _Nonnull previewController, __kindof DWMediaPreviewCell * _Nonnull cell, NSInteger index, CGPoint touchLocationOnMedia) {
+            if (cell.media) {
+                __strong typeof(weakSelf)strongSelf = weakSelf;
+                if (!strongSelf.isFocusOnMedia) {
+                    [strongSelf setFocusMode:YES animated:YES];
+                }
+                [cell zoomMediaView:!cell.zooming point:touchLocationOnMedia];
+            }
+        };
+    }
+    return _doubleClickAction;
 }
 
 @end

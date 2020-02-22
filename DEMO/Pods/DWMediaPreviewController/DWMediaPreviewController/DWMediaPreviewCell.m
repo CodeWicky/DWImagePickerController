@@ -28,9 +28,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 };
 
 @interface DWMediaPreviewCell ()<UIScrollViewDelegate,UIGestureRecognizerDelegate>
-{
-    BOOL _finishInitializingLayout;
-}
 
 @property (nonatomic ,strong) UIView * containerView;
 
@@ -83,7 +80,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)refreshCellWithAnimated:(BOOL)animated {
-    [self configBadgeWithAnimated:animated];
+    if (self.shouldShowBadge) {
+        [self configBadgeWithAnimated:animated];
+    }
 }
 
 -(void)zoomMediaView:(BOOL)zoomIn point:(CGPoint)point {
@@ -123,6 +122,17 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     }
 }
 
+-(void)configBadgeIfNeeded {
+    if (self.shouldShowBadge) {
+        ///如果没有导航控制器的话，不会走layoutSubviews。所以要处理一下角标
+        if (!self.previewController.navigationController) {
+            [self configBadgeWithAnimated:YES];
+        } else if (self.previewController.topToolBar) {
+            [self configBadgeWithAnimated:YES];
+        }
+    }
+}
+
 #pragma mark --- private method ---
 -(void)configIndex:(NSUInteger)index {
     _index = index;
@@ -156,7 +166,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.loadingIndicator.center = CGPointMake(self.bounds.size.width * 0.5, self.bounds.size.height * 0.5);
     }
     [self.contentView bringSubviewToFront:self.loadingIndicator];
-    if (_media) {
+    if (self.media && self.shouldShowBadge) {
         [self configBadgeWithAnimated:YES];
     }
 }
@@ -165,7 +175,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (self.enterFocus) {
         self.enterFocus(self,YES);
     }
-    [self setBadgeHidden:YES animated:YES];
+    if (self.shouldShowBadge) {
+        [self setBadgeHidden:YES animated:YES];
+    }
 }
 
 -(void)onZooming:(CGFloat)zoomScale {
@@ -257,8 +269,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
                 break;
         }
         
-        
-        
         CGFloat minY = 0;
         ///如果有toolBar，以toolBar的baseLine做基准
         if (self.previewController.topToolBar) {
@@ -323,13 +333,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)tapAction:(UITapGestureRecognizer *)tap {
     if (self.tapAction) {
-        self.tapAction(self);
-    }
-    ///如果没有导航控制器的话，不会走layoutSubviews。所以要处理一下角标
-    if (!self.previewController.navigationController) {
-        [self configBadgeWithAnimated:YES];
-    } else if (self.previewController.topToolBar) {
-        [self configBadgeWithAnimated:YES];
+        CGPoint point = [tap locationInView:self.mediaView];
+        self.tapAction(self,point);
     }
 }
 
@@ -534,16 +539,14 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         self.panGes = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureAction:)];
         self.panGes.delegate = self;
         [self addGestureRecognizer:self.panGes];
+        [self initializingSubviews];
+        [self clearCell];
     }
     return self;
 }
 
 -(void)layoutSubviews {
     [super layoutSubviews];
-    if (!_finishInitializingLayout) {
-        _finishInitializingLayout = YES;
-        [self initializingSubviews];
-    }
     [self setupSubviews];
 }
 
@@ -564,7 +567,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 -(void)setMedia:(id)media {
     _media = media;
     [self configScaleFactorWithMediaSize:[self sizeForMedia:media]];
-    [self configBadgeWithAnimated:NO];
+    if (self.shouldShowBadge) {
+        [self configBadgeWithAnimated:NO];
+    }
 }
 
 -(UIImageView *)mediaView {
@@ -730,9 +735,25 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @end
 
+API_AVAILABLE_BEGIN(macos(10.15), ios(9.1), tvos(10))
 @implementation DWLivePhotoPreviewCell
 @dynamic media;
 @dynamic mediaView;
+
+#pragma mark --- interface method ---
+-(void)play {
+    if (!self.media) {
+        return;
+    }
+    [self.mediaView startPlaybackWithStyle:(PHLivePhotoViewPlaybackStyleFull)];
+}
+
+-(void)stop {
+    if (!self.media) {
+        return;
+    }
+    [self.mediaView stopPlayback];
+}
 
 #pragma mark --- live photo delegate ---
 -(void)livePhotoView:(PHLivePhotoView *)livePhotoView willBeginPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
@@ -911,6 +932,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 @end
+API_AVAILABLE_END
 
 @interface DWVideoPreviewCell ()<DWPlayerManagerProtocol>
 
@@ -992,6 +1014,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 #pragma mark --- tool method ---
 -(void)play {
+    if (!self.media) {
+        return;
+    }
     [self.mediaView play];
     self.playBtn.hidden = YES;
     if (self.enterFocus) {
@@ -1001,11 +1026,17 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)pause {
+    if (!self.media) {
+        return;
+    }
     [self.mediaView pause];
     self.playBtn.hidden = NO;
 }
 
 -(void)stop {
+    if (!self.media) {
+        return;
+    }
     [self.mediaView stop];
     self.playBtn.hidden = NO;
 }
@@ -1174,13 +1205,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
         }
     }
     if (self.tapAction) {
-        self.tapAction(self);
-    }
-
-    if (!self.previewController.navigationController) {
-        [self configBadgeWithAnimated:YES];
-    } else if (self.previewController.topToolBar) {
-        [self configBadgeWithAnimated:YES];
+        CGPoint point = [tap locationInView:self.mediaView];
+        self.tapAction(self,point);
     }
 }
 
@@ -1192,17 +1218,26 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)play {
     [super play];
+    if (!self.media) {
+        return;
+    }
     [self.control updateControlStatus:YES];
     [self hideControlWithAnimated:YES];
 }
 
 -(void)pause {
     [super pause];
+    if (!self.media) {
+        return;
+    }
     [self.control updateControlStatus:NO];
 }
 
 -(void)stop {
     [super stop];
+    if (!self.media) {
+        return;
+    }
     [self.control updateControlStatus:NO];
 }
 

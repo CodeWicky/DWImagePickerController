@@ -15,7 +15,7 @@ typedef NS_ENUM(NSUInteger, DWMediaPreviewType) {
     DWMediaPreviewTypeNone,
     DWMediaPreviewTypeImage,
     DWMediaPreviewTypeAnimateImage,
-    DWMediaPreviewTypeLivePhoto,
+    DWMediaPreviewTypeLivePhoto API_AVAILABLE(macos(10.15), ios(9.1), tvos(10)),
     DWMediaPreviewTypeVideo,
     DWMediaPreviewTypeCustomize,
 };
@@ -82,8 +82,12 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 
 @optional
 
-//Return whether the media at specific index is hdr type.
-///返回对应位置的媒体是否为HDR模式资源。
+//Return whether show badge for the media at specific index.
+///返回是否需要为对应位置的媒体展示角标。
+-(BOOL)previewController:(DWMediaPreviewController *)previewController shouldShowBadgeAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
+
+//Return whether the media at specific index is hdr type.Only will be call if media at the same index shouldShowBadge is true.
+///返回对应位置的媒体是否为HDR模式资源。只有 -previewController:shouldShowBadgeAtIndex:previewType: 返回true时才会被调用。
 -(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
 
 //Callback for fetching poster at specific index(It will be called before -previewController:fetchMediaAtIndex:previewType:progressHandler:fetchCompletion: to fetch an placeholder for media.If there's a cache of media,this method won't be called.).
@@ -123,6 +127,8 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 -(void)previewController:(DWMediaPreviewController *)previewController didEndDisplayingCell:(DWMediaPreviewCell *)cell forItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType;
 
 @end
+
+typedef void(^DWMediaPreviewCellAction)(DWMediaPreviewController * previewController,__kindof DWMediaPreviewCell * cell,NSInteger index,CGPoint touchLocationOnMedia);
 
 @interface DWMediaPreviewController : UIViewController
 
@@ -225,6 +231,39 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
  @return 重用cell
  */
 -(__kindof DWMediaPreviewCell *)dequeueReusablePreviewCellWithReuseIdentifier:(NSString *)reuseIndentifier forIndex:(NSUInteger)index;
+
+
+/**
+ Config to enter focus on media mode.
+ 设置是否进入专注媒体模式
+ 
+ @param focusMode 是否为专注模式
+ @param animated 是否需要动画
+ 
+ 注：进入专注模式后，将会设置背景颜色为黑色，并隐藏顶部及底部toolBar
+ */
+-(void)setFocusMode:(BOOL)focusMode animated:(BOOL)animated;
+
+/**
+ Config action for cell on single tap gesture.
+ 配置cell单点手势
+ 
+ @param tapAction 单点手势动作
+ 
+ 注：若不配置，或置为nil将采用默认回调，即切换专注媒体模式状态
+ */
+-(void)configTapOnCellAction:(DWMediaPreviewCellAction)tapAction;
+
+
+/**
+Config action for cell on double tap gesture.
+配置cell双击手势
+
+@param doubleClickAction 双击手势动作
+
+注：若不配置，或置为nil将采用默认回调，即切换在fit及fill放大模式键切换
+*/
+-(void)configDoubleClickOnCellAction:(DWMediaPreviewCellAction)doubleClickAction;
 
 @end
 

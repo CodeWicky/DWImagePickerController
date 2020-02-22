@@ -6,7 +6,6 @@
 //
 
 #import "DWFixAdjustCollectionView.h"
-#import <DWKit/NSArray+DWArrayUtils.h>
 
 @interface UICollectionView (DWFixAdjust)
 

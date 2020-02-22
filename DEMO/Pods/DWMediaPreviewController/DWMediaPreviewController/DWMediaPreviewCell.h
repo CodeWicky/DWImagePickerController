@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class DWMediaPreviewCell;
 typedef void(^DWMediaPreviewActionCallback)(DWMediaPreviewCell * cell);
-typedef void(^DWMediaPreviewDoubleClickActionCallback)(DWMediaPreviewCell * cell ,CGPoint point);
+typedef void(^DWMediaPreviewGestureActionCallback)(DWMediaPreviewCell * cell ,CGPoint touchLocationOnMedia);
 typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,BOOL focus);
 
 @protocol DWMediaPreviewLoadingProtocol
@@ -66,17 +66,21 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 ///表明当前媒体是否正处于缩放状态。
 @property (nonatomic ,assign ,readonly) BOOL zooming;
 
-//Indicates whether the media is an hdr type.If YES there will be a hdr badge on preview cell.
-///表明当前展示的资源是否是hdr类型。如果是的话，将会在cell上展示一个hdr的角标。
+//Indicates whether show the badge for media.
+///表明是否需要为当前资源展示角标
+@property (nonatomic ,assign) BOOL shouldShowBadge;
+
+//Indicates whether the media is an hdr type.If YES there will be a hdr badge on preview cell.Only available when shouldShowBadge is true.
+///表明当前展示的资源是否是hdr类型。如果是的话，将会在cell上展示一个hdr的角标。仅在shouldShowBadge为true时有效。
 @property (nonatomic ,assign) BOOL isHDR;
 
 //Callback for tapAction on previewCell.
 ///在单点cell时会触发的回调。
-@property (nonatomic ,copy) DWMediaPreviewActionCallback tapAction;
+@property (nonatomic ,copy) DWMediaPreviewGestureActionCallback tapAction;
 
 //Callback for doubleClickAction on previewCell.
 ///在cell上双击时会触发的回调。
-@property (nonatomic ,copy) DWMediaPreviewDoubleClickActionCallback doubleClickAction;
+@property (nonatomic ,copy) DWMediaPreviewGestureActionCallback doubleClickAction;
 
 //Callback for previewCell to call DWMediaPreviewController to hide navigationBar.It will be call on cell zooming.And you can call it where you want in you subclass to hide navigationBar and do something else at the same time.
 ///当cell通知DWMediaPreviewController隐藏导航栏时触发的回调。当缩放媒体的时候回触发此回调。你也可以在子类中按照你的需求在合适的实际调用他去隐藏导航栏，同时你也可以做一些其他的事情。
@@ -108,6 +112,10 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 //Config the preview cell with previewController so that preview cell can handle something itself via previewController.You should always call it when you config the preview cell.
 ///给cell配置他对应的预览控制器，这样cell才可以根据他来处理相关布局问题。如果你重写了DWMediaPreviewController，在cellForItem代理中必须调用此方法。
 -(void)configPreviewController:(DWMediaPreviewController *)previewController NS_REQUIRES_SUPER;
+
+//Config the badge if the media should show badge.
+///按需配置媒体的角标。
+-(void)configBadgeIfNeeded;
 #pragma mark --- call back method ---
 //These methods below are call back for different event.They maybe called on specific event automatically.Override it if you have other things to do on it.
 ///以下方法都是一些预制的钩子方法，在特定的事件中会自动调用一下方法。你可以重写这些方法来定制化你的cell。
@@ -116,8 +124,8 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 ///表明当前展示的媒体使用的视图类型。例如，当展示一个普通图片时，你仅需返回 +[UIImageView class] 即可，此时会以一个UIImageView来展示图片。如果你要展示的是一个动态图片，你可以在此处返回 +[YYImageView class]。这时媒体的容器则会变为YYImageView。这个方法会在 -initializingSubviews 中调用。
 +(Class)classForMediaView;
 
-//Initialize subviews on first time calling -layoutSubviews.
-///初始化一些子视图资源，会在cell首次调用 -layoutSubviews 时自动调用。
+//Initialize subviews on -initWithFrame:.
+///初始化一些子视图资源，会在cell -initWithFrame:  时自动调用。
 -(void)initializingSubviews;
 
 //Setup subviews on calling -layoutSubviews.
@@ -183,19 +191,32 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 
 @end
 
+API_AVAILABLE_BEGIN(macos(10.15), ios(9.1), tvos(10))
 //Cell to display livephoto.
 ///展示LivePhoto的cell
 @interface DWLivePhotoPreviewCell : DWMediaPreviewCell
 
 @property (nonatomic ,strong) PHLivePhoto * media;
 
+//Media control method.
+///媒体控制方法。
+-(void)play;
+-(void)stop;
+
 @end
+API_AVAILABLE_END
 
 //Cell to display video.
 ///展示视频的cell
 @interface DWVideoPreviewCell : DWMediaPreviewCell
 
 @property (nonatomic ,strong) AVPlayerItem * media;
+
+//Media control method.
+///媒体控制方法。
+-(void)play;
+-(void)pause;
+-(void)stop;
 
 @end
 
