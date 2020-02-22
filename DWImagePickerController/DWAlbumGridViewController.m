@@ -6,9 +6,8 @@
 //
 
 #import "DWAlbumGridViewController.h"
-#import <DWMediaPreviewController/DWFixAdjustCollectionView.h>
+#import <DWKit/DWFixAdjustCollectionView.h>
 #import "DWAlbumGridCell.h"
-#import "DWAlbumPreviewNavigationBar.h"
 #import "DWAlbumMediaHelper.h"
 
 @interface DWGridFlowLayout : UICollectionViewFlowLayout
@@ -504,14 +503,14 @@
         if (@available(iOS 11.0,*)) {
             _collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentAlways;
         } else {
-            self.automaticallyAdjustsScrollViewInsets = NO;
+            self.automaticallyAdjustsScrollViewInsets = YES;
         }
     }
     return _collectionView;
 }
 
 -(UICollectionView *)gridView {
-    return self.collectionView;
+    return _collectionView;
 }
 
 @end
