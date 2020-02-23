@@ -70,6 +70,8 @@ typedef void(^DWAlbumSelectionValidationFailCallback)(NSError * error);
 
 -(BOOL)removeSelectionAtIndex:(NSInteger)index;
 
+-(void)removeAllSelections;
+
 -(NSInteger)indexOfSelection:(PHAsset *)asset;
 
 -(DWAlbumSelectionModel *)selectionModelAtIndex:(NSInteger)index;

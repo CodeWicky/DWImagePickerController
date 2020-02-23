@@ -118,7 +118,6 @@
                 [self.previewCol scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0] atScrollPosition:(UICollectionViewScrollPositionCenteredHorizontally) animated:YES];
             });
         }
-        
     }
 }
 

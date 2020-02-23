@@ -19,6 +19,8 @@
 
 @property (nonatomic ,assign) DWAlbumMediaOption mediaOption;
 
+-(void)reset;
+
 @end
 
 @interface DWAlbumSelectionManager ()
@@ -110,6 +112,15 @@
         return YES;
     }
     return NO;
+}
+
+-(void)removeAllSelections {
+    if (self.selections.count) {
+        [self.selections removeAllObjects];
+        [self.counter reset];
+        _selectableOption = DWAlbumMediaOptionUndefine;
+        [self handleSetNeedsRefreshSelection];
+    }
 }
 
 -(NSInteger)indexOfSelection:(PHAsset *)asset {
@@ -261,6 +272,13 @@ NS_INLINE void safeLinkError(NSError * __autoreleasing * error ,NSError * error2
 @end
 
 @implementation DWAlbumSelectionCounter
+
+-(void)reset {
+    self.imageCount = 0;
+    self.animateImageCount = 0;
+    self.livePhotoCount = 0;
+    self.videoCount = 0;
+}
 
 -(DWAlbumMediaOption)mediaOption {
     DWAlbumMediaOption opt = DWAlbumMediaOptionUndefine;

@@ -150,9 +150,12 @@
         NSInteger idx = [self.selectionManager indexOfSelection:asset];
         if (idx == NSNotFound) {
             if ([self.selectionManager addSelection:asset mediaIndex:index mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
+                ///先设置顶部选择状态
                 [self.previewTopToolBar setSelectAtIndex:self.selectionManager.selections.count];
-                [self.previewBottomToolBar focusOnIndex:self.selectionManager.selections.count - 1];
+                ///然后属性顶部和底部toolBar
                 [self refreshToolBar];
+                ///然后在设置底部焦点（如果先设置焦点在刷新底部会导致无法自动移至中央）
+                [self.previewBottomToolBar focusOnIndex:self.selectionManager.selections.count - 1];
                 ///代表是0~1，代表bottomToolBar高度改变了，要刷新cell
                 if (self.previewVC.isShowing && self.selectionManager.selections.count == 1) {
                     [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
