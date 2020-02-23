@@ -642,7 +642,11 @@
 
 -(DWAlbumSelectionManager *)selectionManager {
     if (!_selectionManager) {
-        _selectionManager = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:self.maxSelectCount selectableOption:(DWAlbumMediaOptionAll) multiTypeSelectionEnable:YES];
+        if (self.pickerConf) {
+            _selectionManager = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:self.pickerConf.maxSelectCount selectableOption:self.pickerConf.selectableOption multiTypeSelectionEnable:self.pickerConf.multiTypeSelectionEnable];
+        } else {
+            _selectionManager = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:0 selectableOption:DWAlbumMediaOptionAll multiTypeSelectionEnable:YES];
+        }
     }
     return _selectionManager;
 }
@@ -738,5 +742,15 @@
 @end
 
 @implementation DWImagePickerConfiguration
+
+-(instancetype)init {
+    if (self = [super init]) {
+        _displayMediaOption = DWAlbumMediaOptionAll;
+        _selectableOption = DWAlbumMediaOptionAll;
+        _maxSelectCount = 0;
+        _multiTypeSelectionEnable = YES;
+    }
+    return self;
+}
 
 @end

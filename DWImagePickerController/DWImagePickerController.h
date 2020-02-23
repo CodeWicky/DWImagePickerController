@@ -19,7 +19,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic ,assign) DWAlbumMediaOption displayMediaOption;
 
-@property (nonatomic ,assign) DWAlbumMediaOption selectMediaOption;
+@property (nonatomic ,assign) DWAlbumMediaOption selectableOption;
+
+@property (nonatomic ,assign) NSInteger maxSelectCount;
+
+@property (nonatomic ,assign) BOOL multiTypeSelectionEnable;
 
 @end
 
@@ -42,8 +46,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic ,assign ,readonly) NSUInteger columnCount;
 
 @property (nonatomic ,assign ,readonly) CGFloat spacing;
-
-@property (nonatomic ,assign ) NSInteger maxSelectCount;
 
 -(instancetype)initWithAlbumManager:(nullable DWAlbumManager *)albumManager fetchOption:(nullable DWAlbumFetchOption *)fetchOption pickerConfiguration:(nullable DWImagePickerConfiguration *)pickerConfiguration columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing;
 

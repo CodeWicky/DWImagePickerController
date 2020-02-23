@@ -38,7 +38,6 @@
     DWImagePickerConfiguration * conf = [DWImagePickerConfiguration new];
     conf.displayMediaOption = DWAlbumMediaOptionVideo;
     DWImagePickerController * picker = [[DWImagePickerController alloc] initWithAlbumManager:nil fetchOption:nil pickerConfiguration:conf columnCount:3 spacing:5];
-    picker.maxSelectCount = 9;
     [picker fetchCameraRollWithCompletion:^{
         [self presentViewController:picker animated:YES completion:nil];
     }];
