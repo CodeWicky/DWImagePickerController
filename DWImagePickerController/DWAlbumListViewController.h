@@ -6,7 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DWAlbumManager.h"
+#import <DWKit/DWAlbumManager.h>
 
 @interface DWAlbumListViewController : UITableViewController
 

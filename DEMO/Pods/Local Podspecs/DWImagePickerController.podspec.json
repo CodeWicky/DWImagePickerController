@@ -30,6 +30,9 @@
     ],
     "DWKit/DWComponent/DWLabel": [
       "~> 0.0.0.10"
+    ],
+    "DWKit/DWUtils/DWAlbumManager": [
+      "~> 0.0.0.13"
     ]
   }
 }

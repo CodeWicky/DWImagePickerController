@@ -14,4 +14,5 @@ s.frameworks = 'UIKit'
 s.dependency 'DWMediaPreviewController'
 s.dependency 'DWAlbumGridController'
 s.dependency 'DWKit/DWComponent/DWLabel', '~> 0.0.0.10'
+s.dependency 'DWKit/DWUtils/DWAlbumManager', '~> 0.0.0.13'
 end

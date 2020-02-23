@@ -7,11 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DWAlbumManager.h"
+#import <DWKit/DWAlbumManager.h>
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
 #import <DWAlbumGridController/DWAlbumGridController.h>
 #import "DWAlbumListViewController.h"
-#import "DWAlbumSelectionManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

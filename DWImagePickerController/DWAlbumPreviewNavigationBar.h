@@ -7,7 +7,6 @@
 
 #import <UIKit/UIKit.h>
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
-//#import "DWAlbumGridController.h"
 
 @class DWAlbumPreviewNavigationBar;
 typedef void(^DWAlbumPreviewNavigationBarAction)(DWAlbumPreviewNavigationBar * toolBar);

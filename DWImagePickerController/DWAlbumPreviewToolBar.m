@@ -7,8 +7,8 @@
 
 #import "DWAlbumPreviewToolBar.h"
 #import <DWKit/DWLabel.h>
-#import "DWAlbumMediaHelper.h"
-#import "DWAlbumGridCell.h"
+#import <DWAlbumGridController/DWAlbumMediaHelper.h>
+#import <DWAlbumGridController/DWAlbumGridCellModel.h>
 
 @interface DWAlbumPreviewToolBarCell : UICollectionViewCell
 

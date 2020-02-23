@@ -9,6 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <Photos/Photos.h>
 
+NS_ASSUME_NONNULL_BEGIN
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wavailability"
+API_AVAILABLE_BEGIN(macos(10.15), ios(9.0), tvos(10))
+
 static const PHImageRequestID PHCachedImageRequestID = -1;
 
 UIKIT_EXTERN NSString * _Nonnull const DWAlbumMediaSourceURL;
@@ -18,7 +23,7 @@ UIKIT_EXTERN const NSInteger DWAlbumSaveErrorCode;
 UIKIT_EXTERN const NSInteger DWAlbumExportErrorCode;
 
 @class DWAlbumManager,DWAlbumFetchOption,DWAlbumModel,DWAssetModel,DWImageAssetModel,DWVideoAssetModel,DWImageDataAssetModel,DWLivePhotoAssetModel,DWAlbumExportVideoOption;
-NS_ASSUME_NONNULL_BEGIN
+
 
 typedef void(^DWAlbumFetchCameraRollCompletion)(DWAlbumManager * _Nullable mgr ,DWAlbumModel * _Nullable obj);
 typedef void(^DWAlbumFetchAlbumCompletion)(DWAlbumManager * _Nullable mgr ,NSArray <DWAlbumModel *>* _Nullable obj);
@@ -415,6 +420,11 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 
 @end
 
+
+
+API_AVAILABLE_END
+API_AVAILABLE_BEGIN(macos(10.15), ios(9.1), tvos(10))
+
 @interface DWLivePhotoAssetModel : DWAssetModel
 
 @property (nonatomic ,strong) PHLivePhoto * media;
@@ -423,5 +433,7 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 @property (nonatomic ,assign ,readonly) BOOL isDegraded;
 
 @end
+API_AVAILABLE_END
+#pragma clang diagnostic pop
 
 NS_ASSUME_NONNULL_END

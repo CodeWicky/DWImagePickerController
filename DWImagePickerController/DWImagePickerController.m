@@ -12,9 +12,8 @@
 #import "DWAlbumToolBar.h"
 #import "DWAlbumPreviewToolBar.h"
 #import "DWAlbumPreviewNavigationBar.h"
-#import "DWMediaPreviewCell.h"
-#import "DWAlbumMediaHelper.h"
-#import "DWAlbumGridCell.h"
+#import <DWMediaPreviewController/DWMediaPreviewCell.h>
+#import <DWAlbumGridController/DWAlbumMediaHelper.h>
 
 @interface DWAlbumModel ()
 

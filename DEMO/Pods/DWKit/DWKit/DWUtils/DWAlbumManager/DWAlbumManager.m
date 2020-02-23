@@ -232,36 +232,42 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             return AVAssetExportPresetLowQuality;
         case DWAlbumExportPresetTypeMediumQuality:
             return AVAssetExportPresetMediumQuality;
-        case DWAlbumExportPresetTypeHighestQuality:
-            return AVAssetExportPresetHighestQuality;
-        case DWAlbumExportPresetTypeHEVCHighestQuality:
-        {
-            if (@available(iOS 11.0,*)) {
-                return AVAssetExportPresetHEVCHighestQuality;
-            }
-            return AVAssetExportPresetHighestQuality;
-        }
         case DWAlbumExportPresetTypeHEVCHighestQualityWithAlpha:
         {
             if (@available(iOS 13.0,*)) {
                 return AVAssetExportPresetHEVCHighestQualityWithAlpha;
             }
-            return AVAssetExportPresetHighestQuality;
         }
+        case DWAlbumExportPresetTypeHEVCHighestQuality:
+        {
+            if (@available(iOS 11.0,*)) {
+                return AVAssetExportPresetHEVCHighestQuality;
+            }
+        }
+        case DWAlbumExportPresetTypeHighestQuality:
+            return AVAssetExportPresetHighestQuality;
         case DWAlbumExportPresetType640x480:
             return AVAssetExportPreset640x480;
         case DWAlbumExportPresetType960x540:
             return AVAssetExportPreset960x540;
         case DWAlbumExportPresetType1280x720:
             return AVAssetExportPreset1280x720;
-        case DWAlbumExportPresetType1920x1080:
-            return AVAssetExportPreset1920x1080;
-        case DWAlbumExportPresetType3840x2160:
-            return AVAssetExportPreset3840x2160;
-        case DWAlbumExportPresetTypeHEVC1920x1080:
+        case DWAlbumExportPresetTypeHEVC3840x2160WithAlpha:
+        {
+            if (@available(iOS 13.0,*)) {
+                return AVAssetExportPresetHEVC3840x2160WithAlpha;
+            }
+        }
+        case DWAlbumExportPresetTypeHEVC3840x2160:
         {
             if (@available(iOS 11.0,*)) {
-                return AVAssetExportPresetHEVC1920x1080;
+                return AVAssetExportPresetHEVC3840x2160;
+            }
+        }
+        case DWAlbumExportPresetType3840x2160:
+        {
+            if (@available(iOS 9.0,*)) {
+                return AVAssetExportPreset3840x2160;;
             }
             return AVAssetExportPreset1920x1080;
         }
@@ -270,22 +276,15 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             if (@available(iOS 13.0,*)) {
                 return AVAssetExportPresetHEVC1920x1080WithAlpha;
             }
-            return AVAssetExportPreset1920x1080;
         }
-        case DWAlbumExportPresetTypeHEVC3840x2160:
+        case DWAlbumExportPresetTypeHEVC1920x1080:
         {
             if (@available(iOS 11.0,*)) {
-                return AVAssetExportPresetHEVC3840x2160;
+                return AVAssetExportPresetHEVC1920x1080;
             }
-            return AVAssetExportPreset3840x2160;
         }
-        case DWAlbumExportPresetTypeHEVC3840x2160WithAlpha:
-        {
-            if (@available(iOS 13.0,*)) {
-                return AVAssetExportPresetHEVC3840x2160WithAlpha;
-            }
-            return AVAssetExportPreset3840x2160;
-        }
+        case DWAlbumExportPresetType1920x1080:
+            return AVAssetExportPreset1920x1080;
         case DWAlbumExportPresetTypeAppleM4A:
             return AVAssetExportPresetAppleM4A;
         case DWAlbumExportPresetTypePassthrough:
@@ -533,33 +532,36 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 }
 
 -(PHImageRequestID)fetchLivePhotoWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchLivePhotoCompletion)completion {
-    if (!asset) {
-        return PHInvalidImageRequestID;
-    }
-    
-    PHLivePhotoRequestOptions * option = [[PHLivePhotoRequestOptions alloc] init];
-    option.networkAccessAllowed = networkAccessAllowed;
-    if (progress) {
-        option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                progress(progress_num,error,stop,info);
-            });
-        };
-    }
-    
-    return [self.phManager requestLivePhotoForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFit options:option resultHandler:^(PHLivePhoto * _Nullable livePhoto, NSDictionary * _Nullable info) {
-        if (livePhoto) {
-            DWLivePhotoAssetModel * model = [[DWLivePhotoAssetModel alloc] init];
-            [model configWithAsset:asset targetSize:targetSize media:livePhoto info:info];
-            if (completion) {
-                completion(self,model);
-            }
-        } else {
-            if (completion) {
-                completion(self,nil);
-            }
+    if (@available(iOS 9.1,*)) {
+        if (!asset) {
+            return PHInvalidImageRequestID;
         }
-    }];
+        
+        PHLivePhotoRequestOptions * option = [[PHLivePhotoRequestOptions alloc] init];
+        option.networkAccessAllowed = networkAccessAllowed;
+        if (progress) {
+            option.progressHandler = ^(double progress_num, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    progress(progress_num,error,stop,info);
+                });
+            };
+        }
+        
+        return [self.phManager requestLivePhotoForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFit options:option resultHandler:^(PHLivePhoto * _Nullable livePhoto, NSDictionary * _Nullable info) {
+            if (livePhoto) {
+                DWLivePhotoAssetModel * model = [[DWLivePhotoAssetModel alloc] init];
+                [model configWithAsset:asset targetSize:targetSize media:livePhoto info:info];
+                if (completion) {
+                    completion(self,model);
+                }
+            } else {
+                if (completion) {
+                    completion(self,nil);
+                }
+            }
+        }];
+    }
+    return PHInvalidImageRequestID;
 }
 
 -(PHImageRequestID)fetchVideoWithAsset:(PHAsset *)asset networkAccessAllowed:(BOOL)networkAccessAllowed progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
@@ -656,38 +658,42 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     }];
 }
 
+
 -(PHImageRequestID)fetchLivePhotoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index targetSize:(CGSize)targetSize shouldCache:(BOOL)shouldCache progress:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchLivePhotoCompletion)completion {
-    if (index >= album.fetchResult.count) {
-        if (completion) {
-            completion(self,nil);
+    if (@available(iOS 9.1,*)) {
+        if (index >= album.fetchResult.count) {
+            if (completion) {
+                completion(self,nil);
+            }
+            return PHInvalidImageRequestID;
         }
-        return PHInvalidImageRequestID;
+        DWLivePhotoAssetModel * model = [album.albumLivePhotoCache objectForKey:@(index)];
+        if (model) {
+            if (completion) {
+                completion(self,model);
+            }
+            return PHCachedImageRequestID;
+        }
+        
+        PHAsset * asset = [album.fetchResult objectAtIndex:index];
+        
+        if (asset.mediaType != PHAssetMediaTypeImage) {
+            if (completion) {
+                completion(self,nil);
+            }
+            return PHInvalidImageRequestID;
+        }
+        
+        return [self fetchLivePhotoWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
+            if (obj && shouldCache) {
+                [album.albumVideoCache setObject:obj forKey:@(index)];
+            }
+            if (completion) {
+                completion(mgr,obj);
+            }
+        }];
     }
-    DWLivePhotoAssetModel * model = [album.albumLivePhotoCache objectForKey:@(index)];
-    if (model) {
-        if (completion) {
-            completion(self,model);
-        }
-        return PHCachedImageRequestID;
-    }
-    
-    PHAsset * asset = [album.fetchResult objectAtIndex:index];
-    
-    if (asset.mediaType != PHAssetMediaTypeImage) {
-        if (completion) {
-            completion(self,nil);
-        }
-        return PHInvalidImageRequestID;
-    }
-    
-    return [self fetchLivePhotoWithAsset:asset targetSize:targetSize networkAccessAllowed:album.networkAccessAllowed progress:progress completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
-        if (obj && shouldCache) {
-            [album.albumVideoCache setObject:obj forKey:@(index)];
-        }
-        if (completion) {
-            completion(mgr,obj);
-        }
-    }];
+    return PHInvalidImageRequestID;
 }
 
 -(PHImageRequestID)fetchVideoWithAlbum:(DWAlbumModel *)album index:(NSUInteger)index shouldCache:(BOOL)shouldCache progrss:(PHAssetImageProgressHandler)progress completion:(DWAlbumFetchVideoCompletion)completion {
@@ -1011,7 +1017,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     return img;
 }
 
-///
+///获取资源
 -(void)saveMedia:(id)media url:(NSURL *)url mediaType:(DWAlbumMediaType)mediaType toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
     
     ///状态码，0 合法，1 空参数，2 错误类型参数，3 不支持的存储类型，4 降级为图片，5 降级为视频
@@ -1058,6 +1064,14 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                 }
             } else if (!url) {
                 ///降级为图片逻辑
+                if (![media isKindOfClass:[UIImage class]] && ![media isKindOfClass:[NSURL class]]) {
+                    validCode = 2;
+                } else {
+                    validCode = 4;
+                    mediaType = DWAlbumMediaTypeImage;
+                }
+            } else if (@available(iOS 9.1,*)) {
+                ///参数都有，但是系统级别不够，降级成为图片
                 if (![media isKindOfClass:[UIImage class]] && ![media isKindOfClass:[NSURL class]]) {
                     validCode = 2;
                 } else {
@@ -1143,14 +1157,17 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                 break;
             case DWAlbumMediaTypeAll:
             {
-                PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
-                if ([media isKindOfClass:[NSURL class]]) {
-                    [request addResourceWithType:PHAssetResourceTypePhoto fileURL:media options:nil];
-                } else if ([media isKindOfClass:[UIImage class]]) {
-                    [request addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(media, 1) options:nil];
+                ///这里就这么写没问题，因为如果版本不合适，上面就已经降级为图片了，不会走到这里。所以这里并没有丢分支
+                if (@available(iOS 9.1,*)) {
+                    PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
+                    if ([media isKindOfClass:[NSURL class]]) {
+                        [request addResourceWithType:PHAssetResourceTypePhoto fileURL:media options:nil];
+                    } else if ([media isKindOfClass:[UIImage class]]) {
+                        [request addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(media, 1) options:nil];
+                    }
+                    [request addResourceWithType:PHAssetResourceTypePairedVideo fileURL:url options:nil];
+                    requestToCameraRoll = request;
                 }
-                [request addResourceWithType:PHAssetResourceTypePairedVideo fileURL:url options:nil];
-                requestToCameraRoll = request;
             }
                 break;
             default:
@@ -1212,13 +1229,15 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                     break;
                 case DWAlbumMediaTypeAll:
                 {
-                    [self fetchOriginLivePhotoWithAsset:asset networkAccessAllowed:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
-                        if (!obj.isDegraded) {
-                            if (completion) {
-                                completion(self,YES,obj, nil);
+                    if (@available(iOS 9.1,*)) {
+                        [self fetchOriginLivePhotoWithAsset:asset networkAccessAllowed:NO progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
+                            if (!obj.isDegraded) {
+                                if (completion) {
+                                    completion(self,YES,obj, nil);
+                                }
                             }
-                        }
-                    }];
+                        }];
+                    }
                 }
                     break;
                 default:
@@ -1232,10 +1251,6 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             }
         }
     }];
-}
-
--(void)saveLivePhotoWithImage:(UIImage *)media videoURL:(NSURL *)videoURL toAlbum:(NSString *)albumName location:(CLLocation *)loc createIfNotExist:(BOOL)createIfNotExist completion:(DWAlbumSaveMediaCompletion)completion {
-    
 }
 
 -(void)exportVideoWithAVAsset:(AVURLAsset *)avasset asset:(PHAsset *)asset option:(DWAlbumExportVideoOption *)opt completion:(DWAlbumExportVideoCompletion)completion {
