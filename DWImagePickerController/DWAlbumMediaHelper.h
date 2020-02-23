@@ -6,17 +6,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <DWMediaPreviewController/DWMediaPreviewController.h>
-#import "DWAlbumManager.h"
+#import "DWAlbumSelectionManager.h"
+#import "DWAlbumGridCell.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DWAlbumMediaHelper : NSObject
 
-+(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset;
++(DWAlbumMediaOption)mediaOptionForAsset:(PHAsset *)asset;
 
-+(void)cachePoster:(DWImageAssetModel *)image withAsset:(PHAsset *)asset;
++(void)cachePoster:(DWAlbumGridCellModel *)image withAsset:(PHAsset *)asset;
 
-+(DWImageAssetModel *)posterCacheForAsset:(PHAsset *)asset;
++(DWAlbumGridCellModel *)posterCacheForAsset:(PHAsset *)asset;
 
 @end
 

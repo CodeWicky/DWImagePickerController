@@ -6,9 +6,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DWAlbumManager.h"
-#import <DWMediaPreviewController/DWMediaPreviewController.h>
 #import "DWAlbumSelectionManager.h"
+#import "DWAlbumGridCell.h"
 
 @protocol DWAlbumGridToolBarProtocol <NSObject>
 
@@ -22,7 +21,7 @@
 
 @end
 
-typedef void(^DWGridViewControllerFetchCompletion)(DWImageAssetModel * model);
+typedef void(^DWGridViewControllerFetchCompletion)(DWAlbumGridCellModel * model);
 @class DWAlbumGridViewController;
 @protocol DWAlbumGridDataSource <NSObject>
 

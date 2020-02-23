@@ -7,7 +7,25 @@
 
 #import "DWAlbumSelectionManager.h"
 
+@interface DWAlbumSelectionCounter : NSObject
 
+@property (nonatomic ,assign) NSInteger imageCount;
+
+@property (nonatomic ,assign) NSInteger animateImageCount;
+
+@property (nonatomic ,assign) NSInteger livePhotoCount;
+
+@property (nonatomic ,assign) NSInteger videoCount;
+
+@property (nonatomic ,assign) DWAlbumMediaOption mediaOption;
+
+@end
+
+@interface DWAlbumSelectionManager ()
+
+@property (nonatomic ,strong) DWAlbumSelectionCounter * counter;
+
+@end
 
 @implementation DWAlbumSelectionManager
 
@@ -19,14 +37,15 @@
     return self;
 }
 
--(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex previewType:(DWMediaPreviewType)previewType {
+-(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex mediaOption:(DWAlbumMediaOption)mediaOption {
     if (asset) {
         if (!self.reachMaxSelectCount) {
             DWAlbumSelectionModel * model = [DWAlbumSelectionModel new];
             model.asset = asset;
             model.mediaIndex = mediaIndex;
-            model.previewType = previewType;
+            model.mediaOption = mediaOption;
             [self.selections addObject:model];
+            [self addMediaOption:mediaOption];
             [self handleSetNeedsRefreshSelection];
             return YES;
         }
@@ -52,9 +71,10 @@
 }
 
 -(BOOL)removeSelection:(PHAsset *)asset {
-    NSInteger idx = [self indexOfSelection:asset];
-    if (idx != NSNotFound) {
-        [self.selections removeObjectAtIndex:idx];
+    DWAlbumSelectionModel * model = [self selectionModelForSelection:asset];
+    if (model) {
+        [self.selections removeObject:model];
+        [self removeMediaOption:model.mediaOption];
         [self handleSetNeedsRefreshSelection];
         return YES;
     }
@@ -62,8 +82,11 @@
 }
 
 -(BOOL)removeSelectionAtIndex:(NSInteger)index {
-    if (index < self.selections.count) {
+    DWAlbumSelectionModel * model = [self selectionModelAtIndex:index];
+    if (model) {
         [self.selections removeObjectAtIndex:index];
+        [self removeMediaOption:model.mediaOption];
+        [self handleSetNeedsRefreshSelection];
         return YES;
     }
     return NO;
@@ -111,6 +134,66 @@
     _needsRefreshSelection = YES;
 }
 
+-(void)addMediaOption:(DWAlbumMediaOption)mediaOption {
+    switch (mediaOption) {
+        case DWAlbumMediaOptionImage:
+        {
+            self.counter.imageCount ++;
+        }
+            break;
+        case DWAlbumMediaOptionAnimateImage:
+        {
+            self.counter.animateImageCount ++;
+        }
+            break;
+        case DWAlbumMediaOptionLivePhoto:
+        {
+            self.counter.livePhotoCount ++;
+        }
+            break;
+        case DWAlbumMediaOptionVideo:
+        {
+            self.counter.videoCount ++;
+        }
+            break;
+        default:
+            break;
+    }
+    [self refreshMediaOption];
+}
+
+-(void)removeMediaOption:(DWAlbumMediaOption)mediaOption {
+    switch (mediaOption) {
+        case DWAlbumMediaOptionImage:
+        {
+            self.counter.imageCount --;
+        }
+            break;
+        case DWAlbumMediaOptionAnimateImage:
+        {
+            self.counter.animateImageCount --;
+        }
+            break;
+        case DWAlbumMediaOptionLivePhoto:
+        {
+            self.counter.livePhotoCount --;
+        }
+            break;
+        case DWAlbumMediaOptionVideo:
+        {
+            self.counter.videoCount --;
+        }
+            break;
+        default:
+            break;
+    }
+    [self refreshMediaOption];
+}
+
+-(void)refreshMediaOption {
+    _selectionOption = self.counter.mediaOption;
+}
+
 #pragma mark --- setter/getter ---
 -(NSMutableArray<DWAlbumSelectionModel *> *)selections {
     if (!_selections) {
@@ -126,8 +209,36 @@
     return NO;
 }
 
+-(DWAlbumSelectionCounter *)counter {
+    if (!_counter) {
+        _counter = [DWAlbumSelectionCounter new];
+    }
+    return _counter;
+}
+
 @end
 
 @implementation DWAlbumSelectionModel
+
+@end
+
+@implementation DWAlbumSelectionCounter
+
+-(DWAlbumMediaOption)mediaOption {
+    DWAlbumMediaOption opt = DWAlbumMediaOptionUndefine;
+    if (self.imageCount > 0) {
+        opt |= DWAlbumMediaOptionImage;
+    }
+    if (self.animateImageCount > 0) {
+        opt |= DWAlbumMediaOptionAnimateImage;
+    }
+    if (self.livePhotoCount > 0) {
+        opt |= DWAlbumMediaOptionLivePhoto;
+    }
+    if (self.videoCount > 0) {
+        opt |= DWAlbumMediaOptionVideo;
+    }
+    return opt;
+}
 
 @end

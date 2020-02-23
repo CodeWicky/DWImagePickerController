@@ -291,7 +291,7 @@
     NSInteger idx = [self.selectionManager indexOfSelection:asset];
     BOOL needRefresh = NO;
     if (idx == NSNotFound) {
-        if ([self.selectionManager addSelection:asset mediaIndex:cell.index previewType:[DWAlbumMediaHelper previewTypeForAsset:asset]]) {
+        if ([self.selectionManager addSelection:asset mediaIndex:cell.index mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
             if (self.selectionManager.reachMaxSelectCount) {
                 [self selectVisibleCells];
             } else {
@@ -352,7 +352,7 @@
         PHAsset * asset = cell.model.asset;
         NSInteger index = [self.results indexOfObject:asset];
         cell.index = index;
-        [self loadImageForAsset:asset targetSize:self.photoSize thumnail:NO completion:^(DWImageAssetModel *model) {
+        [self loadImageForAsset:asset targetSize:self.photoSize thumnail:NO completion:^(DWAlbumGridCellModel *model) {
             if (cell.index == index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     cell.model = model;
@@ -394,12 +394,12 @@
         thumnail = YES;
     }
     
-    DWImageAssetModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
+    DWAlbumGridCellModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
     if (media) {
         cell.model = media;
     } else {
         CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
-        [self loadImageForAsset:asset targetSize:targetSize thumnail:YES completion:^(DWImageAssetModel *model) {
+        [self loadImageForAsset:asset targetSize:targetSize thumnail:YES completion:^(DWAlbumGridCellModel *model) {
             if (!thumnail && model.media && model.asset) {
                 [DWAlbumMediaHelper cachePoster:model withAsset:model.asset];
             }

@@ -8,12 +8,13 @@
 #import "DWAlbumPreviewToolBar.h"
 #import <DWKit/DWLabel.h>
 #import "DWAlbumMediaHelper.h"
+#import "DWAlbumGridCell.h"
 
 @interface DWAlbumPreviewToolBarCell : UICollectionViewCell
 
 @property (nonatomic ,strong) UIImageView * previewImageView;
 
-@property (nonatomic ,strong) DWImageAssetModel * model;
+@property (nonatomic ,strong) DWAlbumGridCellModel * model;
 
 @property (nonatomic ,assign) NSInteger index;
 
@@ -59,7 +60,7 @@
     return _previewImageView;
 }
 
--(void)setModel:(DWImageAssetModel *)model {
+-(void)setModel:(DWAlbumGridCellModel *)model {
     _model = model;
     self.previewImageView.image = model.media;
 }
@@ -168,14 +169,14 @@
     NSInteger originIndex = indexPath.item;
     cell.index = originIndex;
     PHAsset * asset = [self.selectionManager selectionAtIndex:originIndex];
-    DWImageAssetModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
+    DWAlbumGridCellModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
     if (media) {
         cell.model = media;
     } else {
         [self.albumManager fetchImageWithAsset:asset targetSize:self.previewSize networkAccessAllowed:self.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
             if (cell.index == originIndex && !obj.isDegraded) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.model = obj;
+                    cell.model = [self gridCellModelFromImageAssetModel:obj];
                 });
             }
         }];
@@ -188,6 +189,16 @@
     if (self.selectAction) {
         self.selectAction(self, indexPath.item);
     }
+}
+
+#pragma mark --- tool method ---
+-(DWAlbumGridCellModel *)gridCellModelFromImageAssetModel:(DWImageAssetModel *)assetModel {
+    DWAlbumGridCellModel * gridModel = [DWAlbumGridCellModel new];
+    gridModel.asset = assetModel.asset;
+    gridModel.media = assetModel.media;
+    gridModel.mediaType = assetModel.mediaType;
+    gridModel.targetSize = assetModel.targetSize;
+    return gridModel;
 }
 
 #pragma mark --- override ---
@@ -279,9 +290,6 @@
             [self.previewCol reloadData];
         }
     }
-    
-    
-    
 }
 
 -(BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {

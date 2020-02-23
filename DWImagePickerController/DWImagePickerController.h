@@ -15,26 +15,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_OPTIONS(NSUInteger, DWImagePickerMediaOption) {
-    DWImagePickerMediaOptionUndefine = 0,
-    DWImagePickerMediaOptionImage = 1 << 0,
-    DWImagePickerMediaOptionAnimateImage = 1 << 1,
-    DWImagePickerMediaOptionLivePhoto = 1 << 2,
-    DWImagePickerMediaOptionVideo = 1 << 3,
-    
-    ///聚合类型
-    DWImagePickerOptionAll = DWImagePickerMediaOptionImage | DWImagePickerMediaOptionAnimateImage | DWImagePickerMediaOptionLivePhoto | DWImagePickerMediaOptionVideo,
-    
-    ///Mask
-    DWImagePickerOptionImageMask = DWImagePickerMediaOptionImage | DWImagePickerMediaOptionAnimateImage | DWImagePickerMediaOptionLivePhoto,
-    DWImagePickerOptionVideoMask = DWImagePickerMediaOptionLivePhoto | DWImagePickerMediaOptionVideo,
-};
-
 @interface DWImagePickerConfiguration : NSObject
 
-@property (nonatomic ,assign) DWImagePickerMediaOption displayMediaOption;
+@property (nonatomic ,assign) DWAlbumMediaOption displayMediaOption;
 
-@property (nonatomic ,assign) DWImagePickerMediaOption selectMediaOption;
+@property (nonatomic ,assign) DWAlbumMediaOption selectMediaOption;
 
 @end
 

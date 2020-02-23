@@ -6,11 +6,23 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DWAlbumManager.h"
+#import <Photos/Photos.h>
+
+@interface DWAlbumGridCellModel : NSObject
+
+@property (nonatomic ,strong) PHAsset * asset;
+
+@property (nonatomic ,strong) UIImage * media;
+
+@property (nonatomic ,assign) CGSize targetSize;
+
+@property (nonatomic ,assign) PHAssetMediaType mediaType;
+
+@end
 
 @interface DWAlbumGridCell : UICollectionViewCell
 
-@property (nonatomic ,strong) DWImageAssetModel * model;
+@property (nonatomic ,strong) DWAlbumGridCellModel * model;
 
 @property (nonatomic ,assign) BOOL showSelectButton;
 

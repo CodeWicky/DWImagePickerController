@@ -16,23 +16,24 @@
 @implementation DWAlbumMediaHelper
 
 #pragma mark --- interface method ---
-+(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset {
+
++(DWAlbumMediaOption)mediaOptionForAsset:(PHAsset *)asset {
     if (asset.mediaType == PHAssetMediaTypeImage) {
         if (asset.mediaSubtypes & PHAssetMediaSubtypePhotoLive) {
-            return DWMediaPreviewTypeLivePhoto;
+            return DWAlbumMediaOptionLivePhoto;
         } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
-            return DWMediaPreviewTypeAnimateImage;
+            return DWAlbumMediaOptionAnimateImage;
         } else {
-            return DWMediaPreviewTypeImage;
+            return DWAlbumMediaOptionImage;
         }
     } else if (asset.mediaType == PHAssetMediaTypeVideo) {
-        return DWMediaPreviewTypeVideo;
+        return DWAlbumMediaOptionVideo;
     } else {
-        return DWMediaPreviewTypeNone;
+        return DWAlbumMediaOptionUndefine;
     }
 }
 
-+(void)cachePoster:(DWImageAssetModel *)image withAsset:(PHAsset *)asset {
++(void)cachePoster:(DWAlbumGridCellModel *)image withAsset:(PHAsset *)asset {
     if (!asset) {
         return;
     }
@@ -40,7 +41,7 @@
     [helper.posterCache setObject:image forKey:asset];
 }
 
-+(DWImageAssetModel *)posterCacheForAsset:(PHAsset *)asset {
++(DWAlbumGridCellModel *)posterCacheForAsset:(PHAsset *)asset {
     if (!asset) {
         return nil;
     }

@@ -14,6 +14,7 @@
 #import "DWAlbumPreviewNavigationBar.h"
 #import "DWMediaPreviewCell.h"
 #import "DWAlbumMediaHelper.h"
+#import "DWAlbumGridCell.h"
 
 @interface DWAlbumModel ()
 
@@ -50,6 +51,8 @@
 @property (nonatomic ,strong) DWAlbumPreviewNavigationBar * previewTopToolBar;
 
 @property (nonatomic ,strong) DWAlbumPreviewToolBar * previewBottomToolBar;
+
+@property (nonatomic ,strong) NSCache * posterCache;
 
 @end
 
@@ -119,6 +122,22 @@
 }
 
 #pragma mark --- tool method ---
+-(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset {
+    DWAlbumMediaOption mediaOption = [DWAlbumMediaHelper mediaOptionForAsset:asset];
+    switch (mediaOption) {
+        case DWAlbumMediaOptionImage:
+            return DWMediaPreviewTypeImage;
+        case DWAlbumMediaOptionAnimateImage:
+            return DWMediaPreviewTypeAnimateImage;
+        case DWAlbumMediaOptionLivePhoto:
+            return DWMediaPreviewTypeLivePhoto;
+        case DWAlbumMediaOptionVideo:
+            return DWMediaPreviewTypeVideo;
+        default:
+            return DWMediaPreviewTypeNone;
+    }
+}
+
 -(void)dismiss {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -128,7 +147,7 @@
         PHAsset * asset = self.currentGridAlbumResult[index];
         NSInteger idx = [self.selectionManager indexOfSelection:asset];
         if (idx == NSNotFound) {
-            if ([self.selectionManager addSelection:asset mediaIndex:index previewType:[DWAlbumMediaHelper previewTypeForAsset:asset]]) {
+            if ([self.selectionManager addSelection:asset mediaIndex:index mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
                 [self.previewTopToolBar setSelectAtIndex:self.selectionManager.selections.count];
                 [self.previewBottomToolBar focusOnIndex:self.selectionManager.selections.count - 1];
                 [self refreshToolBar];
@@ -324,33 +343,17 @@
     [self.previewBottomToolBar refreshSelection];
 }
 
--(DWImagePickerMediaOption)mediaOptionFromPreviewType:(DWMediaPreviewType)previewType {
-    switch (previewType) {
-        case DWMediaPreviewTypeImage:
-            return DWImagePickerMediaOptionImage;
-        case DWMediaPreviewTypeAnimateImage:
-            return DWImagePickerMediaOptionAnimateImage;
-        case DWMediaPreviewTypeVideo:
-            return DWImagePickerMediaOptionVideo;
-        case DWMediaPreviewTypeLivePhoto:
-            return DWImagePickerMediaOptionLivePhoto;
-        default:
-            return DWImagePickerMediaOptionUndefine;
-    }
-}
-
 -(DWAlbumGridModel *)gridModelFromAlbumModel:(DWAlbumModel *)album {
     DWAlbumGridModel * gridModel = [DWAlbumGridModel new];
     NSMutableArray * tmp = [NSMutableArray arrayWithCapacity:album.count];
-    DWImagePickerMediaOption displayOption = self.pickerConf ? self.pickerConf.displayMediaOption : DWImagePickerOptionAll;
-    if (displayOption == DWImagePickerOptionAll) {
+    DWAlbumMediaOption displayOption = self.pickerConf ? self.pickerConf.displayMediaOption : DWAlbumMediaOptionAll;
+    if (displayOption == DWAlbumMediaOptionAll) {
         [album.fetchResult enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [tmp addObject:obj];
         }];
     } else {
         [album.fetchResult enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            DWMediaPreviewType previewType = [DWAlbumMediaHelper previewTypeForAsset:obj];
-            DWImagePickerMediaOption mediaOption = [self mediaOptionFromPreviewType:previewType];
+            DWAlbumMediaOption mediaOption = [DWAlbumMediaHelper mediaOptionForAsset:obj];
             if (displayOption & mediaOption) {
                 [tmp addObject:obj];
             }
@@ -362,19 +365,28 @@
     return gridModel;
 }
 
+-(DWAlbumGridCellModel *)gridCellModelFromImageAssetModel:(DWImageAssetModel *)assetModel {
+    DWAlbumGridCellModel * gridModel = [DWAlbumGridCellModel new];
+    gridModel.asset = assetModel.asset;
+    gridModel.media = assetModel.media;
+    gridModel.mediaType = assetModel.mediaType;
+    gridModel.targetSize = assetModel.targetSize;
+    return gridModel;
+}
+
 #pragma mark --- gridViewController dataSource ---
 -(void)gridViewController:(DWAlbumGridViewController *)gridViewController fetchMediaForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion {
     if (thumnail) {
         [self.albumManager fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:self.currentGridAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
             if (completion) {
-                completion(obj);
+                completion([self gridCellModelFromImageAssetModel:obj]);
             }
         }];
     } else {
         NSInteger index = [self.currentGridAlbumResult indexOfObject:asset];
         [self.albumManager fetchImageWithAlbum:self.currentGridAlbum index:index targetSize:targetSize shouldCache:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
             if (completion) {
-                completion(obj);
+                completion([self gridCellModelFromImageAssetModel:obj]);
             }
         }];
     }
@@ -395,7 +407,7 @@
 
 -(DWMediaPreviewType)previewController:(DWMediaPreviewController *)previewController previewTypeAtIndex:(NSUInteger)index {
     PHAsset * asset = [self.currentGridAlbumResult objectAtIndex:index];
-    return [DWAlbumMediaHelper previewTypeForAsset:asset];
+    return [self previewTypeForAsset:asset];
 }
 
 -(DWMediaPreviewCell *)previewController:(DWMediaPreviewController *)previewController cellForItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
@@ -438,7 +450,7 @@
         return ;
     }
     
-    DWImageAssetModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
+    DWImageAssetModel * media = [self.posterCache objectForKey:asset];
     if (media) {
         if (fetchCompletion) {
             fetchCompletion(media.media,index,NO);
@@ -448,7 +460,9 @@
     
     [self.albumManager fetchImageWithAsset:asset targetSize:self.gridPhotoSize networkAccessAllowed:self.currentGridAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (obj.asset && obj.media) {
-            [DWAlbumMediaHelper cachePoster:obj withAsset:obj.asset];
+            [self.posterCache setObject:obj forKey:obj.asset];
+            
+            [DWAlbumMediaHelper cachePoster:[self gridCellModelFromImageAssetModel:obj] withAsset:obj.asset];
         }
         if (fetchCompletion) {
             fetchCompletion(obj.media,index,[obj satisfiedSize:previewController.previewSize]);
@@ -462,7 +476,7 @@
         dispatch_async(self.preloadQueue, ^{
             NSLog(@"start preload %ld",(long)index);
             PHAsset * asset = [self.currentGridAlbumResult objectAtIndex:index];
-            DWMediaPreviewType previewType = [DWAlbumMediaHelper previewTypeForAsset:asset];
+            DWMediaPreviewType previewType = [self previewTypeForAsset:asset];
             [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
         });
     }];
@@ -486,7 +500,7 @@
     [self.gridVC refreshGrid:newGrid];
     dispatch_async(dispatch_get_main_queue(), ^{
         ///因为只有在全展示的情况下，changes中的角标变化与实际展示的变化才是一一对应的，可以用update。否则只能reload解决
-        if (changes.hasIncrementalChanges && self.pickerConf.displayMediaOption == DWImagePickerOptionAll) {
+        if (changes.hasIncrementalChanges && self.pickerConf.displayMediaOption == DWAlbumMediaOptionAll) {
             UICollectionView * col = self.gridVC.gridView;
             if (col) {
                 [col performBatchUpdates:^{
@@ -686,6 +700,13 @@
         };
     }
     return _previewBottomToolBar;
+}
+
+-(NSCache *)posterCache {
+    if (!_posterCache) {
+        _posterCache = [[NSCache alloc] init];
+    }
+    return _posterCache;
 }
 
 @end

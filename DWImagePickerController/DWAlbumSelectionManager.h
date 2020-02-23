@@ -6,9 +6,23 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DWAlbumManager.h"
-#import <DWMediaPreviewController/DWMediaPreviewController.h>
+#import <Photos/Photos.h>
 NS_ASSUME_NONNULL_BEGIN
+
+typedef NS_OPTIONS(NSUInteger, DWAlbumMediaOption) {
+    DWAlbumMediaOptionUndefine = 0,
+    DWAlbumMediaOptionImage = 1 << 0,
+    DWAlbumMediaOptionAnimateImage = 1 << 1,
+    DWAlbumMediaOptionLivePhoto = 1 << 2,
+    DWAlbumMediaOptionVideo = 1 << 3,
+    
+    ///聚合类型
+    DWAlbumMediaOptionAll = DWAlbumMediaOptionImage | DWAlbumMediaOptionAnimateImage | DWAlbumMediaOptionLivePhoto | DWAlbumMediaOptionVideo,
+    
+    ///Mask
+    DWAlbumMediaOptionImageMask = DWAlbumMediaOptionImage | DWAlbumMediaOptionAnimateImage | DWAlbumMediaOptionLivePhoto,
+    DWAlbumMediaOptionVideoMask = DWAlbumMediaOptionLivePhoto | DWAlbumMediaOptionVideo,
+};
 
 @class DWAlbumSelectionModel;
 @class DWAlbumSelectionManager;
@@ -24,6 +38,8 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 @property (nonatomic ,assign ,readonly) BOOL reachMaxSelectCount;
 
+@property (nonatomic ,assign ,readonly) DWAlbumMediaOption selectionOption;
+
 @property (nonatomic ,assign) BOOL useOriginImage;
 
 @property (nonatomic ,copy) DWAlbumSelectionAction reachMaxSelectCountAction;
@@ -32,7 +48,7 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 -(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount;
 
--(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex previewType:(DWMediaPreviewType)previewType;
+-(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex mediaOption:(DWAlbumMediaOption)mediaOption;
 
 -(void)addUserInfo:(id)userInfo forAsset:(PHAsset *)asset;
 
@@ -60,7 +76,7 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 @property (nonatomic ,assign) NSInteger mediaIndex;
 
-@property (nonatomic ,assign) DWMediaPreviewType previewType;
+@property (nonatomic ,assign) DWAlbumMediaOption mediaOption;
 
 @property (nonatomic ,strong) id userInfo;
 

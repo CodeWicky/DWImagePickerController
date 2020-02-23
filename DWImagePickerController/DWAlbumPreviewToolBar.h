@@ -8,6 +8,7 @@
 #import <UIKit/UIKit.h>
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
 #import "DWAlbumToolBar.h"
+#import "DWAlbumManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @class DWAlbumPreviewToolBar;

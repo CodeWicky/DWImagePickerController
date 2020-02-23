@@ -8,6 +8,10 @@
 #import "DWAlbumGridCell.h"
 #import <DWKit/DWLabel.h>
 
+@implementation DWAlbumGridCellModel
+
+@end
+
 @interface DWAlbumGridCell ()
 
 @property (nonatomic ,strong) UIImageView * gridImage;
@@ -100,7 +104,7 @@
 }
 
 #pragma mark --- setter/getter ---
--(void)setModel:(DWImageAssetModel *)model {
+-(void)setModel:(DWAlbumGridCellModel *)model {
     _model = model;
     self.gridImage.image = model.media;
     if (model.mediaType == PHAssetMediaTypeVideo) {
