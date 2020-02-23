@@ -23,6 +23,8 @@
 
 @interface DWAlbumSelectionManager ()
 
+@property (nonatomic ,strong) NSMutableArray <DWAlbumSelectionModel *>* selections;
+
 @property (nonatomic ,strong) DWAlbumSelectionCounter * counter;
 
 @end
@@ -30,28 +32,46 @@
 @implementation DWAlbumSelectionManager
 
 #pragma mark --- interface method ---
--(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount {
+-(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount selectableOption:(DWAlbumMediaOption)selectableOption multiTypeSelectionEnable:(BOOL)multiTypeSelectionEnable {
     if (self = [super init]) {
         _maxSelectCount = maxSelectCount;
+        _selectableOption = selectableOption;
+        _multiTypeSelectionEnable = multiTypeSelectionEnable;
     }
     return self;
 }
 
+-(BOOL)validateMediaOption:(DWAlbumMediaOption)mediaOption {
+    if (self.selectableOption != DWAlbumMediaOptionUndefine && self.selectableOption != DWAlbumMediaOptionAll) {
+        if (!(self.selectableOption & mediaOption)) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
 -(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex mediaOption:(DWAlbumMediaOption)mediaOption {
     if (asset) {
-        if (!self.reachMaxSelectCount) {
-            DWAlbumSelectionModel * model = [DWAlbumSelectionModel new];
-            model.asset = asset;
-            model.mediaIndex = mediaIndex;
-            model.mediaOption = mediaOption;
-            [self.selections addObject:model];
-            [self addMediaOption:mediaOption];
-            [self handleSetNeedsRefreshSelection];
-            return YES;
-        }
-        
-        if (self.reachMaxSelectCountAction) {
-            self.reachMaxSelectCountAction(self);
+        NSError * error = nil;
+        if ([self validateAsset:asset mediaOption:mediaOption error:&error]) {
+            if (!self.reachMaxSelectCount) {
+                DWAlbumSelectionModel * model = [DWAlbumSelectionModel new];
+                model.asset = asset;
+                model.mediaIndex = mediaIndex;
+                model.mediaOption = mediaOption;
+                [self.selections addObject:model];
+                [self addMediaOption:mediaOption];
+                [self handleSetNeedsRefreshSelection];
+                return YES;
+            } else {
+                if (self.reachMaxSelectCountAction) {
+                    self.reachMaxSelectCountAction(self);
+                }
+            }
+        } else {
+            if (self.validationFailCallback) {
+                self.validationFailCallback(error);
+            }
         }
     }
     
@@ -130,6 +150,17 @@
 }
 
 #pragma mark --- tool method ---
+-(BOOL)validateAsset:(PHAsset *)asset mediaOption:(DWAlbumMediaOption)mediaOption error:(NSError * __autoreleasing *)error {
+    if (![self validateMediaOption:mediaOption]) {
+        safeLinkError(error, [NSError errorWithDomain:@"com.DWAlbumGridController.DWAlbumSelectionManager" code:10001 userInfo:@{@"reason":[NSString stringWithFormat: @"You assign an selectableOption with %lu which is not support current mediaOption: %lu.",(unsigned long)self.selectableOption,(unsigned long)mediaOption]}]);
+        return NO;
+    }
+    if (self.selectionValidation) {
+        return self.selectionValidation(self,asset,mediaOption,error);
+    }
+    return YES;
+}
+
 -(void)handleSetNeedsRefreshSelection {
     _needsRefreshSelection = YES;
 }
@@ -192,6 +223,13 @@
 
 -(void)refreshMediaOption {
     _selectionOption = self.counter.mediaOption;
+}
+
+#pragma mark --- tool func ---
+NS_INLINE void safeLinkError(NSError * __autoreleasing * error ,NSError * error2Link) {
+    if (error != NULL) {
+        *error = error2Link;
+    }
 }
 
 #pragma mark --- setter/getter ---

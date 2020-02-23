@@ -7,6 +7,7 @@
 
 #import <UIKit/UIKit.h>
 #import "DWAlbumSelectionManager.h"
+#import "DWAlbumGridCellModel.h"
 #import "DWAlbumGridCell.h"
 
 @protocol DWAlbumGridToolBarProtocol <NSObject>
@@ -22,16 +23,20 @@
 @end
 
 typedef void(^DWGridViewControllerFetchCompletion)(DWAlbumGridCellModel * model);
-@class DWAlbumGridViewController;
+@class DWAlbumGridController;
 @protocol DWAlbumGridDataSource <NSObject>
 
 @required
--(void)gridViewController:(DWAlbumGridViewController *)gridViewController fetchMediaForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion;
+-(void)gridController:(DWAlbumGridController *)gridController fetchMediaForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion;
 
 @optional
--(void)gridViewController:(DWAlbumGridViewController *)gridViewController startCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
+-(DWAlbumGridCell *)gridViewController:(DWAlbumGridController *)gridController cellForAsset:(PHAsset *)asset mediaOption:(DWAlbumMediaOption)mediaOption atIndex:(NSInteger)index;
 
--(void)gridViewController:(DWAlbumGridViewController *)gridViewController stopCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
+-(void)gridViewController:(DWAlbumGridController *)gridController didSelectAsset:(PHAsset *)asset mediaOption:(DWAlbumMediaOption)mediaOption atIndex:(NSInteger)index;
+
+-(void)gridController:(DWAlbumGridController *)gridController startCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
+
+-(void)gridController:(DWAlbumGridController *)gridController stopCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize;
 
 @end
 
@@ -43,15 +48,13 @@ typedef void(^DWGridViewControllerFetchCompletion)(DWAlbumGridCellModel * model)
 
 @end
 
-@interface DWAlbumGridViewController : UIViewController
+@interface DWAlbumGridController : UIViewController
 
 @property (nonatomic ,weak) id<DWAlbumGridDataSource> dataSource;
 
 @property (nonatomic ,strong ,readonly) UICollectionView * gridView;
 
 @property (nonatomic ,assign) CGFloat itemWidth;
-
-@property (nonatomic ,assign) NSInteger maxSelectCount;
 
 @property (nonatomic ,strong ,readonly) DWAlbumGridModel * gridModel;
 
@@ -61,11 +64,11 @@ typedef void(^DWGridViewControllerFetchCompletion)(DWAlbumGridCellModel * model)
 
 @property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
 
-@property (nonatomic ,copy) void(^gridClickAction)(NSIndexPath * indexPath);
-
 -(instancetype)initWithItemWidth:(CGFloat)width;
 
--(void)registGridCell:(Class)cellClazz;
+-(void)registerClass:(Class)cellClass forCellWithReuseIdentifier:(NSString *)identifier;
+
+-(__kindof DWAlbumGridCell *)dequeueReusableCellWithReuseIdentifier:(NSString *)identifier forIndex:(NSInteger)index;
 
 -(void)configWithGridModel:(DWAlbumGridModel *)gridModel;
 

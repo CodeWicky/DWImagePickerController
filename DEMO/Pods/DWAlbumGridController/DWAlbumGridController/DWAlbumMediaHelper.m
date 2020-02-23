@@ -19,9 +19,12 @@
 
 +(DWAlbumMediaOption)mediaOptionForAsset:(PHAsset *)asset {
     if (asset.mediaType == PHAssetMediaTypeImage) {
-        if (asset.mediaSubtypes & PHAssetMediaSubtypePhotoLive) {
-            return DWAlbumMediaOptionLivePhoto;
-        } else if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
+        if (@available(iOS 9.1, *)) {
+            if (asset.mediaSubtypes & PHAssetMediaSubtypePhotoLive) {
+                return DWAlbumMediaOptionLivePhoto;
+            }
+        }
+        if ([animateExtensions() containsObject:[[[asset valueForKey:@"filename"] pathExtension] lowercaseString]]) {
             return DWAlbumMediaOptionAnimateImage;
         } else {
             return DWAlbumMediaOptionImage;

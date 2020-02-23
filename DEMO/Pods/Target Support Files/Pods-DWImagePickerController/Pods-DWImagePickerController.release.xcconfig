@@ -1,7 +1,7 @@
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/DWImagePickerController" "${PODS_ROOT}/Headers/Public/DWKit" "${PODS_ROOT}/Headers/Public/DWMediaPreviewController" "${PODS_ROOT}/Headers/Public/DWPlayer" "${PODS_ROOT}/Headers/Public/YYImage"
-LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/DWImagePickerController" "${PODS_CONFIGURATION_BUILD_DIR}/DWKit" "${PODS_CONFIGURATION_BUILD_DIR}/DWMediaPreviewController" "${PODS_CONFIGURATION_BUILD_DIR}/DWPlayer" "${PODS_CONFIGURATION_BUILD_DIR}/YYImage"
-OTHER_LDFLAGS = $(inherited) -ObjC -l"DWImagePickerController" -l"DWKit" -l"DWMediaPreviewController" -l"DWPlayer" -l"YYImage" -l"z" -framework "Accelerate" -framework "AssetsLibrary" -framework "CoreFoundation" -framework "ImageIO" -framework "MobileCoreServices" -framework "QuartzCore" -framework "UIKit"
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/DWAlbumGridController" "${PODS_ROOT}/Headers/Public/DWImagePickerController" "${PODS_ROOT}/Headers/Public/DWKit" "${PODS_ROOT}/Headers/Public/DWMediaPreviewController" "${PODS_ROOT}/Headers/Public/DWPlayer" "${PODS_ROOT}/Headers/Public/YYImage"
+LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/DWAlbumGridController" "${PODS_CONFIGURATION_BUILD_DIR}/DWImagePickerController" "${PODS_CONFIGURATION_BUILD_DIR}/DWKit" "${PODS_CONFIGURATION_BUILD_DIR}/DWMediaPreviewController" "${PODS_CONFIGURATION_BUILD_DIR}/DWPlayer" "${PODS_CONFIGURATION_BUILD_DIR}/YYImage"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"DWAlbumGridController" -l"DWImagePickerController" -l"DWKit" -l"DWMediaPreviewController" -l"DWPlayer" -l"YYImage" -l"z" -framework "Accelerate" -framework "AssetsLibrary" -framework "CoreFoundation" -framework "ImageIO" -framework "MobileCoreServices" -framework "QuartzCore" -framework "UIKit"
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/.

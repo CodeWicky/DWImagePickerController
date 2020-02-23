@@ -8,10 +8,6 @@
 #import "DWAlbumGridCell.h"
 #import <DWKit/DWLabel.h>
 
-@implementation DWAlbumGridCellModel
-
-@end
-
 @interface DWAlbumGridCell ()
 
 @property (nonatomic ,strong) UIImageView * gridImage;
@@ -40,12 +36,14 @@
         self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
         self.selectionLb.layer.borderColor = [UIColor whiteColor].CGColor;
         self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
+        self.selectionLb.userInteractionEnabled = YES;
         self.maskLayer.hidden = YES;
     } else {
         ///小于零为不可选中状态，等于零为非选中状态
         [CATransaction begin];
         [CATransaction setAnimationDuration:0];
         self.maskLayer.hidden = index == 0;
+        self.selectionLb.userInteractionEnabled = self.maskLayer.hidden;
         [CATransaction commit];
         self.selectionLb.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
         self.selectionLb.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.3].CGColor;

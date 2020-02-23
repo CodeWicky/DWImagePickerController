@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "DWAlbumManager.h"
 #import <DWMediaPreviewController/DWMediaPreviewController.h>
-#import "DWAlbumGridViewController.h"
+#import <DWAlbumGridController/DWAlbumGridController.h>
 #import "DWAlbumListViewController.h"
 #import "DWAlbumSelectionManager.h"
 
@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic ,strong ,readonly) DWAlbumSelectionManager * selectionManager;
 
-@property (nonatomic ,strong ,readonly) DWAlbumGridViewController * gridVC;
+@property (nonatomic ,strong ,readonly) DWAlbumGridController * gridVC;
 
 @property (nonatomic ,strong ,readonly) DWAlbumListViewController * listVC;
 
@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void)configSelectionManager:(DWAlbumSelectionManager *)selectionManager;
 
--(void)configGridVC:(DWAlbumGridViewController *)gridVC;
+-(void)configGridVC:(DWAlbumGridController *)gridVC;
 
 -(void)configListVC:(DWAlbumListViewController *)listVC;
 

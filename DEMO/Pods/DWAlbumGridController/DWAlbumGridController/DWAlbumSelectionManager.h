@@ -21,18 +21,24 @@ typedef NS_OPTIONS(NSUInteger, DWAlbumMediaOption) {
     
     ///Mask
     DWAlbumMediaOptionImageMask = DWAlbumMediaOptionImage | DWAlbumMediaOptionAnimateImage | DWAlbumMediaOptionLivePhoto,
-    DWAlbumMediaOptionVideoMask = DWAlbumMediaOptionLivePhoto | DWAlbumMediaOptionVideo,
+    DWAlbumMediaOptionVideoMask = DWAlbumMediaOptionVideo,
 };
 
 @class DWAlbumSelectionModel;
 @class DWAlbumSelectionManager;
 typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
+typedef BOOL(^DWAlbumSelectionValidation)(DWAlbumSelectionManager * mgr,PHAsset * asset,DWAlbumMediaOption mediaOption,NSError ** error);
+typedef void(^DWAlbumSelectionValidationFailCallback)(NSError * error);
 
 @interface DWAlbumSelectionManager : NSObject
 
-@property (nonatomic ,strong) NSMutableArray <DWAlbumSelectionModel *>* selections;
+@property (nonatomic ,strong ,readonly) NSMutableArray <DWAlbumSelectionModel *>* selections;
 
 @property (nonatomic ,assign ,readonly) NSInteger maxSelectCount;
+
+@property (nonatomic ,assign ,readonly) DWAlbumMediaOption selectableOption;
+
+@property (nonatomic ,assign ,readonly) BOOL multiTypeSelectionEnable;
 
 @property (nonatomic ,assign ,readonly) BOOL needsRefreshSelection;
 
@@ -42,11 +48,17 @@ typedef void(^DWAlbumSelectionAction)(DWAlbumSelectionManager * mgr);
 
 @property (nonatomic ,assign) BOOL useOriginImage;
 
+@property (nonatomic ,copy) DWAlbumSelectionValidation selectionValidation;
+
+@property (nonatomic ,copy) DWAlbumSelectionValidationFailCallback validationFailCallback;
+
 @property (nonatomic ,copy) DWAlbumSelectionAction reachMaxSelectCountAction;
 
 @property (nonatomic ,copy) DWAlbumSelectionAction sendAction;
 
--(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount;
+-(instancetype)initWithMaxSelectCount:(NSInteger)maxSelectCount selectableOption:(DWAlbumMediaOption)selectableOption multiTypeSelectionEnable:(BOOL)multiTypeSelectionEnable;
+
+-(BOOL)validateMediaOption:(DWAlbumMediaOption)mediaOption;
 
 -(BOOL)addSelection:(PHAsset *)asset mediaIndex:(NSInteger)mediaIndex mediaOption:(DWAlbumMediaOption)mediaOption;
 

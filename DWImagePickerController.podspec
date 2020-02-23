@@ -12,6 +12,6 @@ s.source_files = 'DWImagePickerController/**/*.{h,m}'
 s.resource = 'DWImagePickerController/DWImagePickerController.bundle'
 s.frameworks = 'UIKit'
 s.dependency 'DWMediaPreviewController'
+s.dependency 'DWAlbumGridController'
 s.dependency 'DWKit/DWComponent/DWLabel', '~> 0.0.0.10'
-
 end

@@ -5,10 +5,10 @@
 //  Created by Wicky on 2019/8/4.
 //
 
-#import "DWAlbumGridViewController.h"
-#import <DWKit/DWFixAdjustCollectionView.h>
+#import "DWAlbumGridController.h"
 #import "DWAlbumGridCell.h"
 #import "DWAlbumMediaHelper.h"
+#import <DWKit/DWFixAdjustCollectionView.h>
 
 @interface DWGridFlowLayout : UICollectionViewFlowLayout
 
@@ -30,7 +30,7 @@
 
 @end
 
-@interface DWAlbumGridViewController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,UICollectionViewDataSourcePrefetching>
+@interface DWAlbumGridController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,UICollectionViewDataSourcePrefetching>
 {
     NSInteger _innerNotifyChangeIndex;
     BOOL _firstAppear;
@@ -54,11 +54,11 @@
 
 @property (nonatomic ,assign) CGFloat lastOffsetY;
 
-@property (nonatomic ,strong) Class cellClazz;
+@property (nonatomic ,strong) NSMutableDictionary * clsCtn;
 
 @end
 
-@implementation DWAlbumGridViewController
+@implementation DWAlbumGridController
 
 #pragma mark --- interface method ---
 -(instancetype)initWithItemWidth:(CGFloat)width {
@@ -78,8 +78,19 @@
     }
 }
 
--(void)registGridCell:(Class)cellClazz {
-    self.cellClazz = cellClazz;
+-(void)registerClass:(Class)cellClass forCellWithReuseIdentifier:(NSString *)identifier {
+    if (!identifier.length) {
+        return;
+    }
+    if (_collectionView) {
+        [self.collectionView registerClass:cellClass forCellWithReuseIdentifier:identifier];
+    } else {
+        [self.clsCtn setObject:cellClass forKey:identifier];
+    }
+}
+
+-(DWAlbumGridCell *)dequeueReusableCellWithReuseIdentifier:(NSString *)identifier forIndex:(NSInteger)index {
+    return [_collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
 -(void)notifyPreviewIndexChangeTo:(NSInteger)index {
@@ -91,7 +102,7 @@
 #pragma mark --- life cycle ---
 -(void)viewDidLoad {
     [super viewDidLoad];
-    
+    self.view.backgroundColor = [UIColor whiteColor];
     [self.view addSubview:self.collectionView];
     if (self.bottomToolBar) {
         [self.view addSubview:self.bottomToolBar];
@@ -107,11 +118,6 @@
         self.collectionView.contentInset = insets;
     }
     
-    self.view.backgroundColor = [UIColor whiteColor];
-    self.collectionView.backgroundColor = [UIColor whiteColor];
-    if (@available(iOS 10.0,*)) {
-        self.collectionView.prefetchDataSource = self;
-    }
     _firstAppear = YES;
     _innerNotifyChangeIndex = -1;
 }
@@ -269,6 +275,7 @@
         };
     } else {
         cell.showSelectButton = NO;
+        [cell setSelectAtIndex:0];
     }
 }
 
@@ -278,7 +285,30 @@
         if (self.selectionManager.reachMaxSelectCount) {
             idx = -1;
         } else {
-            idx = 0;
+            DWAlbumMediaOption mediaOpt = [DWAlbumMediaHelper mediaOptionForAsset:asset];
+            if (![self.selectionManager validateMediaOption:mediaOpt]) {
+                idx = -1;
+            } else if (!self.selectionManager.multiTypeSelectionEnable && self.selectionManager.selectionOption != DWAlbumMediaOptionUndefine) {
+                ///当不可混选，且已经有所选择时，要判断可选性
+                ///已选的是图片类型
+                if (self.selectionManager.selectionOption & DWAlbumMediaOptionImageMask) {
+                    ///本资源不是图片类型，应该是不可选
+                    if (!(mediaOpt & DWAlbumMediaOptionImageMask)) {
+                        idx = -1;
+                    } else {
+                        idx = 0;
+                    }
+                } else {
+                    ///本资源不是视频资源类型，应该是不可选
+                    if (!(mediaOpt & DWAlbumMediaOptionVideoMask)) {
+                        idx = -1;
+                    } else {
+                        idx = 0;
+                    }
+                }
+            } else {
+                idx = 0;
+            }
         }
     } else {
         [self.selectionManager addUserInfo:cell atIndex:idx];
@@ -294,6 +324,9 @@
         if ([self.selectionManager addSelection:asset mediaIndex:cell.index mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
             if (self.selectionManager.reachMaxSelectCount) {
                 [self selectVisibleCells];
+            } else if (!self.selectionManager.multiTypeSelectionEnable && self.selectionManager.selections.count == 1) {
+                ///如果不允许混合选择，在首次确定资源类型后，要刷新可见cell的可选性
+                [self selectVisibleCells];
             } else {
                 NSInteger index = self.selectionManager.selections.count;
                 [self.selectionManager addUserInfo:cell atIndex:index - 1];
@@ -308,13 +341,20 @@
                 [self.selectionManager removeSelectionAtIndex:idx];
                 [self selectVisibleCells];
             } else {
-                ///两种情况，如果移除对位的话，只影响队尾，否则删除后需要更改对应idx后的序号
-                [self resetSelectionCellAtIndex:idx toIndex:0];
-                [self.selectionManager removeSelectionAtIndex:idx];
-                
-                for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
-                    [self resetSelectionCellAtIndex:i toIndex:i + 1];
+                ///这种情况如果移除后，会影响可选性，所以刷新当前可见cell
+                if (!self.selectionManager.multiTypeSelectionEnable && self.selectionManager.selections.count == 1) {
+                    [self.selectionManager removeSelectionAtIndex:idx];
+                    [self selectVisibleCells];
+                } else {
+                    ///两种情况，如果移除对位的话，只影响队尾，否则删除后需要更改对应idx后的序号
+                    [self resetSelectionCellAtIndex:idx toIndex:0];
+                    [self.selectionManager removeSelectionAtIndex:idx];
+                    
+                    for (NSInteger i = idx; i < self.selectionManager.selections.count; i++) {
+                        [self resetSelectionCellAtIndex:i toIndex:i + 1];
+                    }
                 }
+                
             }
             needRefresh = YES;
         }
@@ -364,9 +404,20 @@
 }
 
 -(void)loadImageForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion {
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:fetchMediaForAsset:targetSize:thumnail:completion:)]) {
-        [self.dataSource gridViewController:self fetchMediaForAsset:asset targetSize:targetSize thumnail:thumnail completion:completion];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridController:fetchMediaForAsset:targetSize:thumnail:completion:)]) {
+        [self.dataSource gridController:self fetchMediaForAsset:asset targetSize:targetSize thumnail:thumnail completion:completion];
     }
+}
+
+-(DWAlbumGridCell *)cellForAsset:(PHAsset *)asset atIndexPath:(NSIndexPath *)indexPath {
+    DWAlbumGridCell * cell = nil;
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:cellForAsset:mediaOption:atIndex:)]) {
+        cell = [self.dataSource gridViewController:self cellForAsset:asset mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset] atIndex:indexPath.item];
+    }
+    if (!cell) {
+        cell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"DefaultGridCellReuseIdentifier" forIndexPath:indexPath];
+    }
+    return cell;
 }
 
 #pragma mark --- collectionView delegate ---
@@ -375,12 +426,19 @@
 }
 
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    ///iOS 10.0以后新增了prefetch功能，这是个双刃剑。他可以预先在屏幕中不包含指定indexPath的时候去加载一部分数据等待被展示，从而提升滑动体验。但是这就造成开启此功能后，有一部分cell既不在visibleCells中，当他滚动进来的时候也不会走cellForItem（因为预先走过了）。这会导致一些动态刷新的状态不正确。
+    ///例如本例中选择图片后想刷新当前屏幕中所以视频为不可选。使用visibleCells做当前屏幕刷新，更改状态，而不再屏幕中又预先走了cellForItem的cell即被遗漏，即使滚动出屏幕也无法通过cellForItem设置可选状态。
+    
+    ///为了解决这个问题，可以将状态的设置放置在willDisplayCell中，这样即可保证在cell出现前一定会被设置一次状态
+    
+    ///当然你也可以关于预加载功能，可以设置collectionView.prefetchingEnabled = NO;
     PHAsset * asset = [self.results objectAtIndex:indexPath.row];
-    DWAlbumGridCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GridCell" forIndexPath:indexPath];
+    DWAlbumGridCell *cell = [self cellForAsset:asset atIndexPath:indexPath];;
     NSInteger originIndex = indexPath.item;
     cell.index = originIndex;
     
-    [self configCellSelect:cell asset:asset];
+    ///再去去掉设置选择状态，已经移动至willDisplayCell代理中，具体原因上面写了
+//    [self configCellSelect:cell asset:asset];
 
     ///通过速度、滚动、偏移量联合控制是否展示缩略图
     ///显示缩略图的情景应为快速拖动，故前两个条件为判断快速及拖动
@@ -416,9 +474,17 @@
     return cell;
 }
 
+-(void)collectionView:(UICollectionView *)collectionView willDisplayCell:(DWAlbumGridCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    ///这里设置一下可选状态，具体原因在cellForItem中有详细描述
+    PHAsset * asset = [self.results objectAtIndex:indexPath.row];
+    [self configCellSelect:cell asset:asset];
+}
+
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    if (self.gridClickAction) {
-        self.gridClickAction(indexPath);
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:didSelectAsset:mediaOption:atIndex:)]) {
+        PHAsset * asset = [self.results objectAtIndex:indexPath.item];
+        DWAlbumMediaOption mediaOption = [DWAlbumMediaHelper mediaOptionForAsset:asset];
+        [self.dataSource gridViewController:self didSelectAsset:asset mediaOption:mediaOption atIndex:indexPath.item];
     }
 }
 
@@ -438,23 +504,23 @@
 }
 
 -(void)collectionView:(UICollectionView *)collectionView prefetchItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths {
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:startCachingMediaForIndexes:targetSize:)]) {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridController:startCachingMediaForIndexes:targetSize:)]) {
         NSMutableIndexSet * indexes = [NSMutableIndexSet indexSet];
         [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [indexes addIndex:obj.row];
         }];
-        [self.dataSource gridViewController:self startCachingMediaForIndexes:indexes targetSize:self.photoSize];
+        [self.dataSource gridController:self startCachingMediaForIndexes:indexes targetSize:self.photoSize];
     }
     
 }
 
 -(void)collectionView:(UICollectionView *)collectionView cancelPrefetchingForItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths {
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:stopCachingMediaForIndexes:targetSize:)]) {
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridController:stopCachingMediaForIndexes:targetSize:)]) {
         NSMutableIndexSet * indexes = [NSMutableIndexSet indexSet];
         [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [indexes addIndex:obj.row];
         }];
-        [self.dataSource gridViewController:self stopCachingMediaForIndexes:indexes targetSize:self.photoSize];
+        [self.dataSource gridController:self stopCachingMediaForIndexes:indexes targetSize:self.photoSize];
     }
 }
 
@@ -494,10 +560,19 @@
 -(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
         _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:self.collectionViewLayout];
-        Class cls = self.cellClazz?:[DWAlbumGridCell class];
-        [self.collectionView registerClass:cls forCellWithReuseIdentifier:@"GridCell"];
+        if (_clsCtn.count > 0) {
+            [self.clsCtn enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                [_collectionView registerClass:obj forCellWithReuseIdentifier:key];
+            }];
+            [self.clsCtn removeAllObjects];
+        }
+        [_collectionView registerClass:[DWAlbumGridCell class] forCellWithReuseIdentifier:@"DefaultGridCellReuseIdentifier"];
+        _collectionView.backgroundColor = [UIColor whiteColor];
         _collectionView.delegate = self;
         _collectionView.dataSource = self;
+        if (@available(iOS 10.0,*)) {
+            _collectionView.prefetchDataSource = self;
+        }
         _collectionView.showsHorizontalScrollIndicator = NO;
         _collectionView.clipsToBounds = NO;
         if (@available(iOS 11.0,*)) {
@@ -511,6 +586,13 @@
 
 -(UICollectionView *)gridView {
     return _collectionView;
+}
+
+-(NSMutableDictionary *)clsCtn {
+    if (!_clsCtn) {
+        _clsCtn = [NSMutableDictionary dictionary];
+    }
+    return _clsCtn;
 }
 
 @end

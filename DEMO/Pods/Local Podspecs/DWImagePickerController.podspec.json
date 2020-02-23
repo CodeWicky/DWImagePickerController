@@ -25,6 +25,9 @@
     "DWMediaPreviewController": [
 
     ],
+    "DWAlbumGridController": [
+
+    ],
     "DWKit/DWComponent/DWLabel": [
       "~> 0.0.0.10"
     ]

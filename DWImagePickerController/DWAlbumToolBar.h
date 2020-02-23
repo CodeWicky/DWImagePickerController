@@ -6,7 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DWAlbumGridViewController.h"
+#import <DWAlbumGridController/DWAlbumGridController.h>
 NS_ASSUME_NONNULL_BEGIN
 
 @class DWAlbumToolBar;

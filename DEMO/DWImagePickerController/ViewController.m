@@ -66,7 +66,7 @@
 
 -(DWAlbumSelectionManager *)mgr {
     if (!_mgr) {
-        _mgr = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:9];
+        _mgr = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:9 selectableOption:(DWAlbumMediaOptionAll) multiTypeSelectionEnable:YES];
     }
     return _mgr;
 }

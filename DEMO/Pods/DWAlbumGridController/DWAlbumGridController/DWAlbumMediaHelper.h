@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import "DWAlbumSelectionManager.h"
-#import "DWAlbumGridCell.h"
+#import "DWAlbumGridCellModel.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DWAlbumMediaHelper : NSObject

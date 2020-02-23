@@ -1,5 +1,9 @@
 PODS:
+  - DWAlbumGridController (0.0.0.3):
+    - DWKit/DWComponent/DWFixAdjustCollectionView (~> 0.0.0.12)
+    - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
   - DWImagePickerController (0.0.0.1):
+    - DWAlbumGridController
     - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
     - DWMediaPreviewController
   - DWKit/DWComponent/DWFixAdjustCollectionView (0.0.0.12)
@@ -21,6 +25,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
+    - DWAlbumGridController
     - DWKit
     - DWMediaPreviewController
     - DWPlayer
@@ -31,7 +36,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  DWImagePickerController: c45b48679e9bf2a75acb6d6e59b4d2205884bcbd
+  DWAlbumGridController: e66a55ad48cbda182f8f894239a2d7cfb628e1ea
+  DWImagePickerController: 36d61cb9b4b81582c08c360d8c77413591c68f55
   DWKit: bcb486754a7c6421ce76ee828f69d9d0dd8ae8fc
   DWMediaPreviewController: a0212cd7b504d6b8c2221260cef843a842251320
   DWPlayer: 489f2116280123fdf4f53cf94893bb4a0f017cc1

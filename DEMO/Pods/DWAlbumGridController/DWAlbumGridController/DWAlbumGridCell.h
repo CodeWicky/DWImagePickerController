@@ -6,19 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <Photos/Photos.h>
-
-@interface DWAlbumGridCellModel : NSObject
-
-@property (nonatomic ,strong) PHAsset * asset;
-
-@property (nonatomic ,strong) UIImage * media;
-
-@property (nonatomic ,assign) CGSize targetSize;
-
-@property (nonatomic ,assign) PHAssetMediaType mediaType;
-
-@end
+#import "DWAlbumGridCellModel.h"
 
 @interface DWAlbumGridCell : UICollectionViewCell
 
