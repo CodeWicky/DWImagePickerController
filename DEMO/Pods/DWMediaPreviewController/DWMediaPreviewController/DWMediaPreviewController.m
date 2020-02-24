@@ -421,7 +421,6 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
                             }
                         }];
                     }
-                    
                 }
                     break;
                 case DWMediaPreviewTypeImage:

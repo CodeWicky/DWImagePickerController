@@ -7,7 +7,7 @@ s.homepage = 'https://github.com/CodeWicky/DWImagePickerController'
 s.authors = { 'codeWicky' => 'codewicky@163.com' }
 s.source = { :git => 'https://github.com/CodeWicky/DWImagePickerController.git', :tag => s.version.to_s }
 s.requires_arc = true
-s.ios.deployment_target = '9.1'
+s.ios.deployment_target = '9.0'
 s.source_files = 'DWImagePickerController/**/*.{h,m}'
 s.resource = 'DWImagePickerController/DWImagePickerController.bundle'
 s.frameworks = 'UIKit'

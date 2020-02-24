@@ -1214,30 +1214,6 @@
 			};
 			name = Debug;
 		};
-		1F5910CC6E87A63CB89D1D4F3465D8C9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4021058C825FD97B998DFC227E818B3C /* DWImagePickerController.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/DWImagePickerController/DWImagePickerController-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = DWImagePickerController;
-				PRODUCT_NAME = DWImagePickerController;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		2BF40FD1F51F0067F95DA65498DEBAF3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F0003AA12AC725F1DB4020B9BE7E2C99 /* Pods-DWImagePickerController.release.xcconfig */;
@@ -1261,7 +1237,7 @@
 			};
 			name = Release;
 		};
-		4BA512A8850400AE77D414D1EE07E928 /* Debug */ = {
+		4C2F0BF6EF3522F2D08B8FF9B4DAE795 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4021058C825FD97B998DFC227E818B3C /* DWImagePickerController.xcconfig */;
 			buildSettings = {
@@ -1270,7 +1246,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				GCC_PREFIX_HEADER = "Target Support Files/DWImagePickerController/DWImagePickerController-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
@@ -1507,6 +1483,30 @@
 			};
 			name = Debug;
 		};
+		D5B0D50E39C751B3F4AE9CC9E4D40E44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4021058C825FD97B998DFC227E818B3C /* DWImagePickerController.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/DWImagePickerController/DWImagePickerController-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = DWImagePickerController;
+				PRODUCT_NAME = DWImagePickerController;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		EE4666CB3B3428403AFBB2E156336925 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 1C870E0082256C4F13D9BAAAC90B18E9 /* DWPlayer.xcconfig */;
@@ -1590,8 +1590,8 @@
 		F2BF16B9C2E9E5D11B9688DFE14F57C9 /* Build configuration list for PBXNativeTarget "DWImagePickerController" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4BA512A8850400AE77D414D1EE07E928 /* Debug */,
-				1F5910CC6E87A63CB89D1D4F3465D8C9 /* Release */,
+				4C2F0BF6EF3522F2D08B8FF9B4DAE795 /* Debug */,
+				D5B0D50E39C751B3F4AE9CC9E4D40E44 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
