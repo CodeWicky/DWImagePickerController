@@ -58,28 +58,6 @@
 
 @end
 
-@interface DWMediaPreviewData : NSObject
-
-@property (nonatomic ,strong) UIImage * previewImage;
-
-@property (nonatomic ,strong) id media;
-
-@property (nonatomic ,strong) YYImage * animateImage;
-
-@property (nonatomic ,assign) DWMediaPreviewType previewType;
-
-@property (nonatomic ,assign) BOOL shouldShowBadge;
-
-@property (nonatomic ,assign) BOOL isHDR;
-
-@property (nonatomic ,assign) BOOL shouldShowProgressIndicator;
-
-@end
-
-@implementation DWMediaPreviewData
-
-@end
-
 @interface DWMediaPreviewController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>
 
 @property (nonatomic ,strong) DWFixAdjustCollectionView * collectionView;
@@ -150,17 +128,13 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [cell refreshCellWithAnimated:animated];
 }
 
--(void)photoCountHasChanged {
-    [self.collectionView reloadData];
-}
-
 -(void)clearCache {
     [self.dataCache removeAllObjects];
 }
 
 -(void)resetOnChangeDatasource {
     [self clearCache];
-    [self photoCountHasChanged];
+    [self.collectionView reloadData];
 }
 
 -(void)registerClass:(Class)clazz forCustomizePreviewCellWithReuseIdentifier:(NSString *)reuseIndentifier {
@@ -296,7 +270,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(DWMediaPreviewData *)dataAtIndex:(NSUInteger)index {
     ///获取数据模型，如果不存在则创建并缓存
-    DWMediaPreviewData * data = [self.dataCache objectForKey:@(index)];
+    DWMediaPreviewData * data = nil;
+    if (self.userInternalDataCache) {
+        data = [self.dataCache objectForKey:@(index)];
+    }
+    
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:previewDataAtIndex:)]) {
+        data = [self.dataSource previewController:self previewDataAtIndex:index];
+    }
+    
     if (!data) {
         data = [[DWMediaPreviewData alloc] init];
         if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:previewTypeAtIndex:)]) {
@@ -317,7 +299,13 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             data.shouldShowProgressIndicator = [self.dataSource previewController:self shouldShowProgressIndicatorAtIndex:index previewType:data.previewType];
         }
         
-        [self.dataCache setObject:data forKey:@(index)];
+        if (self.userInternalDataCache) {
+            [self.dataCache setObject:data forKey:@(index)];
+        }
+        
+        if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:finishBuildingPreviewData:atIndex:)]) {
+            [self.dataSource previewController:self finishBuildingPreviewData:data atIndex:index];
+        }
     }
     return data;
 }
@@ -767,6 +755,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _cacheCount = 10;
         _prefetchCount = 2;
         _previewSize = [UIScreen mainScreen].bounds.size;
+        _userInternalDataCache = YES;
         _closeOnSlidingDown = YES;
         _closeThreshold = 100;
     }

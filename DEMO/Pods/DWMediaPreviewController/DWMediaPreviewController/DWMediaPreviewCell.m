@@ -149,6 +149,15 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     [self.contentView addSubview:self.loadingIndicator];
 }
 
+-(void)configGestureTarget:(UIView *)target {
+    _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
+    [target addGestureRecognizer:_tapGesture];
+    _doubleClickGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleClickAction:)];
+    _doubleClickGesture.numberOfTapsRequired = 2;
+    [target addGestureRecognizer:_doubleClickGesture];
+    [_tapGesture requireGestureRecognizerToFail:_doubleClickGesture];
+}
+
 -(void)setupSubviews {
     if (!CGRectEqualToRect(self.containerView.frame, self.bounds)) {
         if (self.zoomable) {
@@ -346,15 +355,6 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 #pragma mark --- tool method ---
--(void)configGestureTarget:(UIView *)target {
-    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
-    [target addGestureRecognizer:tap];
-    UITapGestureRecognizer * doubleClick = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleClickAction:)];
-    doubleClick.numberOfTapsRequired = 2;
-    [target addGestureRecognizer:doubleClick];
-    [tap requireGestureRecognizerToFail:doubleClick];
-}
-
 -(void)closeActionOnSlidingDown {
     if ([self.previewController.navigationController.viewControllers.lastObject isEqual:self.previewController]) {
         [self.previewController.navigationController popViewControllerAnimated:YES];
@@ -729,9 +729,9 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,strong) PHLivePhotoView * mediaView;
 
-@property (nonatomic ,assign) BOOL livePhotoIsPlaying;
-
 @property (nonatomic ,strong) UIImageView * livePhotoBadge;
+
+@property (nonatomic ,assign) BOOL originTapGestureEnable;
 
 @end
 
@@ -757,11 +757,12 @@ API_AVAILABLE_BEGIN(macos(10.15), ios(9.1), tvos(10))
 
 #pragma mark --- live photo delegate ---
 -(void)livePhotoView:(PHLivePhotoView *)livePhotoView willBeginPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
-    self.livePhotoIsPlaying = YES;
+    self.originTapGestureEnable = self.tapGesture.enabled;
+    self.tapGesture.enabled = NO;
 }
 
 -(void)livePhotoView:(PHLivePhotoView *)livePhotoView didEndPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle {
-    self.livePhotoIsPlaying = NO;
+    self.tapGesture.enabled = self.originTapGestureEnable;
 }
 
 #pragma mark --- override ---
@@ -893,13 +894,6 @@ API_AVAILABLE_BEGIN(macos(10.15), ios(9.1), tvos(10))
         }
         self.livePhotoBadge.alpha = alpha;
     }
-}
-
--(void)tapAction:(UITapGestureRecognizer *)sender {
-    if (self.livePhotoIsPlaying) {
-        return;
-    }
-    [super tapAction:sender];
 }
 
 #pragma mark --- setter/getter ---

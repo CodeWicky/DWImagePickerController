@@ -10,5 +10,9 @@
 
 #import "DWMediaPreviewController.h"
 #import "DWMediaPreviewCell.h"
+#import "DWMediaPreviewData.h"
+#import "DWMediaPreviewImageDecoder.h"
+#import "DWMediaPreviewLoading.h"
+#import "DWMediaPreviewVideoControl.h"
 
 #endif /* DWMediaPreviewHeader_h */

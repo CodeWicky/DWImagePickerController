@@ -74,6 +74,14 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 ///表明当前展示的资源是否是hdr类型。如果是的话，将会在cell上展示一个hdr的角标。仅在shouldShowBadge为true时有效。
 @property (nonatomic ,assign) BOOL isHDR;
 
+//The tap gesture for media view.
+///媒体视图的单点手势
+@property (nonatomic ,strong ,readonly) UITapGestureRecognizer * tapGesture;
+
+//The double click gesture for media view.
+///媒体视图的双击手势
+@property (nonatomic ,strong ,readonly) UITapGestureRecognizer * doubleClickGesture;
+
 //Callback for tapAction on previewCell.
 ///在单点cell时会触发的回调。
 @property (nonatomic ,copy) DWMediaPreviewGestureActionCallback tapAction;
@@ -127,6 +135,10 @@ typedef void(^DWMediaPreviewCellEnterFocusCallback)(DWMediaPreviewCell * cell ,B
 //Initialize subviews on -initWithFrame:.
 ///初始化一些子视图资源，会在cell -initWithFrame:  时自动调用。
 -(void)initializingSubviews;
+
+//Config gesture for media view on -initializingSubviews。
+///为meidiaView配置手势，在 -initializingSubviews 是会自动调用。
+-(void)configGestureTarget:(UIView *)target;
 
 //Setup subviews on calling -layoutSubviews.
 ///配置子视图的回调方法，每次调用 -layoutSubviews 时都会调用。

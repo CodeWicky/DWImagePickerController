@@ -7,19 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "DWMediaPreviewData.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @class DWMediaPreviewCell;
-typedef NS_ENUM(NSUInteger, DWMediaPreviewType) {
-    DWMediaPreviewTypeNone,
-    DWMediaPreviewTypeImage,
-    DWMediaPreviewTypeAnimateImage,
-    DWMediaPreviewTypeLivePhoto API_AVAILABLE(macos(10.15), ios(9.1), tvos(10)),
-    DWMediaPreviewTypeVideo,
-    DWMediaPreviewTypeCustomize,
-};
-
 
 typedef void(^DWMediaPreviewFetchMediaProgress)(CGFloat progressNum,NSUInteger index);
 typedef void(^DWMediaPreviewFetchPosterCompletion)(_Nullable id media, NSUInteger index, BOOL satisfiedSize);
@@ -81,6 +72,13 @@ typedef void(^DWMediaPreviewFetchMediaCompletion)(_Nullable id media, NSUInteger
 -(void)previewController:(DWMediaPreviewController *)previewController fetchMediaAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion;
 
 @optional
+//Callback for fetching a previewData.(If there's a cache of previewData internal,this method won't be called.).If you return nil, it will come the build previewData operation.
+///返回对应的预览数据的回调（如果内部命中缓存，则不回调）。如果你在代理中返回为空，后续将开启创建previewData的流程。
+-(nullable DWMediaPreviewData *)previewController:(DWMediaPreviewController *)previewController previewDataAtIndex:(NSUInteger)index;
+
+//Callback on finish building previewData.You can cache it and provide it to me next time on calling -previewController:previewDataAtIndex: .
+///previewData创建完成的回调。你可以在这里将其缓存并在下次调用 -previewController:previewDataAtIndex: 的时候将其返回。
+-(void)previewController:(DWMediaPreviewController *)previewController finishBuildingPreviewData:(DWMediaPreviewData *)previewData atIndex:(NSUInteger)index;
 
 //Return whether show badge for the media at specific index.
 ///返回是否需要为对应位置的媒体展示角标。
@@ -148,6 +146,10 @@ typedef void(^DWMediaPreviewCellAction)(DWMediaPreviewController * previewContro
 ///当前预览控制器是否正在展示的标志位
 @property (nonatomic ,assign ,readonly) BOOL isShowing;
 
+//Switch for use internal previewData cache.Suitable using when dataSource not often changes.Default by YES.
+///指定是否使用内部的previewData缓存逻辑。适合数据源并经常发生改变的情况使用。默认为真。
+@property (nonatomic ,assign) BOOL userInternalDataCache;
+
 //Top tool bar of previewController.
 ///当前的顶部工具栏
 @property (nonatomic ,strong) UIView <DWMediaPreviewToolBarProtocol>* topToolBar;
@@ -191,12 +193,6 @@ typedef void(^DWMediaPreviewCellAction)(DWMediaPreviewController * previewContro
  @param animated 是否需要动画
  */
 -(void)refreshCurrentPreviewLayoutWithAnimated:(BOOL)animated;
-
-/**
- To notice the previewController that the total count of media to preview has been changed.
- 通知预览控制器当前数据源个数发生改变。
- */
--(void)photoCountHasChanged;
 
 /**
  Clear preview cache.

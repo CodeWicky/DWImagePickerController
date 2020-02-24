@@ -55,6 +55,8 @@
 
 @property (nonatomic ,strong) NSCache * posterCache;
 
+@property (nonatomic ,strong) NSCache * previewDataCache;
+
 @end
 
 @implementation DWImagePickerController
@@ -470,6 +472,17 @@
     return [self previewTypeForAsset:asset];
 }
 
+-(DWMediaPreviewData *)previewController:(DWMediaPreviewController *)previewController previewDataAtIndex:(NSUInteger)index {
+    DWMediaPreviewData * previewData = [self.previewDataCache objectForKey:@(index)];
+    return previewData;
+}
+
+-(void)previewController:(DWMediaPreviewController *)previewController finishBuildingPreviewData:(DWMediaPreviewData *)previewData atIndex:(NSUInteger)index {
+    if (previewData) {
+        [self.previewDataCache setObject:previewData forKey:@(index)];
+    }
+}
+
 -(DWMediaPreviewCell *)previewController:(DWMediaPreviewController *)previewController cellForItemAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
     if (previewType != DWMediaPreviewTypeVideo) {
         return nil;
@@ -657,6 +670,7 @@
     if (!_previewVC) {
         _previewVC = [[DWMediaPreviewController alloc] init];
         _previewVC.dataSource = self;
+        _previewVC.userInternalDataCache = NO;
         [_previewVC registerClass:[DWVideoControlPreviewCell class] forCustomizePreviewCellWithReuseIdentifier:@"videoControlCell"];
         _previewVC.topToolBar = self.previewTopToolBar;
         _previewVC.bottomToolBar = self.previewBottomToolBar;
@@ -767,6 +781,13 @@
         _posterCache = [[NSCache alloc] init];
     }
     return _posterCache;
+}
+
+-(NSCache *)previewDataCache {
+    if (!_previewDataCache) {
+        _previewDataCache = [[NSCache alloc] init];
+    }
+    return _previewDataCache;
 }
 
 @end
