@@ -201,10 +201,16 @@ typedef void(^DWMediaPreviewCellAction)(DWMediaPreviewController * previewContro
 -(void)clearCache;
 
 /**
+ Notify previewCtroller to reload preview media.
+ 通知内部刷新当前预览媒体
+ */
+-(void)reloadPreview;
+
+/**
  To notice the previewController that the dataSource has been changed.
  通知预览控制器当前数据源发生改变
  
- 注：内部会自动调用 -clearCache 和 -photoCountHasChanged。
+ 注：内部会自动调用 -clearCache 和 -reloadPreview。
  */
 -(void)resetOnChangeDatasource;
 

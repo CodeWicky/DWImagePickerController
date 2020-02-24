@@ -34,6 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic ,assign) BOOL shouldShowProgressIndicator;
 
+@property (nonatomic ,strong) id userInfo;
+
 @end
 
 NS_ASSUME_NONNULL_END

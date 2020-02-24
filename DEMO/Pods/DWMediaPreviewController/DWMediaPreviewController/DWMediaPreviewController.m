@@ -132,9 +132,15 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [self.dataCache removeAllObjects];
 }
 
+-(void)reloadPreview {
+    ///强制刷新innerMediaCount
+    [self collectionView:self.collectionView numberOfItemsInSection:0];
+    [self.collectionView reloadData];
+}
+
 -(void)resetOnChangeDatasource {
     [self clearCache];
-    [self.collectionView reloadData];
+    [self reloadPreview];
 }
 
 -(void)registerClass:(Class)clazz forCustomizePreviewCellWithReuseIdentifier:(NSString *)reuseIndentifier {

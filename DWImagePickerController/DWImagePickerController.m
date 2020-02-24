@@ -125,65 +125,32 @@
 }
 
 #pragma mark --- tool method ---
--(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset {
-    DWAlbumMediaOption mediaOption = [DWAlbumMediaHelper mediaOptionForAsset:asset];
-    switch (mediaOption) {
-        case DWAlbumMediaOptionImage:
-            return DWMediaPreviewTypeImage;
-        case DWAlbumMediaOptionAnimateImage:
-            return DWMediaPreviewTypeAnimateImage;
-        case DWAlbumMediaOptionLivePhoto:
-            return DWMediaPreviewTypeLivePhoto;
-        case DWAlbumMediaOptionVideo:
-            return DWMediaPreviewTypeVideo;
-        default:
-            return DWMediaPreviewTypeNone;
-    }
-}
-
+#pragma mark ------ 控制器相关 ------
 -(void)dismiss {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void)previewTopToolBarSelectAtIndex:(NSInteger)index {
-    if (index < self.currentPreviewResults.count) {
-        PHAsset * asset = self.currentPreviewResults[index];
-        NSInteger idx = [self.selectionManager indexOfSelection:asset];
-        if (idx == NSNotFound) {
-            ///这里由于gridViewController中添加的selection对应的mediaIndex是gridIndex，这里要转化成gridIndex
-            NSInteger gridIndex = [self.currentGridModel.results indexOfObject:asset];
-            if ([self.selectionManager addSelection:asset mediaIndex:gridIndex mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
-                ///先设置顶部选择状态
-                [self.previewTopToolBar setSelectAtIndex:self.selectionManager.selections.count];
-                ///然后属性顶部和底部toolBar
-                [self refreshToolBar];
-                ///然后在设置底部焦点（如果先设置焦点在刷新底部会导致无法自动移至中央）
-                [self.previewBottomToolBar focusOnIndex:self.selectionManager.selections.count - 1];
-                ///代表是0~1，代表bottomToolBar高度改变了，要刷新cell
-                if (self.previewVC.isShowing && self.selectionManager.selections.count == 1) {
-                    [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
-                }
-            }
-        } else {
-            if ([self.selectionManager removeSelection:asset]) {
-                [self.previewTopToolBar setSelectAtIndex:0];
-                [self.previewBottomToolBar focusOnIndex:NSNotFound];
-                [self refreshToolBar];
-                ///代表是1~0，代表bottomToolBar高度改变了，要刷新cell
-                if (self.previewVC.isShowing && self.selectionManager.selections.count == 0) {
-                    [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
-                }
-            }
+-(void)handleGridPreviewAtIndex:(NSInteger)index {
+    if (index < self.currentGridModel.results.count) {
+        [self configCurrentPreviewResultsIfNeeded];
+        NSInteger previewIndex = [self transformGridIndexToPreviewIndex:index];
+        if (previewIndex == NSNotFound) {
+            return;
         }
+        [self.previewVC previewAtIndex:previewIndex];
+        if (self.selectionManager.needsRefreshSelection) {
+            [self.previewBottomToolBar refreshUI];
+        }
+        [self setPreviewTopToolBarSelectedAtIndex:previewIndex];
+        [self handlePreviewBottomToolFocusAtIndex:previewIndex];
+        [self pushViewController:self.previewVC animated:YES];
     }
 }
 
+#pragma mark ------ 资源获取 ------
 -(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    NSInteger albumIndex = index;
-    if (self.pickerConf.displayMediaOption != DWAlbumMediaOptionAll) {
-        ///这里由于预览数据源跟album数据源存在差异（不在展示范围内的可能不会丢给预览控制器，所以要将预览控制器中的index转换成album对应的index）
-        albumIndex = [self.currentAlbum.fetchResult indexOfObject:asset];
-    }
+    ///这里由于预览数据源跟album数据源存在差异（不在展示范围内的可能不会丢给预览控制器，所以要将预览控制器中的index转换成album对应的index）
+    NSInteger albumIndex = [self.currentAlbum.fetchResult indexOfObject:asset];
     
     dispatch_async(self.fetchMediaQueue, ^{
         switch (previewType) {
@@ -302,6 +269,23 @@
     }];
 }
 
+-(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset {
+    DWAlbumMediaOption mediaOption = [DWAlbumMediaHelper mediaOptionForAsset:asset];
+    switch (mediaOption) {
+        case DWAlbumMediaOptionImage:
+            return DWMediaPreviewTypeImage;
+        case DWAlbumMediaOptionAnimateImage:
+            return DWMediaPreviewTypeAnimateImage;
+        case DWAlbumMediaOptionLivePhoto:
+            return DWMediaPreviewTypeLivePhoto;
+        case DWAlbumMediaOptionVideo:
+            return DWMediaPreviewTypeVideo;
+        default:
+            return DWMediaPreviewTypeNone;
+    }
+}
+
+#pragma mark ------ 相册变动相关 ------
 -(void)configAlbum:(DWAlbumModel *)album {
     if (![self.currentAlbum isEqual:album]) {
         self.currentAlbum = album;
@@ -311,26 +295,64 @@
     }
 }
 
--(void)handleGridPreviewAtIndex:(NSInteger)index {
-    if (index < self.currentGridModel.results.count) {
-        NSInteger previewIndex = [self transformGridIndexToPreviewIndex:index];
-        [self.previewVC previewAtIndex:previewIndex];
-        [self handlePreviewTopToolBarSelectedAtIndex:previewIndex];
-        [self handlePreviewBottomToolFocusAtIndex:previewIndex];
-        [self pushViewController:self.previewVC animated:YES];
-    }
+-(void)onCurrentAlbumChange {
+    self.currentGridModel = [self gridModelFromAlbumModel:self.currentAlbum];
+    [self configCurrentPreviewResultsIfNeeded];
 }
 
--(void)handlePreviewTopToolBarSelectedAtIndex:(NSUInteger)index {
-    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
-    NSUInteger idx = [self.selectionManager indexOfSelection:asset];
-    ///调整idx。如果找不到改为0，因为navigationBar中规定0为未选中，如果找到则自加，因为规定角标从1开始
-    if (idx == NSNotFound) {
-        idx = 0;
-    } else {
-        ++ idx;
+-(void)configCurrentPreviewResultsIfNeeded {
+    NSArray <PHAsset *>* previewResults = [self previewResutlsFromGridModel:self.currentGridModel];
+    if ([self.currentPreviewResults isEqualToArray:previewResults]) {
+        return ;
     }
-    [self.previewTopToolBar setSelectAtIndex:idx];
+    [self configCurrentPreviewResults:previewResults];
+}
+
+-(void)configCurrentPreviewResults:(NSArray <PHAsset *>*)previewResults {
+    self.currentPreviewResults = previewResults;
+    [self.previewDataCache removeAllObjects];
+}
+
+#pragma mark ------ toolBar相关 ------
+-(void)handleGridBottomToolBarPreview {
+    PHAsset * asset = self.selectionManager.selections.firstObject.asset;
+    NSInteger idx = [self.currentGridModel.results indexOfObject:asset];
+    [self handleGridPreviewAtIndex:idx];
+}
+
+-(void)handlePreviewTopToolBarSelectAtIndex:(NSInteger)index {
+    if (index < self.currentPreviewResults.count) {
+        PHAsset * asset = self.currentPreviewResults[index];
+        NSInteger idx = [self.selectionManager indexOfSelection:asset];
+        if (idx == NSNotFound) {
+            ///这里由于gridViewController中添加的selection对应的mediaIndex是gridIndex，这里要转化成gridIndex
+            NSInteger gridIndex = [self.currentGridModel.results indexOfObject:asset];
+            if ([self.selectionManager addSelection:asset mediaIndex:gridIndex mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
+                ///先设置顶部选择状态
+                [self.previewTopToolBar setSelectAtIndex:self.selectionManager.selections.count];
+                ///然后属性顶部和底部toolBar
+                [self refreshToolBar];
+                ///然后在设置底部焦点（如果先设置焦点在刷新底部会导致无法自动移至中央）
+                [self.previewBottomToolBar focusOnIndex:self.selectionManager.selections.count - 1];
+                ///代表是0~1，代表bottomToolBar高度改变了，要刷新cell
+                if (self.previewVC.isShowing && self.selectionManager.selections.count == 1) {
+                    [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
+                    [self handleSelectOptionChangeRefreshPreviewDataSourceIfNeeded];
+                }
+            }
+        } else {
+            if ([self.selectionManager removeSelection:asset]) {
+                [self.previewTopToolBar setSelectAtIndex:0];
+                [self.previewBottomToolBar focusOnIndex:NSNotFound];
+                [self refreshToolBar];
+                ///代表是1~0，代表bottomToolBar高度改变了，要刷新cell
+                if (self.previewVC.isShowing && self.selectionManager.selections.count == 0) {
+                    [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
+                    [self handleSelectOptionChangeRefreshPreviewDataSourceIfNeeded];
+                }
+            }
+        }
+    }
 }
 
 -(void)handlePreviewBottomToolFocusAtIndex:(NSUInteger)index {
@@ -350,14 +372,36 @@
         ///selectionModel中记录的是gridIndex，转换成previewIndex
         NSInteger previewIndex = [self transformGridIndexToPreviewIndex:selectionModel.mediaIndex];
         [self.previewVC previewAtIndex:previewIndex];
-        [self handlePreviewTopToolBarSelectedAtIndex:previewIndex];
+        [self setPreviewTopToolBarSelectedAtIndex:previewIndex];
     }
 }
 
--(void)handleGridBottomToolBarPreview {
-    PHAsset * asset = self.selectionManager.selections.firstObject.asset;
-    NSInteger idx = [self.currentGridModel.results indexOfObject:asset];
-    [self handleGridPreviewAtIndex:idx];
+-(void)handleSelectOptionChangeRefreshPreviewDataSourceIfNeeded {
+    if (!self.selectionManager.multiTypeSelectionEnable) {
+        NSArray <PHAsset *>* filterResults = [self previewResutlsFromGridModel:self.currentGridModel];
+        if ([filterResults isEqualToArray:self.currentPreviewResults]) {
+            return;
+        }
+        PHAsset * currentPreviewAsset = [self.currentPreviewResults objectAtIndex:self.previewVC.currentIndex];
+        DWMediaPreviewData * currentPreviewData = [self.previewDataCache objectForKey:@(self.previewVC.currentIndex)];
+        [self configCurrentPreviewResults:filterResults];
+        NSInteger newPreviewIndex = [self.currentPreviewResults indexOfObject:currentPreviewAsset];
+        [self.previewDataCache setObject:currentPreviewData forKey:@(newPreviewIndex)];
+        [self.previewVC reloadPreview];
+        [self.previewVC previewAtIndex:newPreviewIndex];
+    }
+}
+
+-(void)setPreviewTopToolBarSelectedAtIndex:(NSUInteger)index {
+    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+    NSUInteger idx = [self.selectionManager indexOfSelection:asset];
+    ///调整idx。如果找不到改为0，因为navigationBar中规定0为未选中，如果找到则自加，因为规定角标从1开始
+    if (idx == NSNotFound) {
+        idx = 0;
+    } else {
+        ++ idx;
+    }
+    [self.previewTopToolBar setSelectAtIndex:idx];
 }
 
 -(void)refreshToolBar {
@@ -365,6 +409,7 @@
     [self.previewBottomToolBar refreshSelection];
 }
 
+#pragma mark ------ 转换相关 ------
 -(DWAlbumGridModel *)gridModelFromAlbumModel:(DWAlbumModel *)album {
     DWAlbumGridModel * gridModel = [DWAlbumGridModel new];
     NSMutableArray * tmp = [NSMutableArray arrayWithCapacity:album.count];
@@ -387,6 +432,40 @@
     return gridModel;
 }
 
+-(NSArray <PHAsset *>*)previewResutlsFromGridModel:(DWAlbumGridModel *)gridModel {
+    
+    ///如果可以混选且可选类型为全部的话，内部数据其实就是一样的。
+    if (self.selectionManager.multiTypeSelectionEnable && self.selectionManager.selectableOption == DWAlbumMediaOptionAll) {
+        return gridModel.results;
+    }
+    NSMutableArray * tmp = [NSMutableArray arrayWithCapacity:gridModel.results.count];
+    BOOL multiSelectionEnable = self.selectionManager.multiTypeSelectionEnable;
+    DWAlbumMediaOption selectableOpt = self.selectionManager.selectableOption;
+    DWAlbumMediaOption selectedOpt = self.selectionManager.selectionOption;
+    [gridModel.results enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        DWAlbumMediaOption mediaOpt = [DWAlbumMediaHelper mediaOptionForAsset:obj];
+        ///不能选不往里面加
+        if (!(selectableOpt & mediaOpt)) {
+            return ;
+        }
+        ///如果选择了，且不是混选的话，排除掉与当前已选类型不一样的
+        if ((selectedOpt != DWAlbumMediaOptionUndefine) && !multiSelectionEnable) {
+            ///如果已经选择的是图片类型且当前资源为视频类型，过滤（这里不能直接 !(selectedOpt & mediaOpt) ，因为仅为图片类型这里也不符合条件）
+            if ((selectedOpt & DWAlbumMediaOptionImageMask) && (mediaOpt & DWAlbumMediaOptionVideoMask)) {
+                return ;
+            }
+            ///如果已经选择的是视频类型且当前资源为图片类型，也过滤
+            if ((selectedOpt & DWAlbumMediaOptionVideoMask) && (mediaOpt & DWAlbumMediaOptionImageMask)) {
+                return ;
+            }
+        }
+        
+        ///一直没过滤，那这个媒体类型就是有用得了
+        [tmp addObject:obj];
+    }];
+    return tmp;
+}
+
 -(DWAlbumGridCellModel *)gridCellModelFromImageAssetModel:(DWImageAssetModel *)assetModel {
     DWAlbumGridCellModel * gridModel = [DWAlbumGridCellModel new];
     gridModel.asset = assetModel.asset;
@@ -407,11 +486,6 @@
         [tmp addIndex:albumIndex];
     }];
     return [tmp copy];
-}
-
--(void)onCurrentAlbumChange {
-    self.currentGridModel = [self gridModelFromAlbumModel:self.currentAlbum];
-    self.currentPreviewResults = self.currentGridModel.results;
 }
 
 -(NSInteger)transformGridIndexToPreviewIndex:(NSInteger)index {
@@ -562,7 +636,7 @@
 -(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
     NSInteger gridIndex = [self transformPreviewIndexToGridIndex:index];
     [self.gridVC notifyPreviewIndexChangeTo:gridIndex];
-    [self handlePreviewTopToolBarSelectedAtIndex:index];
+    [self setPreviewTopToolBarSelectedAtIndex:index];
     [self handlePreviewBottomToolFocusAtIndex:index];
 }
 
@@ -577,7 +651,7 @@
     [self.gridVC refreshGrid:self.currentGridModel];
     dispatch_async(dispatch_get_main_queue(), ^{
         ///由于内部存在缓存机制，导致只要数据源变化了，就要重新刷新预览控制器内部数据
-        [self.previewVC resetOnChangeDatasource];
+        [self.previewVC reloadPreview];
         ///因为只有在全展示的情况下，changes中的角标变化与实际展示的变化才是一一对应的，可以用update。否则只能reload解决
         if (changes.hasIncrementalChanges && self.pickerConf.displayMediaOption == DWAlbumMediaOptionAll) {
             UICollectionView * col = self.gridVC.gridView;
@@ -745,7 +819,7 @@
         };
         _previewTopToolBar.selectionAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
-            [strongSelf previewTopToolBarSelectAtIndex:strongSelf.previewVC.currentIndex];
+            [strongSelf handlePreviewTopToolBarSelectAtIndex:strongSelf.previewVC.currentIndex];
         };
     }
     return _previewTopToolBar;

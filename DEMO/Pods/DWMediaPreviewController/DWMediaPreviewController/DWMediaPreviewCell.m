@@ -33,6 +33,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 @property (nonatomic ,strong) UIScrollView * zoomContainerView;
 
+@property (nonatomic ,strong) UIView * zoomView;
+
 @property (nonatomic ,strong) UIImageView * mediaView;
 
 @property (nonatomic ,strong) UIImageView * hdrBadge;
@@ -144,7 +146,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 }
 
 -(void)initializingSubviews {
-    [self.containerView addSubview:self.mediaView];
+    [self.containerView addSubview:self.zoomView];
+    [self.zoomView addSubview:self.mediaView];
     [self.contentView addSubview:self.hdrBadge];
     [self.contentView addSubview:self.loadingIndicator];
 }
@@ -168,7 +171,8 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
             [self configScaleFactorWithMediaSize:_mediaSize];
         }
     }
-    if (!CGRectEqualToRect(self.mediaView.bounds, self.bounds)) {
+    if (!CGRectEqualToRect(self.zoomView.bounds, self.bounds)) {
+        self.zoomView.frame = self.bounds;
         self.mediaView.frame = self.bounds;
     }
     if (!CGPointEqualToPoint(self.loadingIndicator.center, CGPointMake(self.bounds.size.width * 0.5, self.bounds.size.height * 0.5))) {
@@ -337,7 +341,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 -(void)zoomableHasBeenChangedTo:(BOOL)zoomable {
     _zoomContainerView.hidden = !zoomable;
-    [self.containerView addSubview:self.mediaView];
+    [self.containerView addSubview:self.zoomView];
 }
 
 -(void)tapAction:(UITapGestureRecognizer *)tap {
@@ -375,7 +379,7 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
 
 #pragma mark --- scroll delegate ---
 -(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
-    return self.mediaView;
+    return self.zoomView;
 }
 
 -(void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view {
@@ -570,6 +574,13 @@ typedef NS_ENUM(NSUInteger, DWImagePanDirectionType) {
     if (self.shouldShowBadge) {
         [self configBadgeWithAnimated:NO];
     }
+}
+
+-(UIView *)zoomView {
+    if (!_zoomView) {
+        _zoomView = [[UIView alloc] init];
+    }
+    return _zoomView;
 }
 
 -(UIImageView *)mediaView {
@@ -788,11 +799,7 @@ API_AVAILABLE_BEGIN(macos(10.15), ios(9.1), tvos(10))
 -(void)initializingSubviews {
     [super initializingSubviews];
     self.mediaView.delegate = self;
-    if (self.zoomable) {
-        [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
-    } else {
-        [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
-    }
+    [self.zoomView insertSubview:self.posterView belowSubview:self.mediaView];
     [self.contentView bringSubviewToFront:self.hdrBadge];
     [self.contentView addSubview:self.livePhotoBadge];
 }
@@ -969,11 +976,7 @@ API_AVAILABLE_END
 -(void)initializingSubviews {
     [super initializingSubviews];
     self.mediaView.playerManager.delegate = self;
-    if (self.zoomable) {
-        [self.contentView insertSubview:self.posterView belowSubview:self.containerView];
-    } else {
-        [self.contentView insertSubview:self.posterView belowSubview:self.mediaView];
-    }
+    [self.zoomView insertSubview:self.posterView belowSubview:self.mediaView];
     [self.contentView bringSubviewToFront:self.hdrBadge];
     [self.contentView addSubview:self.playBtn];
 }
@@ -1044,9 +1047,10 @@ API_AVAILABLE_END
 -(void)playerManager:(DWPlayerManager *)manager readyToPlayForAsset:(AVAsset *)asset {
     ///清除poster，否则缩放有底图。更改时机为ready以后，防止 -setMedia: 时移除导致的视频尚未ready导致无法展示首帧，中间的等待时间为空白
     ///还得延时0.1s，这个代理走的时候首帧也不一定能解析出来，稍微延迟一点
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        self.posterView.image = nil;
-    });
+    ///这里最终移除清除poster的逻辑，因为始终会用空白展示。现在将poster放在zoomView上，让posterView与mediaView同时缩放，从根本上解决需要清除poster的逻辑
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        self.posterView.image = nil;
+//    });
 }
 
 -(void)playerManager:(DWPlayerManager *)manager finishPlayingAsset:(AVAsset *)asset {
