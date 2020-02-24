@@ -144,16 +144,21 @@
 
 -(void)handleGridPreviewAtIndex:(NSInteger)index {
     if (index < self.currentGridModel.results.count) {
+        ///刷新一下最新的资源，因为在gridVC选择的过程中，可用preview资源有可能会发生改变，所以按需刷新
         [self configCurrentPreviewResultsIfNeeded];
+        ///由于gridVC与previewVC资源是不一致的，所以要转换为previewVC的index
         NSInteger previewIndex = [self transformGridIndexToPreviewIndex:index];
         if (previewIndex == NSNotFound) {
             return;
         }
         [self.previewVC previewAtIndex:previewIndex];
+        ///按需刷新previewVC底部的预览toolBar
         if (self.selectionManager.needsRefreshSelection) {
             [self.previewBottomToolBar refreshUI];
         }
+        ///刷新previewVC顶部toolBar的选择状态
         [self setPreviewTopToolBarSelectedAtIndex:previewIndex];
+        ///previewVC底部预览toolBar的focus状态刷新
         [self handlePreviewBottomToolFocusAtIndex:previewIndex];
         [self pushViewController:self.previewVC animated:YES];
     }
@@ -409,6 +414,7 @@
         if ([filterResults isEqualToArray:self.currentPreviewResults]) {
             return;
         }
+        ///这里要尽可能的保证资源刷新的过程中，previewVC当前展示的cell不变。所以记录当前展示的asset，在刷新后再切换回他的位置
         PHAsset * currentPreviewAsset = [self.currentPreviewResults objectAtIndex:self.previewVC.currentIndex];
         DWMediaPreviewData * currentPreviewData = [self.previewDataCache objectForKey:@(self.previewVC.currentIndex)];
         [self configCurrentPreviewResults:filterResults];
