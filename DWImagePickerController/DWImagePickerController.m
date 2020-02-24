@@ -207,16 +207,21 @@
 }
 
 -(void)fetchLivePhotoWithAsset:(PHAsset *)asset index:(NSUInteger)index albumIndex:(NSUInteger)albumIndex targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    
-    [self.albumManager fetchLivePhotoWithAlbum:self.currentAlbum index:albumIndex targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
-        if (progressHandler) {
-            progressHandler(progress,index);
+    if (@available(iOS 9.1,*)) {
+        [self.albumManager fetchLivePhotoWithAlbum:self.currentAlbum index:albumIndex targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+            if (progressHandler) {
+                progressHandler(progress,index);
+            }
+        } completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
+            if (fetchCompletion && !obj.isDegraded) {
+                fetchCompletion(obj.media,index);
+            }
+        }];
+    } else {
+        if (fetchCompletion) {
+            fetchCompletion(nil,index);
         }
-    } completion:^(DWAlbumManager * _Nullable mgr, DWLivePhotoAssetModel * _Nullable obj) {
-        if (fetchCompletion && !obj.isDegraded) {
-            fetchCompletion(obj.media,index);
-        }
-    }];
+    }
 }
 
 -(void)fetchVideoWithIndex:(NSUInteger)index albumIndex:(NSUInteger)albumIndex progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
@@ -309,7 +314,10 @@
         case DWAlbumMediaOptionAnimateImage:
             return DWMediaPreviewTypeAnimateImage;
         case DWAlbumMediaOptionLivePhoto:
-            return DWMediaPreviewTypeLivePhoto;
+            if (@available(iOS 9.1,*)) {
+                return DWMediaPreviewTypeLivePhoto;
+            }
+            return DWMediaPreviewTypeImage;
         case DWAlbumMediaOptionVideo:
             return DWMediaPreviewTypeVideo;
         default:
