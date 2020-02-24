@@ -124,10 +124,22 @@
     return imagePicker;
 }
 
+-(void)dismissImagePickerWithCompletion:(DWImagePickerAction)completion {
+    [self dismissViewControllerAnimated:YES completion:^{
+        if (completion) {
+            completion(self);
+        }
+    }];
+}
+
 #pragma mark --- tool method ---
 #pragma mark ------ 控制器相关 ------
--(void)dismiss {
-    [self dismissViewControllerAnimated:YES completion:nil];
+-(void)dismissByCancel {
+    [self dismissViewControllerAnimated:YES completion:^{
+        if (self.pickerConf.cancelAction) {
+            self.pickerConf.cancelAction(self);
+        }
+    }];
 }
 
 -(void)handleGridPreviewAtIndex:(NSInteger)index {
@@ -343,8 +355,8 @@
         } else {
             if ([self.selectionManager removeSelection:asset]) {
                 [self.previewTopToolBar setSelectAtIndex:0];
-                [self.previewBottomToolBar focusOnIndex:NSNotFound];
                 [self refreshToolBar];
+                [self.previewBottomToolBar focusOnIndex:NSNotFound];
                 ///代表是1~0，代表bottomToolBar高度改变了，要刷新cell
                 if (self.previewVC.isShowing && self.selectionManager.selections.count == 0) {
                     [self.previewVC refreshCurrentPreviewLayoutWithAnimated:YES];
@@ -715,7 +727,7 @@
             [weakSelf pushViewController:weakSelf.gridVC animated:YES];
         };
         _listVC.title = @"照片";
-        _listVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismiss)];
+        _listVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismissByCancel)];
         _listVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];
         _listVC.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:nil];
         _listVC.navigationItem.backBarButtonItem.tintColor = [UIColor blackColor];
@@ -732,7 +744,7 @@
         _gridPhotoSize = CGSizeMake(width * 2, width * 2);
         _gridVC.selectionManager = self.selectionManager;
         _gridVC.bottomToolBar = self.gridBottomToolBar;
-        _gridVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismiss)];
+        _gridVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismissByCancel)];
         _gridVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];
         _gridVC.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:nil];
         _gridVC.navigationItem.backBarButtonItem.tintColor = [UIColor blackColor];
@@ -764,6 +776,13 @@
     if (!_selectionManager) {
         if (self.pickerConf) {
             _selectionManager = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:self.pickerConf.maxSelectCount selectableOption:self.pickerConf.selectableOption multiTypeSelectionEnable:self.pickerConf.multiTypeSelectionEnable];
+            if (self.pickerConf.sendAction) {
+                __weak typeof(self) weakSelf = self;
+                _selectionManager.sendAction = ^(DWAlbumSelectionManager * _Nonnull mgr) {
+                    __strong typeof(weakSelf) strongSelf = weakSelf;
+                    strongSelf.pickerConf.sendAction(strongSelf);
+                };
+            }
         } else {
             _selectionManager = [[DWAlbumSelectionManager alloc] initWithMaxSelectCount:0 selectableOption:DWAlbumMediaOptionAll multiTypeSelectionEnable:YES];
         }
@@ -789,12 +808,13 @@
     if (!_gridBottomToolBar) {
         _gridBottomToolBar = [DWAlbumToolBar toolBar];
         __weak typeof(self) weakSelf = self;
-        _gridBottomToolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if (strongSelf.selectionManager.sendAction) {
-                strongSelf.selectionManager.sendAction(strongSelf.selectionManager);
-            }
-        };
+        if (self.pickerConf.sendAction) {
+            _gridBottomToolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                strongSelf.pickerConf.sendAction(strongSelf);
+            };
+        }
+        
         _gridBottomToolBar.previewAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             [strongSelf handleGridBottomToolBarPreview];
@@ -835,12 +855,13 @@
             __strong typeof(weakSelf) strongSelf = weakSelf;
             [strongSelf handlePreviewBottomToolBarSelectAtIndex:index];
         };
-        _previewBottomToolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if (strongSelf.selectionManager.sendAction) {
-                strongSelf.selectionManager.sendAction(strongSelf.selectionManager);
-            }
-        };
+        if (self.pickerConf.sendAction) {
+            _previewBottomToolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                strongSelf.pickerConf.sendAction(strongSelf);
+            };
+        }
+        
         _previewBottomToolBar.originImageAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             strongSelf.selectionManager.useOriginImage = !strongSelf.selectionManager.useOriginImage;

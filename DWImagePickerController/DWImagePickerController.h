@@ -14,6 +14,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+
+@class DWImagePickerController;
+typedef void(^DWImagePickerAction)(DWImagePickerController * imagePicker);
+
 @interface DWImagePickerConfiguration : NSObject
 
 @property (nonatomic ,assign) DWAlbumMediaOption displayMediaOption;
@@ -23,6 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic ,assign) NSInteger maxSelectCount;
 
 @property (nonatomic ,assign) BOOL multiTypeSelectionEnable;
+
+@property (nonatomic ,copy) DWImagePickerAction cancelAction;
+
+@property (nonatomic ,copy) DWImagePickerAction sendAction;
 
 @end
 
@@ -59,6 +67,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)fetchCameraRollWithCompletion:(dispatch_block_t)completion;
 
 +(instancetype)showImagePickerWithAlbumManager:(nullable DWAlbumManager *)albumManager fetchOption:(nullable DWAlbumFetchOption *)fetchOption pickerConfiguration:(nullable DWImagePickerConfiguration *)pickerConf currentVC:(UIViewController *)currentVC;
+
+-(void)dismissImagePickerWithCompletion:(DWImagePickerAction)completion;
 
 @end
 

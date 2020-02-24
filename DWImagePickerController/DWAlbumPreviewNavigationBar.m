@@ -64,9 +64,11 @@
 -(void)setSelectAtIndex:(NSInteger)index {
     if (index > 0 && index != NSNotFound) {
         self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
+        self.selectionLb.layer.borderColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1].CGColor;
         self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
     } else {
         self.selectionLb.backgroundColor = [UIColor clearColor];
+        self.selectionLb.layer.borderColor = [UIColor lightGrayColor].CGColor;
         self.selectionLb.text = nil;
     }
     
@@ -208,7 +210,7 @@
         _selectionLb.marginInsets = UIEdgeInsetsMake(0, 5, 0, 5);
         _selectionLb.textColor = [UIColor whiteColor];
         _selectionLb.backgroundColor = [UIColor clearColor];
-        _selectionLb.layer.borderColor = [UIColor lightGrayColor].CGColor;;
+        _selectionLb.layer.borderColor = [UIColor lightGrayColor].CGColor;
         _selectionLb.layer.borderWidth = 2;
         _selectionLb.layer.cornerRadius = 11;
         _selectionLb.layer.masksToBounds = YES;

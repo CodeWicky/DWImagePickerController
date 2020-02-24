@@ -112,8 +112,12 @@
 -(void)focusOnIndex:(NSInteger)index {
     if (_originFocusIndex != index) {
         _originFocusIndex = index;
-        [self.previewCol reloadData];
-        if (index >= 0 && index < [self collectionView:self.previewCol numberOfItemsInSection:0]) {
+        NSInteger count = [self collectionView:self.previewCol numberOfItemsInSection:0];
+        ///这里如果count为0且index为NSNotFound的话，是取消最后一个，这里就不reload的，如果reload的话就看不到col消失动画了，在消失动画中会自动reload。所以这里屏蔽
+        if (index != NSNotFound || count > 0) {
+            [self.previewCol reloadData];
+        }
+        if (index >= 0 && index < count) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.previewCol scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0] atScrollPosition:(UICollectionViewScrollPositionCenteredHorizontally) animated:YES];
             });
