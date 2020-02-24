@@ -160,7 +160,7 @@
     DWPosterCell * cell = [tableView dequeueReusableCellWithIdentifier:@"PosterCell" forIndexPath:indexPath];
     DWAlbumModel * albumModel = self.albums[indexPath.row];
     cell.titleLabel.text = albumModel.name;
-    cell.countLabel.text = [NSString stringWithFormat:@"(%ld)",albumModel.count];
+    cell.countLabel.text = [NSString stringWithFormat:@"(%ld)",(long)albumModel.count];
     cell.albumModel = albumModel;
     [self.albumManager fetchPostForAlbum:albumModel targetSize:self.photoSize completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if ([albumModel isEqual:cell.albumModel]) {
