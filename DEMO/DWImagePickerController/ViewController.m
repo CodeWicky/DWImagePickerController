@@ -36,7 +36,7 @@
 //    DWImagePickerController * picker = [DWImagePickerController  showImagePickerWithAlbumManager:nil option:nil currentVC:self];
 //#pragma clang diagnostic pop
     DWImagePickerConfiguration * conf = [DWImagePickerConfiguration new];
-    conf.displayMediaOption = DWAlbumMediaOptionVideo;
+    conf.displayMediaOption = DWAlbumMediaOptionAll;
     DWImagePickerController * picker = [[DWImagePickerController alloc] initWithAlbumManager:nil fetchOption:nil pickerConfiguration:conf columnCount:3 spacing:5];
     [picker fetchCameraRollWithCompletion:^{
         [self presentViewController:picker animated:YES completion:nil];
