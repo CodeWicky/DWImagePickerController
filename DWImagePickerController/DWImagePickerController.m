@@ -281,6 +281,21 @@
     }];
 }
 
+-(void)fetchOriginPosterForVideoAsset:(PHAsset *)asset atIndex:(NSInteger)index {
+    [self.albumManager fetchOriginImageWithAsset:asset networkAccessAllowed:self.currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        ///不是缩略图
+        if (obj.media && !obj.isDegraded) {
+            if (index < self.currentPreviewResults.count) {
+                DWMediaPreviewData * data = [self.previewDataCache objectForKey:@(index)];
+                ///资源还能对的上
+                if ([data.userInfo isEqual:asset]) {
+                    data.previewImage = obj.media;
+                }
+            }
+        }
+    }];
+}
+
 -(DWMediaPreviewType)previewTypeForAsset:(PHAsset *)asset {
     DWAlbumMediaOption mediaOption = [DWAlbumMediaHelper mediaOptionForAsset:asset];
     switch (mediaOption) {
@@ -565,6 +580,10 @@
 
 -(void)previewController:(DWMediaPreviewController *)previewController finishBuildingPreviewData:(DWMediaPreviewData *)previewData atIndex:(NSUInteger)index {
     if (previewData) {
+        if (index < self.currentPreviewResults.count) {
+            PHAsset * asset = self.currentPreviewResults[index];
+            previewData.userInfo = asset;
+        }
         [self.previewDataCache setObject:previewData forKey:@(index)];
     }
 }
@@ -625,8 +644,11 @@
     [self.albumManager fetchImageWithAsset:asset targetSize:self.gridPhotoSize networkAccessAllowed:self.currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (obj.asset && obj.media) {
             [self.posterCache setObject:obj forKey:obj.asset];
-            
             [DWAlbumMediaHelper cachePoster:[self gridCellModelFromImageAssetModel:obj] withAsset:obj.asset];
+        }
+        ///如果是为视频资源获取poster的话，尽可能要获取原图，这样会减少视频资源从poster过渡到视频资源过程中的变化
+        if (previewType == DWMediaPreviewTypeVideo) {
+            [self fetchOriginPosterForVideoAsset:asset atIndex:index];
         }
         if (fetchCompletion) {
             fetchCompletion(obj.media,index,[obj satisfiedSize:previewController.previewSize]);

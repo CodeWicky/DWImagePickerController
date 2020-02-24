@@ -408,7 +408,20 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
             switch (previewType) {
                 case DWMediaPreviewTypeVideo:
                 {
-                    cell.poster = cellData.previewImage;
+                    ///预加载时可能会只有media，这种情况对于image可以，但是对于一定要有poster的videoType还是要先搞一个poster的，要不然会白色闪屏
+                    if (cellData.previewImage) {
+                        cell.poster = cellData.previewImage;
+                    } else {
+                        needConfigMedia = NO;
+                        [self fetchPosterAtIndex:originIndex previewType:previewType fetchCompletion:^(id  _Nullable media, NSUInteger index, BOOL satisfiedSize) {
+                            cellData.previewImage = media;
+                            if (index == cell.index) {
+                                cell.poster = cellData.previewImage;
+                                [self configMediaForCell:cell withMedia:cellData.media];
+                            }
+                        }];
+                    }
+                    
                 }
                     break;
                 case DWMediaPreviewTypeImage:
