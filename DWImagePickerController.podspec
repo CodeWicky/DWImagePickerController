@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name = 'DWImagePickerController'
-s.version = '0.0.0.1'
+s.version = '0.0.0.2'
 s.license = { :type => 'MIT', :file => 'LICENSE' }
 s.summary = '一个相册选择库。ImagePicker frameworks.'
 s.homepage = 'https://github.com/CodeWicky/DWImagePickerController'

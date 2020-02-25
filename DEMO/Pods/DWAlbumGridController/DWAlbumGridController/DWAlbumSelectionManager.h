@@ -94,6 +94,10 @@ typedef void(^DWAlbumSelectionValidationFailCallback)(NSError * error);
 
 @property (nonatomic ,strong) id userInfo;
 
+@property (nonatomic ,strong) UIImage * previewImage;
+
+@property (nonatomic ,strong) id media;
+
 @end
 
 NS_ASSUME_NONNULL_END

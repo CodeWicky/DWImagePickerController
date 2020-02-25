@@ -364,6 +364,27 @@
             ///这里由于gridViewController中添加的selection对应的mediaIndex是gridIndex，这里要转化成gridIndex
             NSInteger gridIndex = [self.currentGridModel.results indexOfObject:asset];
             if ([self.selectionManager addSelection:asset mediaIndex:gridIndex mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
+                ///这里同样尽可能的为selection获取更多的复用资源
+                DWAlbumSelectionModel * lastSelection = self.selectionManager.selections.lastObject;
+                DWMediaPreviewData * previewData = [self.previewDataCache objectForKey:asset];
+                if (previewData) {
+                    ///previewData中会有全部数据，包括原始media数据及previewIamge
+                    lastSelection.media = previewData.media;
+                    lastSelection.previewImage = previewData.previewImage;
+                }
+                
+                ///部分情况下，previewData中会没有previewImage，比如预加载只会获取media，导致实际加载cell时由于media存在而不再拉取poster的情况，这种情况继续寻找备援poster。首先寻找的是preview数据中加载的poster
+                if (!lastSelection.previewImage) {
+                    DWImageAssetModel * previewPosterCache = [self.posterCache objectForKey:asset];
+                    lastSelection.previewImage = previewPosterCache.media;
+                }
+                
+                ///如果仍然没有，最后再尝试在DWAlbumMediaHelper中寻找缓存。这部分缓存数据是给gridController进行复用的。目的是为了获取previewPoster的同时缓存给gridController。所以这里同样可以借用gridController的缓存。由于gridController中的分辨率最低，所以优先级最低。同时gridController大小刚好适中，所以也可以满足预览需求
+                if (!lastSelection.previewImage) {
+                    DWAlbumGridCellModel * gridModel = [DWAlbumMediaHelper posterCacheForAsset:asset];
+                    lastSelection.previewImage = gridModel.media;
+                }
+                
                 ///先设置顶部选择状态
                 [self.previewTopToolBar setSelectAtIndex:self.selectionManager.selections.count];
                 ///然后属性顶部和底部toolBar
@@ -642,6 +663,7 @@
         return ;
     }
     
+    ///这里由于获取图片使用的是非缓存模式，所以单独将poster缓存维护在外部
     DWImageAssetModel * media = [self.posterCache objectForKey:asset];
     if (media) {
         if (fetchCompletion) {
@@ -650,6 +672,7 @@
         return;
     }
     
+    ///这里获取poster不做缓存。因为poster的缓存可能会将更大分辨率的同样的asset的缓存覆盖掉
     [self.albumManager fetchImageWithAsset:asset targetSize:self.gridPhotoSize networkAccessAllowed:self.currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (obj.asset && obj.media) {
             [self.posterCache setObject:obj forKey:obj.asset];

@@ -322,6 +322,12 @@
     BOOL needRefresh = NO;
     if (idx == NSNotFound) {
         if ([self.selectionManager addSelection:asset mediaIndex:cell.index mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
+            ///刚添加成功，模型已经在最后一个，取出来给他赋值一个previewImage，尽可能复用呗
+            DWAlbumSelectionModel * lastSelection = self.selectionManager.selections.lastObject;
+            DWAlbumGridCellModel * gridModel = [DWAlbumMediaHelper posterCacheForAsset:asset];
+            if (gridModel.media) {
+                lastSelection.previewImage = gridModel.media;
+            }
             if (self.selectionManager.reachMaxSelectCount) {
                 [self selectVisibleCells];
             } else if (!self.selectionManager.multiTypeSelectionEnable && self.selectionManager.selections.count == 1) {
@@ -329,7 +335,7 @@
                 [self selectVisibleCells];
             } else {
                 NSInteger index = self.selectionManager.selections.count;
-                [self.selectionManager addUserInfo:cell atIndex:index - 1];
+                lastSelection.userInfo = cell;
                 [cell setSelectAtIndex:index];
             }
             needRefresh = YES;
