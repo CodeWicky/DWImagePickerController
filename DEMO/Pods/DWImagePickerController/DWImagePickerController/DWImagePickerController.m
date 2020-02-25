@@ -296,8 +296,11 @@
         ///不是缩略图
         if (obj.media && !obj.isDegraded) {
             if (index < self.currentPreviewResults.count) {
-                DWMediaPreviewData * data = [self.previewDataCache objectForKey:asset];
-                data.previewImage = obj.media;
+                DWMediaPreviewData * data = [self.previewDataCache objectForKey:@(index)];
+                ///资源还能对的上
+                if ([data.userInfo isEqual:asset]) {
+                    data.previewImage = obj.media;
+                }
             }
         }
     }];
@@ -347,6 +350,7 @@
 
 -(void)configCurrentPreviewResults:(NSArray <PHAsset *>*)previewResults {
     self.currentPreviewResults = previewResults;
+    [self.previewDataCache removeAllObjects];
 }
 
 #pragma mark ------ toolBar相关 ------
@@ -420,8 +424,10 @@
         }
         ///这里要尽可能的保证资源刷新的过程中，previewVC当前展示的cell不变。所以记录当前展示的asset，在刷新后再切换回他的位置
         PHAsset * currentPreviewAsset = [self.currentPreviewResults objectAtIndex:self.previewVC.currentIndex];
+        DWMediaPreviewData * currentPreviewData = [self.previewDataCache objectForKey:@(self.previewVC.currentIndex)];
         [self configCurrentPreviewResults:filterResults];
         NSInteger newPreviewIndex = [self.currentPreviewResults indexOfObject:currentPreviewAsset];
+        [self.previewDataCache setObject:currentPreviewData forKey:@(newPreviewIndex)];
         [self.previewVC reloadPreview];
         [self.previewVC previewAtIndex:newPreviewIndex];
     }
@@ -582,8 +588,7 @@
 }
 
 -(DWMediaPreviewData *)previewController:(DWMediaPreviewController *)previewController previewDataAtIndex:(NSUInteger)index {
-    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
-    DWMediaPreviewData * previewData = [self.previewDataCache objectForKey:asset];
+    DWMediaPreviewData * previewData = [self.previewDataCache objectForKey:@(index)];
     return previewData;
 }
 
@@ -592,8 +597,8 @@
         if (index < self.currentPreviewResults.count) {
             PHAsset * asset = self.currentPreviewResults[index];
             previewData.userInfo = asset;
-            [self.previewDataCache setObject:previewData forKey:asset];
         }
+        [self.previewDataCache setObject:previewData forKey:@(index)];
     }
 }
 
