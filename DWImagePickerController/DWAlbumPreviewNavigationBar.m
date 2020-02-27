@@ -52,6 +52,8 @@
 
 @property (nonatomic ,strong) DWLabel * selectionLb;
 
+@property (nonatomic ,assign) NSInteger index;
+
 @end
 
 @implementation DWAlbumPreviewNavigationBar
@@ -63,10 +65,12 @@
 
 -(void)setSelectAtIndex:(NSInteger)index {
     if (index > 0 && index != NSNotFound) {
-        self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
-        self.selectionLb.layer.borderColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1].CGColor;
+        _index = index;
+        self.selectionLb.backgroundColor = self.tintColor;
+        self.selectionLb.layer.borderColor = self.tintColor.CGColor;
         self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
     } else {
+        _index = NSNotFound;
         self.selectionLb.backgroundColor = [UIColor clearColor];
         self.selectionLb.layer.borderColor = [UIColor lightGrayColor].CGColor;
         self.selectionLb.text = nil;
@@ -75,7 +79,12 @@
     [self refreshUI];
 }
 
-#pragma mark --- tool method ---
+-(void)setupDefaultValue {
+    _show = YES;
+    self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
+    _index = NSNotFound;
+}
+
 -(void)setupUI {
     UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
     UIVisualEffectView * blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
@@ -113,9 +122,7 @@
         btnFrame.origin.y = CGRectGetMaxY([UIApplication sharedApplication].statusBarFrame);
     }
     [self.retBtn setFrame:btnFrame];
-    
 
-    
     if (self.show) {
         btnFrame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, CGRectGetMaxY(btnFrame));
     } else {
@@ -172,7 +179,7 @@
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        _show = YES;
+        [self setupDefaultValue];
         [self setupUI];
         [self refreshUI];
     }
@@ -186,6 +193,14 @@
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     
+}
+
+-(void)setTintColor:(UIColor *)tintColor {
+    [super setTintColor:tintColor];
+    if (_index != NSNotFound) {
+        self.selectionLb.backgroundColor = tintColor;
+        self.selectionLb.layer.borderColor = tintColor.CGColor;
+    }
 }
 
 #pragma mark --- setter/getter ---

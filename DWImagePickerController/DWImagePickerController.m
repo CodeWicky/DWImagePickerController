@@ -1011,19 +1011,30 @@
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (strongSelf.previewSelectionMode) {
                 NSMutableIndexSet * selectionIndexes = strongSelf.previewBottomToolBar.previewSelectionIndexes;
-                for (NSInteger i = strongSelf.selectionManager.selections.count - 1; i >= 0; --i) {
-                    if ([selectionIndexes containsIndex:i]) {
-                        continue;
+                NSInteger selectionIndexesCount = selectionIndexes.count;
+                ///个数不相等，说明在预览模式下有减少
+                if (selectionIndexesCount < strongSelf.selectionManager.selections.count) {
+                    for (NSInteger i = strongSelf.selectionManager.selections.count - 1; i >= 0; --i) {
+                        ///如果当前index包含，说明这个没删除
+                        if ([selectionIndexes containsIndex:i]) {
+                            continue;
+                        }
+                        ///如果不包含，删除
+                        [strongSelf.selectionManager removeSelectionAtIndex:i];
+                        ///如果删除完成的时候，个数一样了，则说明删除完了，停止循环
+                        if (strongSelf.selectionManager.selections.count == selectionIndexesCount) {
+                            break;
+                        }
                     }
-                    [strongSelf.selectionManager removeSelectionAtIndex:i];
+                    strongSelf.previewSelectionMode = NO;
+                    strongSelf.previewBottomToolBar.previewSelectionMode = NO;
+                    strongSelf.previewBottomToolBar.previewSelectionIndexes = nil;
+                    ///这里先不标记，还要刷新gridViewController
+                    if (strongSelf.selectionManager.needsRefreshSelection) {
+                        [strongSelf.gridBottomToolBar refreshSelection];
+                    }
                 }
-                strongSelf.previewSelectionMode = NO;
-                strongSelf.previewBottomToolBar.previewSelectionMode = NO;
-                strongSelf.previewBottomToolBar.previewSelectionIndexes = nil;
-                ///这里先不标记，还要刷新gridViewController
-                if (strongSelf.selectionManager.needsRefreshSelection) {
-                    [strongSelf.gridBottomToolBar refreshSelection];
-                }
+                
             }
             [strongSelf popViewControllerAnimated:YES];
         };

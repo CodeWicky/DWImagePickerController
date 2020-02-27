@@ -37,6 +37,7 @@
 
 #pragma mark --- tool method ---
 -(void)setupDefaultValue {
+    self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
     self.toolBarHeight = 49;
 }
 
@@ -100,7 +101,7 @@
     if (self.selectionManager.selections.count) {
         self.sendButton.text = [NSString stringWithFormat:@"发送(%lu)",(unsigned long)self.selectionManager.selections.count];
         self.sendButton.userInteractionEnabled = YES;
-        self.sendButton.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
+        self.sendButton.backgroundColor = self.tintColor;
     } else {
         self.sendButton.text = @"发送";
         self.sendButton.userInteractionEnabled = NO;
@@ -162,6 +163,14 @@
     ///这里用touchBegan来避免事件穿透至底层视图中实现touchBegan的事件中。只要空实现即可
 }
 
+-(void)setTintColor:(UIColor *)tintColor {
+    [super setTintColor:tintColor];
+    self.originIndicator.backgroundColor = tintColor;
+    if (self.selectionManager.selections.count) {
+        self.sendButton.backgroundColor = tintColor;
+    }
+}
+
 #pragma mark --- setter/getter ---
 -(UIVisualEffectView *)blurView {
     if (!_blurView) {
@@ -212,7 +221,7 @@
 -(UIView *)originIndicator {
     if (!_originIndicator) {
         _originIndicator = [[UIView alloc] initWithFrame:CGRectMake(4, 4, 10, 10)];
-        _originIndicator.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
+        _originIndicator.backgroundColor = self.tintColor;
         _originIndicator.userInteractionEnabled = NO;
         _originIndicator.layer.cornerRadius = 5;
         _originIndicator.layer.masksToBounds = YES;

@@ -21,4 +21,10 @@ typedef void(^DWAlbumPreviewNavigationBarAction)(DWAlbumPreviewNavigationBar * t
 
 -(void)setSelectAtIndex:(NSInteger)index;
 
+-(void)setupDefaultValue;
+
+-(void)setupUI;
+
+-(void)refreshUI;
+
 @end

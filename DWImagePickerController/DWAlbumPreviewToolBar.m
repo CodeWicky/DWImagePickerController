@@ -57,9 +57,15 @@
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
         [self setupUI];
     }
     return self;
+}
+
+-(void)setTintColor:(UIColor *)tintColor {
+    [super setTintColor:tintColor];
+    self.borderView.layer.borderColor = tintColor.CGColor;
 }
 
 #pragma mark --- setter/getter ---
@@ -69,8 +75,6 @@
         _previewImageView.contentMode = UIViewContentModeScaleAspectFill;
         _previewImageView.clipsToBounds = YES;
         _previewImageView.layer.cornerRadius = 5;
-        _previewImageView.layer.borderWidth = 0;
-        _previewImageView.layer.borderColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1].CGColor;
         _previewImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return _previewImageView;
@@ -93,7 +97,7 @@
         _borderView.userInteractionEnabled = NO;
         _borderView.layer.cornerRadius = 5;
         _borderView.layer.borderWidth = 0;
-        _borderView.layer.borderColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1].CGColor;
+        _borderView.layer.borderColor = self.tintColor.CGColor;
         _borderView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return _borderView;
@@ -213,6 +217,7 @@
     DWAlbumPreviewToolBarCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
     NSInteger originIndex = indexPath.item;
     cell.index = originIndex;
+    cell.tintColor = self.tintColor;
     PHAsset * asset = [self.selectionManager selectionAtIndex:originIndex];
     DWAlbumGridCellModel * media = [DWAlbumMediaHelper posterCacheForAsset:asset];
     if (media) {
@@ -260,16 +265,12 @@
 }
 
 #pragma mark --- override ---
--(instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        _show = YES;
-        _originFocusIndex = NSNotFound;
-    }
-    return self;
-}
 
 -(void)setupDefaultValue {
     [super setupDefaultValue];
+    _show = YES;
+    _originFocusIndex = NSNotFound;
+    self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
     self.itemS = 64;
     self.previewCtnHeight = self.itemS + 10;
     self.previewSize = CGSizeMake(self.itemS * 2, self.itemS * 2);
@@ -363,6 +364,14 @@
         return inside;
     }
     return CGRectContainsPoint(self.previewCtn.frame, point);
+}
+
+-(void)setTintColor:(UIColor *)tintColor {
+    [super setTintColor:tintColor];
+    if (self.selectionManager.selections.count && self.originFocusIndex != NSNotFound) {
+        DWAlbumPreviewToolBarCell * focusCell = (DWAlbumPreviewToolBarCell *)[_previewCol cellForItemAtIndexPath:[NSIndexPath indexPathForItem:self.originFocusIndex inSection:0]];
+        [focusCell setTintColor:tintColor];
+    }
 }
 
 #pragma mark --- setter/getter ---

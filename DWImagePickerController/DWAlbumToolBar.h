@@ -23,7 +23,9 @@ typedef void(^ToolBarAction)(DWAlbumToolBar * toolBar);
 +(instancetype)toolBar;
 
 -(void)setupDefaultValue;
+
 -(void)setupUI;
+
 -(void)refreshUI;
 
 @end
