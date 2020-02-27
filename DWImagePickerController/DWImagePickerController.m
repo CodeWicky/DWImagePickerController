@@ -1010,14 +1010,19 @@
         _previewTopToolBar.retAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (strongSelf.previewSelectionMode) {
+                NSMutableIndexSet * selectionIndexes = strongSelf.previewBottomToolBar.previewSelectionIndexes;
                 for (NSInteger i = strongSelf.selectionManager.selections.count - 1; i >= 0; --i) {
-                    if ([strongSelf.previewBottomToolBar.previewSelectionIndexes containsIndex:i]) {
+                    if ([selectionIndexes containsIndex:i]) {
                         continue;
                     }
                     [strongSelf.selectionManager removeSelectionAtIndex:i];
-                    strongSelf.previewSelectionMode = NO;
-                    strongSelf.previewBottomToolBar.previewSelectionMode = NO;
-                    strongSelf.previewBottomToolBar.previewSelectionIndexes = nil;
+                }
+                strongSelf.previewSelectionMode = NO;
+                strongSelf.previewBottomToolBar.previewSelectionMode = NO;
+                strongSelf.previewBottomToolBar.previewSelectionIndexes = nil;
+                ///这里先不标记，还要刷新gridViewController
+                if (strongSelf.selectionManager.needsRefreshSelection) {
+                    [strongSelf.gridBottomToolBar refreshSelection];
                 }
             }
             [strongSelf popViewControllerAnimated:YES];
