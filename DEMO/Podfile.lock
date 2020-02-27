@@ -2,7 +2,7 @@ PODS:
   - DWAlbumGridController (0.0.0.5):
     - DWKit/DWComponent/DWFixAdjustCollectionView (~> 0.0.0.12)
     - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
-  - DWImagePickerController (0.0.0.1):
+  - DWImagePickerController (0.0.0.2):
     - DWAlbumGridController
     - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
     - DWKit/DWUtils/DWAlbumManager (~> 0.0.0.13)
@@ -39,7 +39,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   DWAlbumGridController: 9b01cc734fc877986b22861f9e9b5c69fce929bf
-  DWImagePickerController: cdbdc05ca0fcc119036cb9a6d0780bdcda273d67
+  DWImagePickerController: 25b36fae4ace603424337239d79dbeb58ecf345e
   DWKit: 1954097acf80a6f7280920e288bacb00c6eeca63
   DWMediaPreviewController: 8d9db7207fd3756d48c775fc8dc57c5e33f11501
   DWPlayer: 489f2116280123fdf4f53cf94893bb4a0f017cc1

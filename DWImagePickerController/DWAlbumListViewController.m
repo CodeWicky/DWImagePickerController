@@ -26,6 +26,10 @@
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
+        NSString * bundlePath = [[NSBundle mainBundle] pathForResource:@"DWImagePickerController" ofType:@"bundle"];
+        NSBundle * bundle = [NSBundle bundleWithPath:bundlePath];
+        UIImage * image = [UIImage imageWithContentsOfFile:[bundle pathForResource:@"list_indicator@3x" ofType:@"png"]];
+        self.accessoryView = [[UIImageView alloc] initWithImage:image];
     }
     return self;
 }
