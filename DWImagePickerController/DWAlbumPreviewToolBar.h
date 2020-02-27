@@ -14,6 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void(^PreviewToolBarAction)(DWAlbumPreviewToolBar * toolBar,NSInteger index);
 @interface DWAlbumPreviewToolBar : DWAlbumToolBar<DWMediaPreviewToolBarProtocol>
 
+@property (nonatomic ,assign) BOOL previewSelectionMode;
+
+@property (nonatomic ,strong ,nullable) NSMutableIndexSet * previewSelectionIndexes;
+
 @property (nonatomic ,copy) PreviewToolBarAction selectAction;
 
 -(void)configWithAlbumManager:(DWAlbumManager *)albumManager networkAccessAllowed:(BOOL)networkAccessAllowed;

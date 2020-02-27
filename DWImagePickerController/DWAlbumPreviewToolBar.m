@@ -18,7 +18,13 @@
 
 @property (nonatomic ,assign) NSInteger index;
 
+@property (nonatomic ,strong) UIView * shadeView;
+
+@property (nonatomic ,strong) UIView * borderView;
+
 -(void)setNeedsFocus:(BOOL)focus;
+
+-(void)setNeedsSelect:(BOOL)select;
 
 @end
 
@@ -27,15 +33,25 @@
 #pragma mark --- interface method ---
 -(void)setNeedsFocus:(BOOL)focus {
     if (focus) {
-        self.previewImageView.layer.borderWidth = 2;
+        self.borderView.layer.borderWidth = 2;
     } else {
-        self.previewImageView.layer.borderWidth = 0;
+        self.borderView.layer.borderWidth = 0;
+    }
+}
+
+-(void)setNeedsSelect:(BOOL)select {
+    if (select) {
+        self.shadeView.hidden = YES;
+    } else {
+        self.shadeView.hidden = NO;
     }
 }
 
 #pragma mark --- tool method ---
 -(void)setupUI {
     [self.contentView addSubview:self.previewImageView];
+    [self.contentView addSubview:self.shadeView];
+    [self.contentView addSubview:self.borderView];
 }
 
 #pragma mark --- override ---
@@ -58,6 +74,29 @@
         _previewImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return _previewImageView;
+}
+
+-(UIView *)shadeView {
+    if (!_shadeView) {
+        _shadeView = [[UIView alloc] initWithFrame:self.contentView.bounds];
+        _shadeView.userInteractionEnabled = NO;
+        _shadeView.layer.cornerRadius = 5;
+        _shadeView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.3];
+        _shadeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    }
+    return _shadeView;
+}
+
+-(UIView *)borderView {
+    if (!_borderView) {
+        _borderView = [[UIView alloc] initWithFrame:self.contentView.bounds];
+        _borderView.userInteractionEnabled = NO;
+        _borderView.layer.cornerRadius = 5;
+        _borderView.layer.borderWidth = 0;
+        _borderView.layer.borderColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1].CGColor;
+        _borderView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    }
+    return _borderView;
 }
 
 -(void)setModel:(DWAlbumGridCellModel *)model {
@@ -164,6 +203,9 @@
 
 #pragma mark --- collectionView delegate ---
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    if (self.previewSelectionMode) {
+        return self.selectionManager.selections.count;
+    }
     return self.lastPreviewCnt;
 }
 
@@ -185,6 +227,7 @@
         }];
     }
     [cell setNeedsFocus:(originIndex == self.originFocusIndex)];
+    [self setSelectStatusIfNeededForCell:cell atIndex:originIndex];
     return cell;
 }
 
@@ -202,6 +245,18 @@
     gridModel.mediaType = assetModel.mediaType;
     gridModel.targetSize = assetModel.targetSize;
     return gridModel;
+}
+
+-(void)setSelectStatusIfNeededForCell:(DWAlbumPreviewToolBarCell *)cell atIndex:(NSInteger)index {
+    if (self.previewSelectionMode) {
+        if ([self.previewSelectionIndexes containsIndex:index]) {
+            [cell setNeedsSelect:YES];
+        } else {
+            [cell setNeedsSelect:NO];
+        }
+    } else {
+        [cell setNeedsSelect:YES];
+    }
 }
 
 #pragma mark --- override ---
@@ -272,25 +327,32 @@
         }
     }
     
-    if (self.lastPreviewCnt != count) {
-        self.lastPreviewCnt = count;
-        
-        if (showStatusChange) {
-            self.previewCtnShow = toShow;
-            if (toShow) {
-                [UIView animateWithDuration:0.25 animations:^{
-                    self.previewCtn.alpha = 1;
-                }];
-            } else {
-                [UIView animateWithDuration:0.25 animations:^{
-                    self.previewCtn.alpha = 0;
-                } completion:^(BOOL finished) {
-                    [self.previewCol reloadData];
-                }];
+    ///当是预览选择模式时，个数永远不会变，但这时也要刷新
+    if (self.previewSelectionMode) {
+        self.previewCtnShow = YES;
+        self.previewCtn.alpha = 1;
+        [self.previewCol reloadData];
+    } else {
+        if (self.lastPreviewCnt != count) {
+            self.lastPreviewCnt = count;
+            
+            if (showStatusChange) {
+                self.previewCtnShow = toShow;
+                if (toShow) {
+                    [UIView animateWithDuration:0.25 animations:^{
+                        self.previewCtn.alpha = 1;
+                    }];
+                } else {
+                    [UIView animateWithDuration:0.25 animations:^{
+                        self.previewCtn.alpha = 0;
+                    } completion:^(BOOL finished) {
+                        [self.previewCol reloadData];
+                    }];
+                }
             }
-        }
-        if (!(showStatusChange && !toShow)) {
-            [self.previewCol reloadData];
+            if (!(showStatusChange && !toShow)) {
+                [self.previewCol reloadData];
+            }
         }
     }
 }

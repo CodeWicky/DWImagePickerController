@@ -57,6 +57,8 @@
 
 @property (nonatomic ,strong) NSCache * previewDataCache;
 
+@property (nonatomic ,assign) BOOL previewSelectionMode;
+
 @end
 
 @implementation DWImagePickerController
@@ -145,6 +147,8 @@
 -(void)handleGridPreviewAtIndex:(NSInteger)index {
     if (index < self.currentGridModel.results.count) {
         ///刷新一下最新的资源，因为在gridVC选择的过程中，可用preview资源有可能会发生改变，所以按需刷新
+        self.previewSelectionMode = NO;
+        self.previewBottomToolBar.previewSelectionMode = NO;
         [self configCurrentPreviewResultsIfNeeded];
         ///由于gridVC与previewVC资源是不一致的，所以要转换为previewVC的index
         NSInteger previewIndex = [self transformGridIndexToPreviewIndex:index];
@@ -161,6 +165,19 @@
         ///previewVC底部预览toolBar的focus状态刷新
         [self handlePreviewBottomToolFocusAtIndex:previewIndex];
         [self pushViewController:self.previewVC animated:YES];
+    }
+}
+
+-(void)handlePreviewControllerHasChangedToIndex:(NSInteger)index {
+    if (self.previewSelectionMode) {
+        NSInteger selectionIndex = [self transformPreviewIndexToPreviewSelectionIndex:index];
+        [self.previewTopToolBar setSelectAtIndex:selectionIndex];
+        [self handlePreviewBottomToolFocusAtIndex:index];
+    } else {
+        NSInteger gridIndex = [self transformPreviewIndexToGridIndex:index];
+        [self.gridVC notifyPreviewIndexChangeTo:gridIndex];
+        [self setPreviewTopToolBarSelectedAtIndex:index];
+        [self handlePreviewBottomToolFocusAtIndex:index];
     }
 }
 
@@ -342,6 +359,16 @@
     if ([self.currentPreviewResults isEqualToArray:previewResults]) {
         return ;
     }
+    [self.previewVC reloadPreview];
+    [self configCurrentPreviewResults:previewResults];
+}
+
+-(void)configPreviewSelectionResultsIfNeeded {
+    NSArray <PHAsset *>* previewResults = [self previewResutlsFromSelectionsModel:self.selectionManager.selections];
+    if ([self.currentPreviewResults isEqualToArray:previewResults]) {
+        return ;
+    }
+    [self.previewVC reloadPreview];
     [self configCurrentPreviewResults:previewResults];
 }
 
@@ -351,12 +378,33 @@
 
 #pragma mark ------ toolBar相关 ------
 -(void)handleGridBottomToolBarPreview {
-    PHAsset * asset = self.selectionManager.selections.firstObject.asset;
-    NSInteger idx = [self.currentGridModel.results indexOfObject:asset];
-    [self handleGridPreviewAtIndex:idx];
+    self.previewSelectionMode = YES;
+    self.previewBottomToolBar.previewSelectionMode = YES;
+    ///配置预览资源
+    [self configPreviewSelectionResultsIfNeeded];
+    self.previewBottomToolBar.previewSelectionIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.currentPreviewResults.count)];
+    ///直接预览第一个
+    [self.previewVC previewAtIndex:0];
+    ///按需刷新previewVC底部的预览toolBar
+    if (self.selectionManager.needsRefreshSelection) {
+        [self.previewBottomToolBar refreshUI];
+    }
+    ///刷新previewVC顶部toolBar的选择状态
+    [self setPreviewTopToolBarSelectedAtIndex:0];
+    ///previewVC底部预览toolBar的focus状态刷新
+    [self handlePreviewBottomToolFocusAtIndex:0];
+    [self pushViewController:self.previewVC animated:YES];
 }
 
 -(void)handlePreviewTopToolBarSelectAtIndex:(NSInteger)index {
+    if (self.previewSelectionMode) {
+        [self handlePreviewSelectionSelectAtIndex:index];
+    } else {
+        [self handlePreviewAlbumSelectAtIndex:index];
+    }
+}
+
+-(void)handlePreviewAlbumSelectAtIndex:(NSInteger)index {
     if (index < self.currentPreviewResults.count) {
         PHAsset * asset = self.currentPreviewResults[index];
         NSInteger idx = [self.selectionManager indexOfSelection:asset];
@@ -412,6 +460,46 @@
     }
 }
 
+-(void)handlePreviewSelectionSelectAtIndex:(NSInteger)index {
+    if (index < self.currentPreviewResults.count) {
+        
+        if (![self.previewBottomToolBar.previewSelectionIndexes containsIndex:index]) {
+            ///恢复选择
+            [self.previewBottomToolBar.previewSelectionIndexes addIndex:index];
+            
+            ///这里同样尽可能的为selection获取更多的复用资源
+            DWAlbumSelectionModel * selection = [self.selectionManager selectionModelAtIndex:index];
+            if (!selection.media || !selection.previewImage) {
+                PHAsset * asset = selection.asset;
+                DWMediaPreviewData * previewData = [self.previewDataCache objectForKey:asset];
+                if (previewData) {
+                    ///previewData中会有全部数据，包括原始media数据及previewIamge
+                    selection.media = previewData.media;
+                    selection.previewImage = previewData.previewImage;
+                }
+                
+                if (!selection.previewImage) {
+                    DWImageAssetModel * previewPosterCache = [self.posterCache objectForKey:asset];
+                    selection.previewImage = previewPosterCache.media;
+                }
+                
+                if (!selection.previewImage) {
+                    DWAlbumGridCellModel * gridModel = [DWAlbumMediaHelper posterCacheForAsset:asset];
+                    selection.previewImage = gridModel.media;
+                }
+            }
+            
+            [self.previewTopToolBar setSelectAtIndex:[self transformPreviewIndexToPreviewSelectionIndex:index]];
+            [self.previewBottomToolBar refreshSelection];
+        } else {
+            
+            [self.previewBottomToolBar.previewSelectionIndexes removeIndex:index];
+            [self.previewTopToolBar setSelectAtIndex:NSNotFound];
+            [self.previewBottomToolBar refreshSelection];
+        }
+    }
+}
+
 -(void)handlePreviewBottomToolFocusAtIndex:(NSUInteger)index {
     if (index >= self.currentPreviewResults.count) {
         [self.previewBottomToolBar focusOnIndex:NSNotFound];
@@ -423,13 +511,23 @@
 }
 
 -(void)handlePreviewBottomToolBarSelectAtIndex:(NSInteger)index {
-    DWAlbumSelectionModel * selectionModel = [self.selectionManager selectionModelAtIndex:index];
-    if ([self.currentPreviewResults containsObject:selectionModel.asset]) {
+    if (self.previewSelectionMode) {
         [self.previewBottomToolBar focusOnIndex:index];
-        ///selectionModel中记录的是gridIndex，转换成previewIndex
-        NSInteger previewIndex = [self transformGridIndexToPreviewIndex:selectionModel.mediaIndex];
-        [self.previewVC previewAtIndex:previewIndex];
-        [self setPreviewTopToolBarSelectedAtIndex:previewIndex];
+        [self.previewVC previewAtIndex:index];
+        if ([self.previewBottomToolBar.previewSelectionIndexes containsIndex:index]) {
+            [self.previewTopToolBar setSelectAtIndex:[self transformPreviewIndexToPreviewSelectionIndex:index]];
+        } else {
+            [self.previewTopToolBar setSelectAtIndex:NSNotFound];
+        }
+    } else {
+        DWAlbumSelectionModel * selectionModel = [self.selectionManager selectionModelAtIndex:index];
+        if ([self.currentPreviewResults containsObject:selectionModel.asset]) {
+            [self.previewBottomToolBar focusOnIndex:index];
+            ///selectionModel中记录的是gridIndex，转换成previewIndex
+            NSInteger previewIndex = [self transformGridIndexToPreviewIndex:selectionModel.mediaIndex];
+            [self.previewVC previewAtIndex:previewIndex];
+            [self setPreviewTopToolBarSelectedAtIndex:previewIndex];
+        }
     }
 }
 
@@ -522,6 +620,17 @@
     return tmp;
 }
 
+-(NSArray <PHAsset *>*)previewResutlsFromSelectionsModel:(NSArray <DWAlbumSelectionModel *>*)selectionModels {
+    if (selectionModels.count == 0) {
+        return nil;
+    }
+    NSMutableArray * tmp = [NSMutableArray arrayWithCapacity:selectionModels.count];
+    [selectionModels enumerateObjectsUsingBlock:^(DWAlbumSelectionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [tmp addObject:obj.asset];
+    }];
+    return tmp;
+}
+
 -(DWAlbumGridCellModel *)gridCellModelFromImageAssetModel:(DWImageAssetModel *)assetModel {
     DWAlbumGridCellModel * gridModel = [DWAlbumGridCellModel new];
     gridModel.asset = assetModel.asset;
@@ -558,6 +667,20 @@
     }
     PHAsset * asset = self.currentPreviewResults[index];
     return [self.currentGridModel.results indexOfObject:asset];
+}
+
+-(NSInteger)transformPreviewIndexToPreviewSelectionIndex:(NSInteger)index {
+    __block NSInteger ret = NSNotFound;
+    __block NSInteger findIndex = 1;
+    [self.previewBottomToolBar.previewSelectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+        if (idx == index) {
+            ret = findIndex;
+            *stop = YES;
+        } else {
+            findIndex ++;
+        }
+    }];
+    return ret;
 }
 
 #pragma mark --- gridViewController dataSource ---
@@ -700,10 +823,7 @@
 }
 
 -(void)previewController:(DWMediaPreviewController *)previewController hasChangedToIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
-    NSInteger gridIndex = [self transformPreviewIndexToGridIndex:index];
-    [self.gridVC notifyPreviewIndexChangeTo:gridIndex];
-    [self setPreviewTopToolBarSelectedAtIndex:index];
-    [self handlePreviewBottomToolFocusAtIndex:index];
+    [self handlePreviewControllerHasChangedToIndex:index];
 }
 
 #pragma mark --- observer for Photos ---
@@ -889,6 +1009,17 @@
         __weak typeof(self) weakSelf = self;
         _previewTopToolBar.retAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf.previewSelectionMode) {
+                for (NSInteger i = strongSelf.selectionManager.selections.count - 1; i >= 0; --i) {
+                    if ([strongSelf.previewBottomToolBar.previewSelectionIndexes containsIndex:i]) {
+                        continue;
+                    }
+                    [strongSelf.selectionManager removeSelectionAtIndex:i];
+                    strongSelf.previewSelectionMode = NO;
+                    strongSelf.previewBottomToolBar.previewSelectionMode = NO;
+                    strongSelf.previewBottomToolBar.previewSelectionIndexes = nil;
+                }
+            }
             [strongSelf popViewControllerAnimated:YES];
         };
         _previewTopToolBar.selectionAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
