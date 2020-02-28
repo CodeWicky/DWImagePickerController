@@ -110,6 +110,12 @@
 
 @end
 
+@interface DWAlbumToolBar (Private)
+
+@property (nonatomic ,strong) DWLabel * sendButton;
+
+@end
+
 @interface DWAlbumPreviewToolBar ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>
 
 @property (nonatomic ,strong) DWLabel * previewButton;
@@ -285,6 +291,32 @@
 
 -(void)refreshUI {
     [super refreshUI];
+    
+    if (self.previewSelectionMode) {
+        if (self.previewSelectionIndexes.count) {
+            self.sendButton.text = [NSString stringWithFormat:@"发送(%lu)",(unsigned long)self.previewSelectionIndexes.count];
+            self.sendButton.userInteractionEnabled = YES;
+            self.sendButton.backgroundColor = self.tintColor;
+        } else {
+            self.sendButton.text = @"发送";
+            self.sendButton.userInteractionEnabled = NO;
+            self.sendButton.backgroundColor = [UIColor lightGrayColor];
+        }
+        [self.sendButton sizeToFit];
+        CGRect btnFrame = self.sendButton.frame;
+        CGSize btnSize = btnFrame.size;
+        btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
+        btnFrame.origin.x = self.superview.bounds.size.width - 15 - btnSize.width;
+        
+        if (@available(iOS 11.0,*)) {
+            btnFrame.origin.x -= self.safeAreaInsets.right;
+        }
+        
+        self.sendButton.frame = btnFrame;
+    }
+    
+    
+    
     if (!self.show) {
         CGRect frame =  self.frame;
         frame.origin.y = self.superview.bounds.size.height;
