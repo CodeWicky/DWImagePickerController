@@ -149,7 +149,10 @@
         ///刷新一下最新的资源，因为在gridVC选择的过程中，可用preview资源有可能会发生改变，所以按需刷新
         self.previewSelectionMode = NO;
         self.previewBottomToolBar.previewSelectionMode = NO;
-        [self configCurrentPreviewResultsIfNeeded];
+        if ([self configCurrentPreviewResultsIfNeeded]) {
+            [self.previewVC reloadPreview];
+        }
+        
         ///由于gridVC与previewVC资源是不一致的，所以要转换为previewVC的index
         NSInteger previewIndex = [self transformGridIndexToPreviewIndex:index];
         if (previewIndex == NSNotFound) {
@@ -349,27 +352,27 @@
     }
 }
 
--(void)onCurrentAlbumChange {
+-(BOOL)onCurrentAlbumChange {
     self.currentGridModel = [self gridModelFromAlbumModel:self.currentAlbum];
-    [self configCurrentPreviewResultsIfNeeded];
+    return [self configCurrentPreviewResultsIfNeeded];
 }
 
--(void)configCurrentPreviewResultsIfNeeded {
+-(BOOL)configCurrentPreviewResultsIfNeeded {
     NSArray <PHAsset *>* previewResults = [self previewResutlsFromGridModel:self.currentGridModel];
     if ([self.currentPreviewResults isEqualToArray:previewResults]) {
-        return ;
+        return NO;
     }
-    [self.previewVC reloadPreview];
     [self configCurrentPreviewResults:previewResults];
+    return YES;
 }
 
--(void)configPreviewSelectionResultsIfNeeded {
+-(BOOL)configPreviewSelectionResultsIfNeeded {
     NSArray <PHAsset *>* previewResults = [self previewResutlsFromSelectionsModel:self.selectionManager.selections];
     if ([self.currentPreviewResults isEqualToArray:previewResults]) {
-        return ;
+        return NO;
     }
-    [self.previewVC reloadPreview];
     [self configCurrentPreviewResults:previewResults];
+    return YES;
 }
 
 -(void)configCurrentPreviewResults:(NSArray <PHAsset *>*)previewResults {
@@ -381,7 +384,10 @@
     self.previewSelectionMode = YES;
     self.previewBottomToolBar.previewSelectionMode = YES;
     ///配置预览资源
-    [self configPreviewSelectionResultsIfNeeded];
+    if ([self configPreviewSelectionResultsIfNeeded]) {
+        [self.previewVC reloadPreview];
+    }
+    
     self.previewBottomToolBar.previewSelectionIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.currentPreviewResults.count)];
     ///直接预览第一个
     [self.previewVC previewAtIndex:0];
