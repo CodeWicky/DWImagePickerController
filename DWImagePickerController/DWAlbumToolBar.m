@@ -99,11 +99,11 @@
     
     
     if (self.selectionManager.selections.count) {
-        self.sendButton.text = [NSString stringWithFormat:@"发送(%lu)",(unsigned long)self.selectionManager.selections.count];
+        self.sendButton.text = [NSString stringWithFormat:@"完成(%lu)",(unsigned long)self.selectionManager.selections.count];
         self.sendButton.userInteractionEnabled = YES;
         self.sendButton.backgroundColor = self.tintColor;
     } else {
-        self.sendButton.text = @"发送";
+        self.sendButton.text = @"完成";
         self.sendButton.userInteractionEnabled = NO;
         self.sendButton.backgroundColor = [UIColor lightGrayColor];
     }
