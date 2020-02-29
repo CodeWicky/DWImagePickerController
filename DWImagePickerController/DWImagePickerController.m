@@ -564,6 +564,35 @@
     [self.previewTopToolBar setSelectAtIndex:idx];
 }
 
+-(void)handleBackFromPreviewSelectionModeSelectionsChangeIfNeeded {
+    if (self.previewSelectionMode) {
+        NSMutableIndexSet * selectionIndexes = self.previewBottomToolBar.previewSelectionIndexes;
+        NSInteger selectionIndexesCount = selectionIndexes.count;
+        ///个数不相等，说明在预览模式下有减少
+        if (selectionIndexesCount < self.selectionManager.selections.count) {
+            for (NSInteger i = self.selectionManager.selections.count - 1; i >= 0; --i) {
+                ///如果当前index包含，说明这个没删除
+                if ([selectionIndexes containsIndex:i]) {
+                    continue;
+                }
+                ///如果不包含，删除
+                [self.selectionManager removeSelectionAtIndex:i];
+                ///如果删除完成的时候，个数一样了，则说明删除完了，停止循环
+                if (self.selectionManager.selections.count == selectionIndexesCount) {
+                    break;
+                }
+            }
+            self.previewSelectionMode = NO;
+            self.previewBottomToolBar.previewSelectionMode = NO;
+            self.previewBottomToolBar.previewSelectionIndexes = nil;
+            ///这里先不标记，还要刷新gridViewController
+            if (self.selectionManager.needsRefreshSelection) {
+                [self.gridBottomToolBar refreshSelection];
+            }
+        }
+    }
+}
+
 -(void)refreshToolBar {
     [self.gridBottomToolBar refreshSelection];
     [self.previewBottomToolBar refreshSelection];
@@ -1015,33 +1044,7 @@
         __weak typeof(self) weakSelf = self;
         _previewTopToolBar.retAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
-            if (strongSelf.previewSelectionMode) {
-                NSMutableIndexSet * selectionIndexes = strongSelf.previewBottomToolBar.previewSelectionIndexes;
-                NSInteger selectionIndexesCount = selectionIndexes.count;
-                ///个数不相等，说明在预览模式下有减少
-                if (selectionIndexesCount < strongSelf.selectionManager.selections.count) {
-                    for (NSInteger i = strongSelf.selectionManager.selections.count - 1; i >= 0; --i) {
-                        ///如果当前index包含，说明这个没删除
-                        if ([selectionIndexes containsIndex:i]) {
-                            continue;
-                        }
-                        ///如果不包含，删除
-                        [strongSelf.selectionManager removeSelectionAtIndex:i];
-                        ///如果删除完成的时候，个数一样了，则说明删除完了，停止循环
-                        if (strongSelf.selectionManager.selections.count == selectionIndexesCount) {
-                            break;
-                        }
-                    }
-                    strongSelf.previewSelectionMode = NO;
-                    strongSelf.previewBottomToolBar.previewSelectionMode = NO;
-                    strongSelf.previewBottomToolBar.previewSelectionIndexes = nil;
-                    ///这里先不标记，还要刷新gridViewController
-                    if (strongSelf.selectionManager.needsRefreshSelection) {
-                        [strongSelf.gridBottomToolBar refreshSelection];
-                    }
-                }
-                
-            }
+            [strongSelf handleBackFromPreviewSelectionModeSelectionsChangeIfNeeded];
             [strongSelf popViewControllerAnimated:YES];
         };
         _previewTopToolBar.selectionAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
@@ -1065,6 +1068,7 @@
         if (self.pickerConf.sendAction) {
             _previewBottomToolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
                 __strong typeof(weakSelf) strongSelf = weakSelf;
+                [strongSelf handleBackFromPreviewSelectionModeSelectionsChangeIfNeeded];
                 strongSelf.pickerConf.sendAction(strongSelf);
             };
         }
