@@ -16,12 +16,6 @@
 
 @property (nonatomic ,assign) NSInteger index;
 
-//@property (nonatomic ,assign) BOOL darkMode;
-//
-//@property (nonatomic ,strong) UIColor * internalBlackColor;
-//
-//@property (nonatomic ,strong) UIBlurEffect * internalBlurEffect;
-
 @end
 
 @implementation DWAlbumPreviewNavigationBar

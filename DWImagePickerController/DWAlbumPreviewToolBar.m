@@ -14,13 +14,13 @@
 
 @property (nonatomic ,strong) UIImageView * previewImageView;
 
-@property (nonatomic ,strong) DWAlbumGridCellModel * model;
-
-@property (nonatomic ,assign) NSInteger index;
-
 @property (nonatomic ,strong) UIView * shadeView;
 
 @property (nonatomic ,strong) UIView * borderView;
+
+@property (nonatomic ,strong) DWAlbumGridCellModel * model;
+
+@property (nonatomic ,assign) NSInteger index;
 
 -(void)setNeedsFocus:(BOOL)focus;
 
@@ -119,34 +119,28 @@
 @end
 
 @interface DWAlbumPreviewToolBar ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>
+{
+    BOOL _show;
+    CGFloat _itemS;
+    CGFloat _previewCtnHeight;
+    CGSize _previewSize;
+    BOOL _previewCtnShow;
+    CGFloat _lastPreviewCnt;
+    BOOL _networkAccessAllowed;
+    NSInteger _originFocusIndex;
+}
 
 @property (nonatomic ,strong) DWLabel * previewButton;
-
-@property (nonatomic ,assign) BOOL show;
-
-@property (nonatomic ,assign) CGFloat itemS;
-
-@property (nonatomic ,assign) CGFloat previewCtnHeight;
-
-@property (nonatomic ,assign) CGSize previewSize;
 
 @property (nonatomic ,strong) UIView * previewCtn;
 
 @property (nonatomic ,strong) UICollectionView * previewCol;
 
-@property (nonatomic ,assign) BOOL previewCtnShow;
-
-@property (nonatomic ,assign) CGFloat previewCtnOffset;
-
-@property (nonatomic ,assign) CGFloat lastPreviewCnt;
-
 @property (nonatomic ,strong) DWAlbumManager * albumManager;
-
-@property (nonatomic ,assign) BOOL networkAccessAllowed;
 
 @property (nonatomic ,strong) UIView * mask;
 
-@property (nonatomic ,assign) NSInteger originFocusIndex;
+@property (nonatomic ,assign) CGFloat previewCtnOffset;;
 
 @end
 
@@ -176,11 +170,11 @@
 
 #pragma mark --- DWMediaPreviewToolBarProtocol method ---
 -(BOOL)isShowing {
-    return self.show;
+    return _show;
 }
 
 -(void)showToolBarWithAnimated:(BOOL)animated {
-    self.show = YES;
+    _show = YES;
     CGRect frame = self.frame;
     frame.origin.y = self.superview.bounds.size.height - frame.size.height;
     if (animated) {
@@ -199,11 +193,11 @@
         [UIView animateWithDuration:0.25 animations:^{
             self.frame = frame;
         } completion:^(BOOL finished) {
-            self.show = NO;
+            self->_show = NO;
         }];
     } else {
         self.frame = frame;
-        self.show = NO;
+        _show = NO;
     }
 }
 
@@ -216,7 +210,7 @@
     if (self.previewSelectionMode) {
         return self.selectionManager.selections.count;
     }
-    return self.lastPreviewCnt;
+    return _lastPreviewCnt;
 }
 
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -229,7 +223,7 @@
     if (media) {
         cell.model = media;
     } else {
-        [self.albumManager fetchImageWithAsset:asset targetSize:self.previewSize networkAccessAllowed:self.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        [self.albumManager fetchImageWithAsset:asset targetSize:_previewSize networkAccessAllowed:_networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
             if (cell.index == originIndex && !obj.isDegraded) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     cell.model = [self gridCellModelFromImageAssetModel:obj];
@@ -237,7 +231,7 @@
             }
         }];
     }
-    [cell setNeedsFocus:(originIndex == self.originFocusIndex)];
+    [cell setNeedsFocus:(originIndex == _originFocusIndex)];
     [self setSelectStatusIfNeededForCell:cell atIndex:originIndex];
     return cell;
 }
@@ -277,9 +271,9 @@
     _show = YES;
     _originFocusIndex = NSNotFound;
     self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
-    self.itemS = 64;
-    self.previewCtnHeight = self.itemS + 10;
-    self.previewSize = CGSizeMake(self.itemS * 2, self.itemS * 2);
+    _itemS = 64;
+    _previewCtnHeight = _itemS + 10;
+    _previewSize = CGSizeMake(_itemS * 2, _itemS * 2);
 }
 
 -(void)setupUI {
@@ -322,7 +316,7 @@
         self.sendButton.frame = btnFrame;
     }
     
-    if (!self.show) {
+    if (!_show) {
         CGRect frame =  self.frame;
         frame.origin.y = self.superview.bounds.size.height;
         self.frame = frame;
@@ -330,7 +324,7 @@
     
     NSInteger count = self.selectionManager.selections.count;
     BOOL toShow = (count != 0);
-    BOOL showStatusChange = (self.lastPreviewCnt != count) && (self.previewCtnShow != toShow);
+    BOOL showStatusChange = (_lastPreviewCnt != count) && (_previewCtnShow != toShow);
     
     CGRect frame = self.previewCtn.frame;
     frame.size.width = self.bounds.size.width;
@@ -371,15 +365,15 @@
     
     ///当是预览选择模式时，个数永远不会变，但这时也要刷新
     if (self.previewSelectionMode) {
-        self.previewCtnShow = YES;
+        _previewCtnShow = YES;
         self.previewCtn.alpha = 1;
         [self.previewCol reloadData];
     } else {
-        if (self.lastPreviewCnt != count) {
-            self.lastPreviewCnt = count;
+        if (_lastPreviewCnt != count) {
+            _lastPreviewCnt = count;
             
             if (showStatusChange) {
-                self.previewCtnShow = toShow;
+                _previewCtnShow = toShow;
                 if (toShow) {
                     if (animated) {
                         [UIView animateWithDuration:0.25 animations:^{
@@ -414,7 +408,7 @@
 
 -(BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
     BOOL inside = [super pointInside:point withEvent:event];
-    if (!self.previewCtnShow || inside) {
+    if (!_previewCtnShow || inside) {
         return inside;
     }
     return CGRectContainsPoint(self.previewCtn.frame, point);
@@ -422,8 +416,8 @@
 
 -(void)setTintColor:(UIColor *)tintColor {
     [super setTintColor:tintColor];
-    if (self.selectionManager.selections.count && self.originFocusIndex != NSNotFound) {
-        DWAlbumPreviewToolBarCell * focusCell = (DWAlbumPreviewToolBarCell *)[_previewCol cellForItemAtIndexPath:[NSIndexPath indexPathForItem:self.originFocusIndex inSection:0]];
+    if (self.selectionManager.selections.count && _originFocusIndex != NSNotFound) {
+        DWAlbumPreviewToolBarCell * focusCell = (DWAlbumPreviewToolBarCell *)[_previewCol cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_originFocusIndex inSection:0]];
         [focusCell setTintColor:tintColor];
     }
 }
@@ -431,7 +425,7 @@
 #pragma mark --- setter/getter ---
 -(UIView *)previewCtn {
     if (!_previewCtn) {
-        _previewCtn = [[UIView alloc] initWithFrame:CGRectMake(0, -self.previewCtnHeight, self.bounds.size.width, self.previewCtnHeight)];
+        _previewCtn = [[UIView alloc] initWithFrame:CGRectMake(0, -_previewCtnHeight, self.bounds.size.width, _previewCtnHeight)];
         _previewCtn.alpha = 0;
     }
     return _previewCtn;
@@ -440,7 +434,7 @@
 -(UICollectionView *)previewCol {
     if (!_previewCol) {
         UICollectionViewFlowLayout * layout = [UICollectionViewFlowLayout new];
-        layout.itemSize = CGSizeMake(self.itemS, self.itemS);
+        layout.itemSize = CGSizeMake(_itemS, _itemS);
         layout.minimumLineSpacing = 5;
         layout.minimumInteritemSpacing = 0;
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
@@ -465,7 +459,7 @@
 }
 
 -(CGFloat)previewCtnOffset {
-    return self.previewCtnShow?self.previewCtnHeight:0;
+    return _previewCtnShow?_previewCtnHeight:0;
 }
 
 @end

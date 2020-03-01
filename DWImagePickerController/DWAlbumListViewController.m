@@ -171,10 +171,10 @@
 @end
 
 @interface DWAlbumListViewController ()<UITraitEnvironment>
-
-@property (nonatomic ,assign) CGFloat cellHeight;
-
-@property (nonatomic ,assign) CGSize photoSize;
+{
+    CGFloat _cellHeight;
+    CGSize _photoSize;
+}
 
 ///深色模式适配
 @property (nonatomic ,assign) BOOL darkMode;
@@ -197,9 +197,9 @@
             self.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
         }
     }
-    self.cellHeight = 70;
+    _cellHeight = 70;
     CGFloat scale = 2;
-    self.photoSize = CGSizeMake(self.cellHeight * scale, self.cellHeight * scale);
+    _photoSize = CGSizeMake(_cellHeight * scale, _cellHeight * scale);
     self.view.backgroundColor = self.internalWhiteColor;
     self.tableView.backgroundColor = self.internalWhiteColor;
     self.tableView.tableFooterView = [[UIView alloc] init];
@@ -233,7 +233,7 @@
     cell.titleLabel.text = albumModel.name;
     cell.countLabel.text = [NSString stringWithFormat:@"(%ld)",(long)albumModel.count];
     cell.albumModel = albumModel;
-    [self.albumManager fetchPostForAlbum:albumModel targetSize:self.photoSize completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+    [self.albumManager fetchPostForAlbum:albumModel targetSize:_photoSize completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         if ([albumModel isEqual:cell.albumModel]) {
             cell.posterImageView.image = obj.media;
         }
@@ -243,7 +243,7 @@
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return self.cellHeight;
+    return _cellHeight;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {

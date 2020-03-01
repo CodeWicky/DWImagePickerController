@@ -28,20 +28,19 @@
 @end
 
 @interface DWImagePickerController ()<DWMediaPreviewDataSource,DWAlbumGridDataSource,PHPhotoLibraryChangeObserver,UITraitEnvironment>
+{
+    DWAlbumModel * _currentAlbum;
+    DWAlbumGridModel * _currentGridModel;
+    NSArray <PHAsset *>* _currentPreviewResults;
+    CGSize _gridPhotoSize;
+    BOOL _previewSelectionMode;
+}
 
 @property (nonatomic ,strong) DWAlbumGridController * gridVC;
 
 @property (nonatomic ,strong) DWAlbumListViewController * listVC;
 
 @property (nonatomic ,strong) DWMediaPreviewController * previewVC;
-
-@property (nonatomic ,strong) DWAlbumModel * currentAlbum;
-
-@property (nonatomic ,strong) DWAlbumGridModel * currentGridModel;
-
-@property (nonatomic ,strong) NSArray <PHAsset *>* currentPreviewResults;
-
-@property (nonatomic ,assign) CGSize gridPhotoSize;
 
 @property (nonatomic ,strong) dispatch_queue_t fetchMediaQueue;
 
@@ -58,8 +57,6 @@
 @property (nonatomic ,strong) NSCache * posterCache;
 
 @property (nonatomic ,strong) NSCache * previewDataCache;
-
-@property (nonatomic ,assign) BOOL previewSelectionMode;
 
 @property (nonatomic ,assign) BOOL darkModeEnabled;
 
@@ -163,9 +160,9 @@
 }
 
 -(void)handleGridPreviewAtIndex:(NSInteger)index {
-    if (index < self.currentGridModel.results.count) {
+    if (index < _currentGridModel.results.count) {
         ///刷新一下最新的资源，因为在gridVC选择的过程中，可用preview资源有可能会发生改变，所以按需刷新
-        self.previewSelectionMode = NO;
+        _previewSelectionMode = NO;
         self.previewBottomToolBar.previewSelectionMode = NO;
         if ([self configCurrentPreviewResultsIfNeeded]) {
             [self.previewVC reloadPreview];
@@ -190,7 +187,7 @@
 }
 
 -(void)handlePreviewControllerHasChangedToIndex:(NSInteger)index {
-    if (self.previewSelectionMode) {
+    if (_previewSelectionMode) {
         NSInteger selectionIndex = [self transformPreviewIndexToPreviewSelectionIndex:index];
         [self.previewTopToolBar setSelectAtIndex:selectionIndex];
         [self handlePreviewBottomToolFocusAtIndex:index];
@@ -205,7 +202,7 @@
 #pragma mark ------ 资源获取 ------
 -(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
     ///这里由于预览数据源跟album数据源存在差异（不在展示范围内的可能不会丢给预览控制器，所以要将预览控制器中的index转换成album对应的index）
-    NSInteger albumIndex = [self.currentAlbum.fetchResult indexOfObject:asset];
+    NSInteger albumIndex = [_currentAlbum.fetchResult indexOfObject:asset];
     
     dispatch_async(self.fetchMediaQueue, ^{
         switch (previewType) {
@@ -246,7 +243,7 @@
 
 -(void)fetchLivePhotoWithAsset:(PHAsset *)asset index:(NSUInteger)index albumIndex:(NSUInteger)albumIndex targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
     if (@available(iOS 9.1,*)) {
-        [self.albumManager fetchLivePhotoWithAlbum:self.currentAlbum index:albumIndex targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+        [self.albumManager fetchLivePhotoWithAlbum:_currentAlbum index:albumIndex targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
             if (progressHandler) {
                 progressHandler(progress,index);
             }
@@ -263,7 +260,7 @@
 }
 
 -(void)fetchVideoWithIndex:(NSUInteger)index albumIndex:(NSUInteger)albumIndex progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    [self.albumManager fetchVideoWithAlbum:self.currentAlbum index:albumIndex shouldCache:YES progrss:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+    [self.albumManager fetchVideoWithAlbum:_currentAlbum index:albumIndex shouldCache:YES progrss:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
             progressHandler(progressNum,index);
         }
@@ -276,7 +273,7 @@
 
 -(void)fetchAnimateImageWithAsset:(PHAsset *)asset index:(NSUInteger)index albumIndex:(NSUInteger)albumIndex progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
     
-    [self.albumManager fetchOriginImageDataWithAlbum:self.currentAlbum index:albumIndex progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+    [self.albumManager fetchOriginImageDataWithAlbum:_currentAlbum index:albumIndex progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
             progressHandler(progressNum,index);
         }
@@ -305,7 +302,7 @@
         targetSize = CGSizeMake(width, width / mediaScale);
     }
     
-    [self.albumManager fetchImageWithAlbum:self.currentAlbum index:albumIndex targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+    [self.albumManager fetchImageWithAlbum:_currentAlbum index:albumIndex targetSize:targetSize shouldCache:YES progress:^(double progress, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
             progressHandler(progress,index);
         }
@@ -318,7 +315,7 @@
 }
 
 -(void)fetchOriginImageWithIndex:(NSUInteger)index albumIndex:(NSUInteger)albumIndex progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
-    [self.albumManager fetchOriginImageWithAlbum:self.currentAlbum index:albumIndex progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
+    [self.albumManager fetchOriginImageWithAlbum:_currentAlbum index:albumIndex progress:^(double progressNum, NSError * _Nullable error, BOOL * _Nonnull stop, NSDictionary * _Nullable info) {
         if (progressHandler) {
             progressHandler(progressNum,index);
         }
@@ -330,10 +327,10 @@
 }
 
 -(void)fetchOriginPosterForVideoAsset:(PHAsset *)asset atIndex:(NSInteger)index {
-    [self.albumManager fetchOriginImageWithAsset:asset networkAccessAllowed:self.currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+    [self.albumManager fetchOriginImageWithAsset:asset networkAccessAllowed:_currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
         ///不是缩略图
         if (obj.media && !obj.isDegraded) {
-            if (index < self.currentPreviewResults.count) {
+            if (index < self->_currentPreviewResults.count) {
                 DWMediaPreviewData * data = [self.previewDataCache objectForKey:asset];
                 data.previewImage = obj.media;
             }
@@ -362,23 +359,23 @@
 
 #pragma mark ------ 相册变动相关 ------
 -(void)configAlbum:(DWAlbumModel *)album {
-    if (![self.currentAlbum isEqual:album]) {
-        self.currentAlbum = album;
+    if (![_currentAlbum isEqual:album]) {
+        _currentAlbum = album;
         [self onCurrentAlbumChange];
         [self.gridTopToolBar configWithTitle:album.name];
-        [self.gridVC configWithGridModel:self.currentGridModel];
+        [self.gridVC configWithGridModel:_currentGridModel];
         [self.previewVC resetOnChangeDatasource];
     }
 }
 
 -(BOOL)onCurrentAlbumChange {
-    self.currentGridModel = [self gridModelFromAlbumModel:self.currentAlbum];
+    _currentGridModel = [self gridModelFromAlbumModel:_currentAlbum];
     return [self configCurrentPreviewResultsIfNeeded];
 }
 
 -(BOOL)configCurrentPreviewResultsIfNeeded {
-    NSArray <PHAsset *>* previewResults = [self previewResutlsFromGridModel:self.currentGridModel];
-    if ([self.currentPreviewResults isEqualToArray:previewResults]) {
+    NSArray <PHAsset *>* previewResults = [self previewResutlsFromGridModel:_currentGridModel];
+    if ([_currentPreviewResults isEqualToArray:previewResults]) {
         return NO;
     }
     [self configCurrentPreviewResults:previewResults];
@@ -387,7 +384,7 @@
 
 -(BOOL)configPreviewSelectionResultsIfNeeded {
     NSArray <PHAsset *>* previewResults = [self previewResutlsFromSelectionsModel:self.selectionManager.selections];
-    if ([self.currentPreviewResults isEqualToArray:previewResults]) {
+    if ([_currentPreviewResults isEqualToArray:previewResults]) {
         return NO;
     }
     [self configCurrentPreviewResults:previewResults];
@@ -395,19 +392,19 @@
 }
 
 -(void)configCurrentPreviewResults:(NSArray <PHAsset *>*)previewResults {
-    self.currentPreviewResults = previewResults;
+    _currentPreviewResults = previewResults;
 }
 
 #pragma mark ------ toolBar相关 ------
 -(void)handleGridBottomToolBarPreview {
-    self.previewSelectionMode = YES;
+    _previewSelectionMode = YES;
     self.previewBottomToolBar.previewSelectionMode = YES;
     ///配置预览资源
     if ([self configPreviewSelectionResultsIfNeeded]) {
         [self.previewVC reloadPreview];
     }
     
-    self.previewBottomToolBar.previewSelectionIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.currentPreviewResults.count)];
+    self.previewBottomToolBar.previewSelectionIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _currentPreviewResults.count)];
     ///直接预览第一个
     [self.previewVC previewAtIndex:0];
     ///按需刷新previewVC底部的预览toolBar
@@ -422,7 +419,7 @@
 }
 
 -(void)handlePreviewTopToolBarSelectAtIndex:(NSInteger)index {
-    if (self.previewSelectionMode) {
+    if (_previewSelectionMode) {
         [self handlePreviewSelectionSelectAtIndex:index];
     } else {
         [self handlePreviewAlbumSelectAtIndex:index];
@@ -430,12 +427,12 @@
 }
 
 -(void)handlePreviewAlbumSelectAtIndex:(NSInteger)index {
-    if (index < self.currentPreviewResults.count) {
-        PHAsset * asset = self.currentPreviewResults[index];
+    if (index < _currentPreviewResults.count) {
+        PHAsset * asset = _currentPreviewResults[index];
         NSInteger idx = [self.selectionManager indexOfSelection:asset];
         if (idx == NSNotFound) {
             ///这里由于gridViewController中添加的selection对应的mediaIndex是gridIndex，这里要转化成gridIndex
-            NSInteger gridIndex = [self.currentGridModel.results indexOfObject:asset];
+            NSInteger gridIndex = [_currentGridModel.results indexOfObject:asset];
             if ([self.selectionManager addSelection:asset mediaIndex:gridIndex mediaOption:[DWAlbumMediaHelper mediaOptionForAsset:asset]]) {
                 ///这里同样尽可能的为selection获取更多的复用资源
                 DWAlbumSelectionModel * lastSelection = self.selectionManager.selections.lastObject;
@@ -486,7 +483,7 @@
 }
 
 -(void)handlePreviewSelectionSelectAtIndex:(NSInteger)index {
-    if (index < self.currentPreviewResults.count) {
+    if (index < _currentPreviewResults.count) {
         
         if (![self.previewBottomToolBar.previewSelectionIndexes containsIndex:index]) {
             ///恢复选择
@@ -526,17 +523,17 @@
 }
 
 -(void)handlePreviewBottomToolFocusAtIndex:(NSUInteger)index {
-    if (index >= self.currentPreviewResults.count) {
+    if (index >= _currentPreviewResults.count) {
         [self.previewBottomToolBar focusOnIndex:NSNotFound];
     } else {
-        PHAsset * asset = self.currentPreviewResults[index];
+        PHAsset * asset = _currentPreviewResults[index];
         index = [self.selectionManager indexOfSelection:asset];
         [self.previewBottomToolBar focusOnIndex:index];
     }
 }
 
 -(void)handlePreviewBottomToolBarSelectAtIndex:(NSInteger)index {
-    if (self.previewSelectionMode) {
+    if (_previewSelectionMode) {
         [self.previewBottomToolBar focusOnIndex:index];
         [self.previewVC previewAtIndex:index];
         if ([self.previewBottomToolBar.previewSelectionIndexes containsIndex:index]) {
@@ -546,7 +543,7 @@
         }
     } else {
         DWAlbumSelectionModel * selectionModel = [self.selectionManager selectionModelAtIndex:index];
-        if ([self.currentPreviewResults containsObject:selectionModel.asset]) {
+        if ([_currentPreviewResults containsObject:selectionModel.asset]) {
             [self.previewBottomToolBar focusOnIndex:index];
             ///selectionModel中记录的是gridIndex，转换成previewIndex
             NSInteger previewIndex = [self transformGridIndexToPreviewIndex:selectionModel.mediaIndex];
@@ -558,21 +555,21 @@
 
 -(void)handleSelectOptionChangeRefreshPreviewDataSourceIfNeeded {
     if (!self.selectionManager.multiTypeSelectionEnable) {
-        NSArray <PHAsset *>* filterResults = [self previewResutlsFromGridModel:self.currentGridModel];
-        if ([filterResults isEqualToArray:self.currentPreviewResults]) {
+        NSArray <PHAsset *>* filterResults = [self previewResutlsFromGridModel:_currentGridModel];
+        if ([filterResults isEqualToArray:_currentPreviewResults]) {
             return;
         }
         ///这里要尽可能的保证资源刷新的过程中，previewVC当前展示的cell不变。所以记录当前展示的asset，在刷新后再切换回他的位置
-        PHAsset * currentPreviewAsset = [self.currentPreviewResults objectAtIndex:self.previewVC.currentIndex];
+        PHAsset * currentPreviewAsset = [_currentPreviewResults objectAtIndex:self.previewVC.currentIndex];
         [self configCurrentPreviewResults:filterResults];
-        NSInteger newPreviewIndex = [self.currentPreviewResults indexOfObject:currentPreviewAsset];
+        NSInteger newPreviewIndex = [_currentPreviewResults indexOfObject:currentPreviewAsset];
         [self.previewVC reloadPreview];
         [self.previewVC previewAtIndex:newPreviewIndex];
     }
 }
 
 -(void)setPreviewTopToolBarSelectedAtIndex:(NSUInteger)index {
-    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+    PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     NSUInteger idx = [self.selectionManager indexOfSelection:asset];
     ///调整idx。如果找不到改为0，因为navigationBar中规定0为未选中，如果找到则自加，因为规定角标从1开始
     if (idx == NSNotFound) {
@@ -584,7 +581,7 @@
 }
 
 -(void)handleBackFromPreviewSelectionModeSelectionsChangeIfNeeded {
-    if (self.previewSelectionMode) {
+    if (_previewSelectionMode) {
         NSMutableIndexSet * selectionIndexes = self.previewBottomToolBar.previewSelectionIndexes;
         NSInteger selectionIndexesCount = selectionIndexes.count;
         ///个数不相等，说明在预览模式下有减少
@@ -601,7 +598,7 @@
                     break;
                 }
             }
-            self.previewSelectionMode = NO;
+            _previewSelectionMode = NO;
             self.previewBottomToolBar.previewSelectionMode = NO;
             self.previewBottomToolBar.previewSelectionIndexes = nil;
             ///这里先不标记，还要刷新gridViewController
@@ -700,27 +697,27 @@
     }
     NSMutableIndexSet * tmp = [NSMutableIndexSet indexSet];
     [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-        PHAsset * asset = self.currentGridModel.results[idx];
-        NSInteger albumIndex = [self.currentAlbum.fetchResult indexOfObject:asset];
+        PHAsset * asset = _currentGridModel.results[idx];
+        NSInteger albumIndex = [_currentAlbum.fetchResult indexOfObject:asset];
         [tmp addIndex:albumIndex];
     }];
     return [tmp copy];
 }
 
 -(NSInteger)transformGridIndexToPreviewIndex:(NSInteger)index {
-    if ([self.currentPreviewResults isEqualToArray:self.currentGridModel.results]) {
+    if ([_currentPreviewResults isEqualToArray:_currentGridModel.results]) {
         return index;
     }
-    PHAsset * asset = self.currentGridModel.results[index];
-    return [self.currentPreviewResults indexOfObject:asset];
+    PHAsset * asset = _currentGridModel.results[index];
+    return [_currentPreviewResults indexOfObject:asset];
 }
 
 -(NSInteger)transformPreviewIndexToGridIndex:(NSInteger)index {
-    if ([self.currentPreviewResults isEqualToArray:self.currentGridModel.results]) {
+    if ([_currentPreviewResults isEqualToArray:_currentGridModel.results]) {
         return index;
     }
-    PHAsset * asset = self.currentPreviewResults[index];
-    return [self.currentGridModel.results indexOfObject:asset];
+    PHAsset * asset = _currentPreviewResults[index];
+    return [_currentGridModel.results indexOfObject:asset];
 }
 
 -(NSInteger)transformPreviewIndexToPreviewSelectionIndex:(NSInteger)index {
@@ -740,14 +737,14 @@
 #pragma mark --- gridViewController dataSource ---
 -(void)gridController:(DWAlbumGridController *)gridController fetchMediaForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize thumnail:(BOOL)thumnail completion:(DWGridViewControllerFetchCompletion)completion {
     if (thumnail) {
-        [self.albumManager fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:self.currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        [self.albumManager fetchImageWithAsset:asset targetSize:targetSize networkAccessAllowed:_currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
             if (completion) {
                 completion([self gridCellModelFromImageAssetModel:obj]);
             }
         }];
     } else {
-        NSInteger index = [self.currentAlbum.fetchResult indexOfObject:asset];
-        [self.albumManager fetchImageWithAlbum:self.currentAlbum index:index targetSize:targetSize shouldCache:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+        NSInteger index = [_currentAlbum.fetchResult indexOfObject:asset];
+        [self.albumManager fetchImageWithAlbum:_currentAlbum index:index targetSize:targetSize shouldCache:YES progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
             if (completion) {
                 completion([self gridCellModelFromImageAssetModel:obj]);
             }
@@ -761,34 +758,34 @@
 
 -(void)gridController:(DWAlbumGridController *)gridController startCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize {
     indexes = [self transformIndexesInGridModelToAlbum:indexes];
-    [self.albumManager startCachingImagesForAlbum:self.currentAlbum indexes:indexes targetSize:targetSize];
+    [self.albumManager startCachingImagesForAlbum:_currentAlbum indexes:indexes targetSize:targetSize];
 }
 
 -(void)gridController:(DWAlbumGridController *)gridController stopCachingMediaForIndexes:(NSIndexSet *)indexes targetSize:(CGSize)targetSize {
     indexes = [self transformIndexesInGridModelToAlbum:indexes];
-    [self.albumManager stopCachingImagesForAlbum:self.currentAlbum indexes:indexes targetSize:targetSize];
+    [self.albumManager stopCachingImagesForAlbum:_currentAlbum indexes:indexes targetSize:targetSize];
 }
 
 #pragma mark --- previewController dataSource ---
 -(NSUInteger)countOfMediaForPreviewController:(DWMediaPreviewController *)previewController {
-    return self.currentPreviewResults.count;
+    return _currentPreviewResults.count;
 }
 
 -(DWMediaPreviewType)previewController:(DWMediaPreviewController *)previewController previewTypeAtIndex:(NSUInteger)index {
-    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+    PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     return [self previewTypeForAsset:asset];
 }
 
 -(DWMediaPreviewData *)previewController:(DWMediaPreviewController *)previewController previewDataAtIndex:(NSUInteger)index {
-    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+    PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     DWMediaPreviewData * previewData = [self.previewDataCache objectForKey:asset];
     return previewData;
 }
 
 -(void)previewController:(DWMediaPreviewController *)previewController finishBuildingPreviewData:(DWMediaPreviewData *)previewData atIndex:(NSUInteger)index {
     if (previewData) {
-        if (index < self.currentPreviewResults.count) {
-            PHAsset * asset = self.currentPreviewResults[index];
+        if (index < _currentPreviewResults.count) {
+            PHAsset * asset = _currentPreviewResults[index];
             previewData.userInfo = asset;
             [self.previewDataCache setObject:previewData forKey:asset];
         }
@@ -803,7 +800,7 @@
 }
 
 -(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
-    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+    PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     return asset.mediaSubtypes & PHAssetMediaSubtypePhotoHDR;
 }
 
@@ -813,26 +810,26 @@
             fetchCompletion(nil,index);
         }
     } else {
-        if (index >= self.currentPreviewResults.count) {
+        if (index >= _currentPreviewResults.count) {
             if (fetchCompletion) {
                 fetchCompletion(nil,index);
             }
             return ;
         }
-        PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+        PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
         [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:progressHandler fetchCompletion:fetchCompletion];
     }
 }
 
 -(void)previewController:(DWMediaPreviewController *)previewController fetchPosterAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType fetchCompletion:(DWMediaPreviewFetchPosterCompletion)fetchCompletion {
-    if (index >= self.currentPreviewResults.count) {
+    if (index >= _currentPreviewResults.count) {
         if (fetchCompletion) {
             fetchCompletion(nil,index,NO);
         }
         return ;
     }
     
-    PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+    PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     if (asset.mediaType != PHAssetMediaTypeImage && asset.mediaType != PHAssetMediaTypeVideo) {
         if (fetchCompletion) {
             fetchCompletion(nil,index,NO);
@@ -850,7 +847,7 @@
     }
     
     ///这里获取poster不做缓存。因为poster的缓存可能会将更大分辨率的同样的asset的缓存覆盖掉
-    [self.albumManager fetchImageWithAsset:asset targetSize:self.gridPhotoSize networkAccessAllowed:self.currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
+    [self.albumManager fetchImageWithAsset:asset targetSize:_gridPhotoSize networkAccessAllowed:_currentAlbum.networkAccessAllowed progress:nil completion:^(DWAlbumManager *mgr, DWImageAssetModel *obj) {
         if (obj.asset && obj.media) {
             [self.posterCache setObject:obj forKey:obj.asset];
             [DWAlbumMediaHelper cachePoster:[self gridCellModelFromImageAssetModel:obj] withAsset:obj.asset];
@@ -869,7 +866,7 @@
     [indexes enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSInteger index = [obj integerValue];
         dispatch_async(self.preloadQueue, ^{
-            PHAsset * asset = [self.currentPreviewResults objectAtIndex:index];
+            PHAsset * asset = [self->_currentPreviewResults objectAtIndex:index];
             DWMediaPreviewType previewType = [self previewTypeForAsset:asset];
             [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
         });
@@ -896,18 +893,18 @@
     _gridVC.view.backgroundColor = self.internalWhiteColor;
     _gridVC.gridView.backgroundColor = self.internalWhiteColor;
     _previewVC.view.backgroundColor = self.internalWhiteColor;
-    _previewVC.previewView.backgroundColor = self.internalWhiteColor;
+    ///不设置_previewVC.previewView.backgroundColor，要始终保持为clearColor
 }
 
 #pragma mark --- observer for Photos ---
 -(void)photoLibraryDidChange:(PHChange *)changeInstance {
-    PHFetchResultChangeDetails * changes = (PHFetchResultChangeDetails *)[changeInstance changeDetailsForFetchResult:self.currentAlbum.fetchResult];
+    PHFetchResultChangeDetails * changes = (PHFetchResultChangeDetails *)[changeInstance changeDetailsForFetchResult:_currentAlbum.fetchResult];
     if (!changes) {
         return;
     }
-    [self.currentAlbum configWithResult:changes.fetchResultAfterChanges];
+    [_currentAlbum configWithResult:changes.fetchResultAfterChanges];
     [self onCurrentAlbumChange];
-    [self.gridVC refreshGrid:self.currentGridModel];
+    [self.gridVC refreshGrid:_currentGridModel];
     dispatch_async(dispatch_get_main_queue(), ^{
         ///由于内部存在缓存机制，导致只要数据源变化了，就要重新刷新预览控制器内部数据
         [self.previewVC reloadPreview];
@@ -1011,7 +1008,6 @@
         _previewVC.bottomToolBar = self.previewBottomToolBar;
         _previewVC.closeOnSlidingDown = YES;
         _previewVC.view.backgroundColor = self.internalWhiteColor;
-        _previewVC.previewView.backgroundColor = self.internalWhiteColor;
     }
     return _previewVC;
 }
