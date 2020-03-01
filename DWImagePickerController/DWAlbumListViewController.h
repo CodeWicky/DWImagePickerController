@@ -10,6 +10,8 @@
 
 @interface DWAlbumListViewController : UITableViewController
 
+@property (nonatomic ,assign) BOOL darkModeEnabled;
+
 @property (nonatomic ,strong) NSArray * albums;
 
 @property (nonatomic ,strong) DWAlbumManager * albumManager;

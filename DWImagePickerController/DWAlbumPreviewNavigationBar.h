@@ -13,6 +13,8 @@ typedef void(^DWAlbumPreviewNavigationBarAction)(DWAlbumPreviewNavigationBar * t
 
 @interface DWAlbumPreviewNavigationBar : UIView<DWMediaPreviewToolBarProtocol>
 
+@property (nonatomic ,assign) BOOL darkModeEnabled;
+
 @property (nonatomic ,copy) DWAlbumPreviewNavigationBarAction retAction;
 
 @property (nonatomic ,copy) DWAlbumPreviewNavigationBarAction selectionAction;

@@ -8,7 +8,7 @@
 #import "DWAlbumToolBar.h"
 #import <DWKit/DWLabel.h>
 
-@interface DWAlbumToolBar ()
+@interface DWAlbumToolBar ()<UITraitEnvironment>
 
 @property (nonatomic ,strong) UIVisualEffectView * blurView;
 
@@ -24,6 +24,13 @@
 
 @property (nonatomic ,strong) DWLabel * sendButton;
 
+///深色模式适配
+@property (nonatomic ,assign) BOOL darkMode;
+
+@property (nonatomic ,strong) UIColor * internalBlackColor;
+
+@property (nonatomic ,strong) UIBlurEffect * internalBlurEffect;
+
 @end
 
 @implementation DWAlbumToolBar
@@ -37,6 +44,7 @@
 
 #pragma mark --- tool method ---
 -(void)setupDefaultValue {
+    _darkModeEnabled = YES;
     self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
     self.toolBarHeight = 49;
 }
@@ -55,7 +63,7 @@
     
     if (self.selectionManager.selections.count) {
         self.previewButton.userInteractionEnabled = YES;
-        self.previewButton.textColor = [UIColor blackColor];
+        self.previewButton.textColor = self.internalBlackColor;
     } else {
         self.previewButton.userInteractionEnabled = NO;
         self.previewButton.textColor = [UIColor lightGrayColor];
@@ -97,7 +105,6 @@
     btnFrame.origin.y = 0;
     self.originCtn.frame = btnFrame;
     
-    
     if (self.selectionManager.selections.count) {
         self.sendButton.text = [NSString stringWithFormat:@"完成(%lu)",(unsigned long)self.selectionManager.selections.count];
         self.sendButton.userInteractionEnabled = YES;
@@ -119,7 +126,7 @@
     
     self.sendButton.frame = btnFrame;
     
-    btnFrame = CGRectMake(0, self.superview.bounds.size.height - self.toolBarHeight, self.superview.bounds.size.width, self.toolBarHeight);
+    btnFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - self.toolBarHeight, [UIScreen mainScreen].bounds.size.width, self.toolBarHeight);
     
     if (@available(iOS 11.0,*)) {
         btnFrame.size.height += self.safeAreaInsets.bottom;
@@ -127,6 +134,23 @@
     }
     
     self.frame = btnFrame;
+}
+
+#pragma mark --- UITraitEnvironment ---
+///处理深色模式
+-(void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection API_AVAILABLE(ios(8.0)) {
+    [super traitCollectionDidChange:previousTraitCollection];
+    if (@available(iOS 13.0,*)) {
+        [self refreshUserInterfaceStyle];
+    }
+}
+
+-(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0)) {
+    self.blurView.effect = self.internalBlurEffect;
+    if (self.previewButton.userInteractionEnabled) {
+        self.previewButton.textColor = self.internalBlackColor;
+    }
+    self.originLb.textColor = self.internalBlackColor;
 }
 
 #pragma mark --- btn action ---
@@ -174,8 +198,7 @@
 #pragma mark --- setter/getter ---
 -(UIVisualEffectView *)blurView {
     if (!_blurView) {
-        UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
-        _blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+        _blurView = [[UIVisualEffectView alloc] initWithEffect:self.internalBlurEffect];
         _blurView.frame = self.bounds;
         _blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
@@ -187,7 +210,7 @@
         _previewButton = [DWLabel new];
         _previewButton.font = [UIFont systemFontOfSize:17];
         _previewButton.text = @"预览";
-        _previewButton.textColor = [UIColor blackColor];
+        _previewButton.textColor = self.internalBlackColor;
         __weak typeof(self)weakSelf = self;
         [_previewButton addAction:^(DWLabel * _Nonnull label) {
             if (weakSelf.previewAction) {
@@ -234,7 +257,7 @@
         _originLb = [DWLabel new];
         _originLb.font = [UIFont systemFontOfSize:17];
         _originLb.text = @"原图";
-        _originLb.textColor = [UIColor blackColor];
+        _originLb.textColor = self.internalBlackColor;
         _originLb.userInteractionEnabled = NO;
     }
     return _originLb;
@@ -256,6 +279,42 @@
         }];
     }
     return _sendButton;
+}
+
+-(void)setDarkModeEnabled:(BOOL)darkModeEnabled {
+    if (_darkModeEnabled != darkModeEnabled) {
+        _darkModeEnabled = darkModeEnabled;
+        if (@available(iOS 13.0,*)) {
+            [self refreshUserInterfaceStyle];
+        }
+    }
+}
+
+-(BOOL)darkMode {
+    if (self.darkModeEnabled) {
+        if (@available(iOS 13.0,*)) {
+            if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
+                return YES;
+            } else {
+                return NO;
+            }
+        }
+    }
+    return NO;
+}
+
+-(UIColor *)internalBlackColor {
+    if (self.darkMode) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
+}
+
+-(UIBlurEffect *)internalBlurEffect {
+    if (self.darkMode) {
+        return [UIBlurEffect effectWithStyle:(UIBlurEffectStyleDark)];
+    }
+    return [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
 }
 
 @end

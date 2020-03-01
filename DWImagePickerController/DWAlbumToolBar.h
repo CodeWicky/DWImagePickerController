@@ -14,6 +14,8 @@ typedef void(^ToolBarAction)(DWAlbumToolBar * toolBar);
 
 @interface DWAlbumToolBar : UIView<DWAlbumGridToolBarProtocol>
 
+@property (nonatomic ,assign) BOOL darkModeEnabled;
+
 @property (nonatomic ,copy) ToolBarAction previewAction;
 
 @property (nonatomic ,copy) ToolBarAction originImageAction;
@@ -27,6 +29,8 @@ typedef void(^ToolBarAction)(DWAlbumToolBar * toolBar);
 -(void)setupUI;
 
 -(void)refreshUI;
+
+-(void)refreshUserInterfaceStyle;
 
 @end
 

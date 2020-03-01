@@ -29,13 +29,19 @@
     return self;
 }
 
+-(void)setTintColor:(UIColor *)tintColor {
+    [super setTintColor:tintColor];
+    self.retImgView.tintColor = tintColor;
+}
+
 #pragma mark --- setter/getter ---
 -(UIImageView *)retImgView {
     if (!_retImgView) {
         _retImgView = [[UIImageView alloc] initWithFrame:CGRectMake(12, 11.5, 13, 21)];
         NSString * bundlePath = [[NSBundle mainBundle] pathForResource:@"DWImagePickerController" ofType:@"bundle"];
         NSBundle * bundle = [NSBundle bundleWithPath:bundlePath];
-        UIImage * image = [UIImage imageWithContentsOfFile:[bundle pathForResource:@"nav_ret_btn@3x" ofType:@"png"]];
+        UIImage * image =
+        [[UIImage imageWithContentsOfFile:[bundle pathForResource:@"nav_ret_btn@3x" ofType:@"png"]] imageWithRenderingMode:(UIImageRenderingModeAlwaysTemplate)];
         _retImgView.image = image;
         _retImgView.userInteractionEnabled = NO;
     }
@@ -44,7 +50,9 @@
 
 @end
 
-@interface DWAlbumPreviewNavigationBar ()
+@interface DWAlbumPreviewNavigationBar ()<UITraitEnvironment>
+
+@property (nonatomic ,strong) UIVisualEffectView * blurView;
 
 @property (nonatomic ,assign) BOOL show;
 
@@ -53,6 +61,12 @@
 @property (nonatomic ,strong) DWLabel * selectionLb;
 
 @property (nonatomic ,assign) NSInteger index;
+
+@property (nonatomic ,assign) BOOL darkMode;
+
+@property (nonatomic ,strong) UIColor * internalBlackColor;
+
+@property (nonatomic ,strong) UIBlurEffect * internalBlurEffect;
 
 @end
 
@@ -80,17 +94,14 @@
 }
 
 -(void)setupDefaultValue {
+    _darkModeEnabled = YES;
     _show = YES;
     self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
     _index = NSNotFound;
 }
 
 -(void)setupUI {
-    UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
-    UIVisualEffectView * blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-    blurView.frame = self.bounds;
-    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self addSubview:blurView];
+    [self addSubview:self.blurView];
     [self addSubview:self.retBtn];
     [self addSubview:self.selectionLb];
 }
@@ -169,6 +180,20 @@
     return self.frame.size.height;
 }
 
+#pragma mark --- UITraitEnvironment ---
+///处理深色模式
+-(void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection API_AVAILABLE(ios(8.0)) {
+    [super traitCollectionDidChange:previousTraitCollection];
+    if (@available(iOS 13.0,*)) {
+        [self refreshUserInterfaceStyle];
+    }
+}
+
+-(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0)) {
+    self.blurView.effect = self.internalBlurEffect;
+    self.retBtn.tintColor = self.internalBlackColor;
+}
+
 #pragma mark --- btn action ---
 -(void)retBtnAction:(UIButton *)sender {
     if (self.retAction) {
@@ -204,11 +229,21 @@
 }
 
 #pragma mark --- setter/getter ---
+-(UIVisualEffectView *)blurView {
+    if (!_blurView) {
+        _blurView = [[UIVisualEffectView alloc] initWithEffect:self.internalBlurEffect];
+        _blurView.frame = self.bounds;
+        _blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    }
+    return _blurView;
+}
+
 -(DWAlbumPreviewReturnBarButton *)retBtn {
     if (!_retBtn) {
         _retBtn = [DWAlbumPreviewReturnBarButton buttonWithType:(UIButtonTypeCustom)];
         [_retBtn setFrame:CGRectMake(0, 0, 44, 44)];
         [_retBtn addTarget:self action:@selector(retBtnAction:) forControlEvents:(UIControlEventTouchUpInside)];
+        _retBtn.tintColor = self.internalBlackColor;
     }
     return _retBtn;
 }
@@ -240,6 +275,42 @@
         _selectionLb.userInteractionEnabled = YES;
     }
     return _selectionLb;
+}
+
+-(void)setDarkModeEnabled:(BOOL)darkModeEnabled {
+    if (_darkModeEnabled != darkModeEnabled) {
+        _darkModeEnabled = darkModeEnabled;
+        if (@available(iOS 13.0,*)) {
+            [self refreshUserInterfaceStyle];
+        }
+    }
+}
+
+-(BOOL)darkMode {
+    if (self.darkModeEnabled) {
+        if (@available(iOS 13.0,*)) {
+            if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
+                return YES;
+            } else {
+                return NO;
+            }
+        }
+    }
+    return NO;
+}
+
+-(UIColor *)internalBlackColor {
+    if (self.darkMode) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
+}
+
+-(UIBlurEffect *)internalBlurEffect {
+    if (self.darkMode) {
+        return [UIBlurEffect effectWithStyle:(UIBlurEffectStyleDark)];
+    }
+    return [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
 }
 
 @end

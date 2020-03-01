@@ -7,7 +7,9 @@
 
 #import "DWAlbumListViewController.h"
 
-@interface DWPosterCell : UITableViewCell
+@interface DWPosterCell : UITableViewCell<UITraitEnvironment>
+
+@property (nonatomic ,assign) BOOL darkModeEnabled;
 
 @property (nonatomic ,strong) UIImageView * posterImageView;
 
@@ -17,6 +19,10 @@
 
 @property (nonatomic ,strong) DWAlbumModel * albumModel;
 
+@property (nonatomic ,assign) BOOL darkMode;
+
+@property (nonatomic ,strong) UIColor * internalBlackColor;
+
 @end
 
 @implementation DWPosterCell
@@ -24,6 +30,7 @@
 #pragma mark --- override ---
 -(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self.darkModeEnabled = YES;
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         NSString * bundlePath = [[NSBundle mainBundle] pathForResource:@"DWImagePickerController" ofType:@"bundle"];
@@ -89,6 +96,18 @@
     }
 }
 
+#pragma mark --- UITraitEnvironment ---
+-(void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection API_AVAILABLE(ios(8.0)) {
+    [super traitCollectionDidChange:previousTraitCollection];
+    if (@available(iOS 13.0,*)) {
+        [self refreshUserInterfaceStyle];
+    }
+}
+
+-(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0)) {
+    self.titleLabel.textColor = self.internalBlackColor;
+}
+
 #pragma mark --- setter/getter ---
 -(UIImageView *)posterImageView {
     if (!_posterImageView) {
@@ -104,7 +123,7 @@
     if (!_titleLabel) {
         _titleLabel = [[UILabel alloc] init];
         _titleLabel.font = [UIFont boldSystemFontOfSize:17];
-        _titleLabel.textColor = [UIColor blackColor];
+        _titleLabel.textColor = self.internalBlackColor;
         [self.contentView addSubview:_titleLabel];
     }
     return _titleLabel;
@@ -120,13 +139,49 @@
     return _countLabel;
 }
 
+-(void)setDarkModeEnabled:(BOOL)darkModeEnabled {
+    if (_darkModeEnabled != darkModeEnabled) {
+        _darkModeEnabled = darkModeEnabled;
+        if (@available(iOS 13.0,*)) {
+            [self refreshUserInterfaceStyle];
+        }
+    }
+}
+
+-(BOOL)darkMode {
+    if (self.darkModeEnabled) {
+        if (@available(iOS 13.0,*)) {
+            if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
+                return YES;
+            } else {
+                return NO;
+            }
+        }
+    }
+    return NO;
+}
+
+-(UIColor *)internalBlackColor {
+    if (self.darkMode) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
+}
+
 @end
 
-@interface DWAlbumListViewController ()
+@interface DWAlbumListViewController ()<UITraitEnvironment>
 
 @property (nonatomic ,assign) CGFloat cellHeight;
 
 @property (nonatomic ,assign) CGSize photoSize;
+
+///深色模式适配
+@property (nonatomic ,assign) BOOL darkMode;
+
+@property (nonatomic ,strong) UIColor * internalBlackColor;
+
+@property (nonatomic ,strong) UIColor * internalWhiteColor;
 
 @end
 
@@ -135,11 +190,12 @@
 #pragma mark --- life cycle ---
 -(void)viewDidLoad {
     [super viewDidLoad];
+    self.darkModeEnabled = YES;
     self.cellHeight = 70;
     CGFloat scale = 2;
     self.photoSize = CGSizeMake(self.cellHeight * scale, self.cellHeight * scale);
-    self.view.backgroundColor = [UIColor whiteColor];
-    self.tableView.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = self.internalWhiteColor;
+    self.tableView.backgroundColor = self.internalWhiteColor;
     self.tableView.tableFooterView = [[UIView alloc] init];
     [self.tableView registerClass:[DWPosterCell class] forCellReuseIdentifier:@"PosterCell"];
 }
@@ -184,6 +240,57 @@
     if (self.albumSelectAction) {
         self.albumSelectAction(albumModel, indexPath);
     }
+}
+
+#pragma mark --- UITraitEnvironment ---
+-(void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection API_AVAILABLE(ios(8.0)) {
+    [super traitCollectionDidChange:previousTraitCollection];
+    if (@available(iOS 13.0,*)) {
+        [self refreshUserInterfaceStyle];
+    }
+}
+
+-(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0)) {
+    self.tableView.backgroundColor = self.internalWhiteColor;
+    self.view.backgroundColor = self.internalWhiteColor;
+    [self.tableView reloadData];
+}
+
+#pragma mark --- setter/getter ---
+-(void)setDarkModeEnabled:(BOOL)darkModeEnabled {
+    if (_darkModeEnabled != darkModeEnabled) {
+        _darkModeEnabled = darkModeEnabled;
+        if (@available(iOS 13.0,*)) {
+            [self refreshUserInterfaceStyle];
+        }
+    }
+}
+
+-(BOOL)darkMode {
+    if (self.darkModeEnabled) {
+        if (@available(iOS 13.0,*)) {
+            if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
+                return YES;
+            } else {
+                return NO;
+            }
+        }
+    }
+    return NO;
+}
+
+-(UIColor *)internalBlackColor {
+    if (self.darkMode) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
+}
+
+-(UIColor *)internalWhiteColor {
+    if (!self.darkMode) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
 }
 
 @end

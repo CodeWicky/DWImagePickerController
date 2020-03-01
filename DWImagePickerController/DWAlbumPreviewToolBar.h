@@ -24,6 +24,8 @@ typedef void(^PreviewToolBarAction)(DWAlbumPreviewToolBar * toolBar,NSInteger in
 
 -(void)focusOnIndex:(NSInteger)index;
 
+-(void)refreshSelectionWithAnimated:(BOOL)animated;
+
 @end
 
 NS_ASSUME_NONNULL_END

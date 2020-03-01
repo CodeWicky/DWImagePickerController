@@ -161,7 +161,7 @@
         [self.previewVC previewAtIndex:previewIndex];
         ///按需刷新previewVC底部的预览toolBar
         if (self.selectionManager.needsRefreshSelection) {
-            [self.previewBottomToolBar refreshUI];
+            [self.previewBottomToolBar refreshSelectionWithAnimated:NO];
         }
         ///刷新previewVC顶部toolBar的选择状态
         [self setPreviewTopToolBarSelectedAtIndex:previewIndex];
@@ -393,7 +393,7 @@
     [self.previewVC previewAtIndex:0];
     ///按需刷新previewVC底部的预览toolBar
     if (self.selectionManager.needsRefreshSelection) {
-        [self.previewBottomToolBar refreshUI];
+        [self.previewBottomToolBar refreshSelectionWithAnimated:NO];
     }
     ///刷新previewVC顶部toolBar的选择状态
     [self setPreviewTopToolBarSelectedAtIndex:0];
@@ -1106,6 +1106,7 @@
         _selectableOption = DWAlbumMediaOptionAll;
         _maxSelectCount = 0;
         _multiTypeSelectionEnable = YES;
+        _darkModeEnabled = YES;
     }
     return self;
 }

@@ -112,6 +112,8 @@
 
 @interface DWAlbumToolBar (Private)
 
+@property (nonatomic ,strong) UIVisualEffectView * blurView;
+
 @property (nonatomic ,strong) DWLabel * sendButton;
 
 @end
@@ -142,7 +144,7 @@
 
 @property (nonatomic ,assign) BOOL networkAccessAllowed;
 
-@property (nonatomic ,strong) UIVisualEffectView * blurView;
+//@property (nonatomic ,strong) UIVisualEffectView * blurView;
 
 @property (nonatomic ,strong) UIView * mask;
 
@@ -290,8 +292,15 @@
 }
 
 -(void)refreshUI {
+    [self refreshUIWithAnimated:NO];
+}
+
+-(void)refreshSelection {
+    [self refreshUIWithAnimated:YES];
+}
+
+-(void)refreshUIWithAnimated:(BOOL)animated {
     [super refreshUI];
-    
     if (self.previewSelectionMode) {
         if (self.previewSelectionIndexes.count) {
             self.sendButton.text = [NSString stringWithFormat:@"完成(%lu)",(unsigned long)self.previewSelectionIndexes.count];
@@ -314,8 +323,6 @@
         
         self.sendButton.frame = btnFrame;
     }
-    
-    
     
     if (!self.show) {
         CGRect frame =  self.frame;
@@ -343,20 +350,24 @@
         frame.size.height = self.bounds.size.height;
     }
     
-    
-    
     if (!CGRectEqualToRect(self.mask.frame, frame)) {
         
         CGRect oriBlurRect = self.mask.frame;
         oriBlurRect.size.width = frame.size.width;
         if (CGRectGetMaxY(oriBlurRect) != self.bounds.size.height) {
             oriBlurRect.size.height = self.bounds.size.height;
+            self.mask.frame = oriBlurRect;
+            [self.mask layoutSubviews];
         }
-        self.mask.frame = oriBlurRect;
+        
         if (!CGRectEqualToRect(oriBlurRect, frame)) {
-            [UIView animateWithDuration:0.25 animations:^{
+            if (animated) {
+                [UIView animateWithDuration:0.25 animations:^{
+                    self.mask.frame = frame;
+                }];
+            } else {
                 self.mask.frame = frame;
-            }];
+            }
         }
     }
     
@@ -372,15 +383,24 @@
             if (showStatusChange) {
                 self.previewCtnShow = toShow;
                 if (toShow) {
-                    [UIView animateWithDuration:0.25 animations:^{
+                    if (animated) {
+                        [UIView animateWithDuration:0.25 animations:^{
+                            self.previewCtn.alpha = 1;
+                        }];
+                    } else {
                         self.previewCtn.alpha = 1;
-                    }];
+                    }
                 } else {
-                    [UIView animateWithDuration:0.25 animations:^{
+                    if (animated) {
+                        [UIView animateWithDuration:0.25 animations:^{
+                            self.previewCtn.alpha = 0;
+                        } completion:^(BOOL finished) {
+                            [self.previewCol reloadData];
+                        }];
+                    } else {
                         self.previewCtn.alpha = 0;
-                    } completion:^(BOOL finished) {
                         [self.previewCol reloadData];
-                    }];
+                    }
                 }
             }
             if (!(showStatusChange && !toShow)) {
@@ -388,6 +408,10 @@
             }
         }
     }
+}
+
+-(void)refreshSelectionWithAnimated:(BOOL)animated {
+    [self refreshUIWithAnimated:animated];
 }
 
 -(BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
@@ -434,14 +458,14 @@
     return _previewCol;
 }
 
--(UIVisualEffectView *)blurView {
-    if (!_blurView) {
-        UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
-        _blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-        _blurView.frame = self.bounds;
-    }
-    return _blurView;
-}
+//-(UIVisualEffectView *)blurView {
+//    if (!_blurView) {
+//        UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
+//        _blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+//        _blurView.frame = self.bounds;
+//    }
+//    return _blurView;
+//}
 
 -(UIView *)mask {
     if (!_mask) {
