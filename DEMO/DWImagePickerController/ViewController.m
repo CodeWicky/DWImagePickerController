@@ -39,6 +39,7 @@
     conf.displayMediaOption = DWAlbumMediaOptionAll;
     conf.selectableOption = DWAlbumMediaOptionAll;
     conf.multiTypeSelectionEnable = NO;
+//    conf.darkModeEnabled = NO;
     DWImagePickerController * picker = [[DWImagePickerController alloc] initWithAlbumManager:nil fetchOption:nil pickerConfiguration:conf columnCount:3 spacing:5];
     [picker fetchCameraRollWithCompletion:^{
         [self presentViewController:picker animated:YES completion:nil];

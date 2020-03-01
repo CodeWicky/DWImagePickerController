@@ -9,8 +9,8 @@
 
 
 #import "DWImagePickerController.h"
-#import "DWAlbumToolBar.h"
 #import "DWAlbumPreviewToolBar.h"
+#import "DWAlbumGridNavigationBar.h"
 #import "DWAlbumPreviewNavigationBar.h"
 #import <DWMediaPreviewController/DWMediaPreviewCell.h>
 #import <DWAlbumGridController/DWAlbumMediaHelper.h>
@@ -27,7 +27,7 @@
 
 @end
 
-@interface DWImagePickerController ()<DWMediaPreviewDataSource,DWAlbumGridDataSource,PHPhotoLibraryChangeObserver>
+@interface DWImagePickerController ()<DWMediaPreviewDataSource,DWAlbumGridDataSource,PHPhotoLibraryChangeObserver,UITraitEnvironment>
 
 @property (nonatomic ,strong) DWAlbumGridController * gridVC;
 
@@ -47,6 +47,8 @@
 
 @property (nonatomic ,strong) dispatch_queue_t preloadQueue;
 
+@property (nonatomic ,strong) DWAlbumGridNavigationBar * gridTopToolBar;
+
 @property (nonatomic ,strong) DWAlbumToolBar * gridBottomToolBar;
 
 @property (nonatomic ,strong) DWAlbumPreviewNavigationBar * previewTopToolBar;
@@ -59,6 +61,14 @@
 
 @property (nonatomic ,assign) BOOL previewSelectionMode;
 
+@property (nonatomic ,assign) BOOL darkModeEnabled;
+
+@property (nonatomic ,assign) BOOL darkMode;
+
+@property (nonatomic ,strong) UIColor * internalBlackColor;
+
+@property (nonatomic ,strong) UIColor * internalWhiteColor;
+
 @end
 
 @implementation DWImagePickerController
@@ -67,6 +77,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    if (@available(iOS 13.0, *)) {
+        if (self.darkModeEnabled) {
+            self.overrideUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
+        } else {
+            self.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
+        }
+    }
 }
 
 #pragma mark --- interface method ---
@@ -79,6 +96,7 @@
         _columnCount = columnCount;
         _spacing = spacing;
         self.modalPresentationStyle = UIModalPresentationFullScreen;
+        
     }
     return self;
 }
@@ -347,6 +365,7 @@
     if (![self.currentAlbum isEqual:album]) {
         self.currentAlbum = album;
         [self onCurrentAlbumChange];
+        [self.gridTopToolBar configWithTitle:album.name];
         [self.gridVC configWithGridModel:self.currentGridModel];
         [self.previewVC resetOnChangeDatasource];
     }
@@ -861,6 +880,25 @@
     [self handlePreviewControllerHasChangedToIndex:index];
 }
 
+#pragma mark --- UITraitEnvironment ---
+///处理深色模式
+-(void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection API_AVAILABLE(ios(8.0)) {
+    [super traitCollectionDidChange:previousTraitCollection];
+    if (@available(iOS 13.0,*)) {
+        [self refreshUserInterfaceStyle];
+    }
+}
+
+-(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0)) {
+    _listVC.navigationItem.rightBarButtonItem.tintColor = self.internalBlackColor;
+    _listVC.view.backgroundColor = self.internalWhiteColor;
+    _listVC.tableView.backgroundColor = self.internalWhiteColor;
+    _gridVC.view.backgroundColor = self.internalWhiteColor;
+    _gridVC.gridView.backgroundColor = self.internalWhiteColor;
+    _previewVC.view.backgroundColor = self.internalWhiteColor;
+    _previewVC.previewView.backgroundColor = self.internalWhiteColor;
+}
+
 #pragma mark --- observer for Photos ---
 -(void)photoLibraryDidChange:(PHChange *)changeInstance {
     PHFetchResultChangeDetails * changes = (PHFetchResultChangeDetails *)[changeInstance changeDetailsForFetchResult:self.currentAlbum.fetchResult];
@@ -930,6 +968,7 @@
 -(DWAlbumListViewController *)listVC {
     if (!_listVC) {
         _listVC = [[DWAlbumListViewController alloc] init];
+        _listVC.darkModeEnabled = self.darkModeEnabled;
         __weak typeof(self) weakSelf = self;
         _listVC.albumSelectAction = ^(DWAlbumModel *album, NSIndexPath *indexPath) {
             [weakSelf configAlbum:album];
@@ -937,9 +976,9 @@
         };
         _listVC.title = @"照片";
         _listVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismissByCancel)];
-        _listVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];
-        _listVC.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:nil];
-        _listVC.navigationItem.backBarButtonItem.tintColor = [UIColor blackColor];
+        _listVC.navigationItem.rightBarButtonItem.tintColor = self.internalBlackColor;
+        _listVC.view.backgroundColor = self.internalWhiteColor;
+        _listVC.tableView.backgroundColor = self.internalWhiteColor;
     }
     return _listVC;
 }
@@ -952,11 +991,10 @@
         _gridVC.dataSource = self;
         _gridPhotoSize = CGSizeMake(width * 2, width * 2);
         _gridVC.selectionManager = self.selectionManager;
+        _gridVC.topToolBar = self.gridTopToolBar;
         _gridVC.bottomToolBar = self.gridBottomToolBar;
-        _gridVC.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(dismissByCancel)];
-        _gridVC.navigationItem.rightBarButtonItem.tintColor = [UIColor blackColor];
-        _gridVC.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:nil];
-        _gridVC.navigationItem.backBarButtonItem.tintColor = [UIColor blackColor];
+        _gridVC.view.backgroundColor = self.internalWhiteColor;
+        _gridVC.gridView.backgroundColor = self.internalWhiteColor;
     }
     return _gridVC;
 }
@@ -970,6 +1008,8 @@
         _previewVC.topToolBar = self.previewTopToolBar;
         _previewVC.bottomToolBar = self.previewBottomToolBar;
         _previewVC.closeOnSlidingDown = YES;
+        _previewVC.view.backgroundColor = self.internalWhiteColor;
+        _previewVC.previewView.backgroundColor = self.internalWhiteColor;
     }
     return _previewVC;
 }
@@ -1013,9 +1053,28 @@
     return _preloadQueue;
 }
 
+-(DWAlbumGridNavigationBar *)gridTopToolBar {
+    if (!_gridTopToolBar) {
+        _gridTopToolBar = [DWAlbumGridNavigationBar toolBar];
+        _gridTopToolBar.darkModeEnabled = self.darkModeEnabled;
+        __weak typeof(self) weakSelf = self;
+        _gridTopToolBar.retAction = ^(DWAlbumNavigationBar *toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf popViewControllerAnimated:YES];
+        };
+        
+        _gridTopToolBar.cancelAction = ^(DWAlbumNavigationBar * _Nonnull toolBar) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf dismissByCancel];
+        };
+    }
+    return _gridTopToolBar;
+}
+
 -(DWAlbumToolBar *)gridBottomToolBar {
     if (!_gridBottomToolBar) {
         _gridBottomToolBar = [DWAlbumToolBar toolBar];
+        _gridBottomToolBar.darkModeEnabled = self.darkModeEnabled;
         __weak typeof(self) weakSelf = self;
         if (self.pickerConf.sendAction) {
             _gridBottomToolBar.sendAction = ^(DWAlbumToolBar * _Nonnull toolBar) {
@@ -1041,13 +1100,14 @@
 -(DWAlbumPreviewNavigationBar *)previewTopToolBar {
     if (!_previewTopToolBar) {
         _previewTopToolBar = [DWAlbumPreviewNavigationBar toolBar];
+        _previewTopToolBar.darkModeEnabled = self.darkModeEnabled;
         __weak typeof(self) weakSelf = self;
-        _previewTopToolBar.retAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
+        _previewTopToolBar.retAction = ^(DWAlbumNavigationBar *toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             [strongSelf handleBackFromPreviewSelectionModeSelectionsChangeIfNeeded];
             [strongSelf popViewControllerAnimated:YES];
         };
-        _previewTopToolBar.selectionAction = ^(DWAlbumPreviewNavigationBar *toolBar) {
+        _previewTopToolBar.selectionAction = ^(DWAlbumNavigationBar *toolBar) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             [strongSelf handlePreviewTopToolBarSelectAtIndex:strongSelf.previewVC.currentIndex];
         };
@@ -1058,6 +1118,7 @@
 -(DWAlbumPreviewToolBar *)previewBottomToolBar {
     if (!_previewBottomToolBar) {
         _previewBottomToolBar = [DWAlbumPreviewToolBar toolBar];
+        _previewBottomToolBar.darkModeEnabled = self.darkModeEnabled;
         [_previewBottomToolBar configWithAlbumManager:self.albumManager networkAccessAllowed:self.fetchOption?self.fetchOption.networkAccessAllowed:YES];
         [_previewBottomToolBar configWithSelectionManager:self.selectionManager];
         __weak typeof(self) weakSelf = self;
@@ -1094,6 +1155,37 @@
         _previewDataCache = [[NSCache alloc] init];
     }
     return _previewDataCache;
+}
+
+-(BOOL)darkModeEnabled {
+    return self.pickerConf?self.pickerConf.darkModeEnabled:YES;
+}
+
+-(BOOL)darkMode {
+    if (self.darkModeEnabled) {
+        if (@available(iOS 13.0,*)) {
+            if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
+                return YES;
+            } else {
+                return NO;
+            }
+        }
+    }
+    return NO;
+}
+
+-(UIColor *)internalBlackColor {
+    if (self.darkMode) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
+}
+
+-(UIColor *)internalWhiteColor {
+    if (!self.darkMode) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
 }
 
 @end

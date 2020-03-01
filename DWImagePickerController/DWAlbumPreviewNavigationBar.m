@@ -8,75 +8,25 @@
 #import "DWAlbumPreviewNavigationBar.h"
 #import <DWKit/DWLabel.h>
 
-@interface DWAlbumPreviewReturnBarButton : UIButton
-
-@property (nonatomic ,strong) UIImageView * retImgView;
-
-@end
-
-@implementation DWAlbumPreviewReturnBarButton
-
-#pragma mark --- tool method ---
--(void)setupUI {
-    [self addSubview:self.retImgView];
-}
-
-#pragma mark --- override ---
--(instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        [self setupUI];
-    }
-    return self;
-}
-
--(void)setTintColor:(UIColor *)tintColor {
-    [super setTintColor:tintColor];
-    self.retImgView.tintColor = tintColor;
-}
-
-#pragma mark --- setter/getter ---
--(UIImageView *)retImgView {
-    if (!_retImgView) {
-        _retImgView = [[UIImageView alloc] initWithFrame:CGRectMake(12, 11.5, 13, 21)];
-        NSString * bundlePath = [[NSBundle mainBundle] pathForResource:@"DWImagePickerController" ofType:@"bundle"];
-        NSBundle * bundle = [NSBundle bundleWithPath:bundlePath];
-        UIImage * image =
-        [[UIImage imageWithContentsOfFile:[bundle pathForResource:@"nav_ret_btn@3x" ofType:@"png"]] imageWithRenderingMode:(UIImageRenderingModeAlwaysTemplate)];
-        _retImgView.image = image;
-        _retImgView.userInteractionEnabled = NO;
-    }
-    return _retImgView;
-}
-
-@end
-
-@interface DWAlbumPreviewNavigationBar ()<UITraitEnvironment>
-
-@property (nonatomic ,strong) UIVisualEffectView * blurView;
+@interface DWAlbumPreviewNavigationBar ()
 
 @property (nonatomic ,assign) BOOL show;
-
-@property (nonatomic ,strong) DWAlbumPreviewReturnBarButton * retBtn;
 
 @property (nonatomic ,strong) DWLabel * selectionLb;
 
 @property (nonatomic ,assign) NSInteger index;
 
-@property (nonatomic ,assign) BOOL darkMode;
-
-@property (nonatomic ,strong) UIColor * internalBlackColor;
-
-@property (nonatomic ,strong) UIBlurEffect * internalBlurEffect;
+//@property (nonatomic ,assign) BOOL darkMode;
+//
+//@property (nonatomic ,strong) UIColor * internalBlackColor;
+//
+//@property (nonatomic ,strong) UIBlurEffect * internalBlurEffect;
 
 @end
 
 @implementation DWAlbumPreviewNavigationBar
 
 #pragma mark --- interface method ---
-+(instancetype)toolBar {
-    return [self new];
-}
-
 -(void)setSelectAtIndex:(NSInteger)index {
     if (index > 0 && index != NSNotFound) {
         _index = index;
@@ -91,56 +41,6 @@
     }
     
     [self refreshUI];
-}
-
--(void)setupDefaultValue {
-    _darkModeEnabled = YES;
-    _show = YES;
-    self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
-    _index = NSNotFound;
-}
-
--(void)setupUI {
-    [self addSubview:self.blurView];
-    [self addSubview:self.retBtn];
-    [self addSubview:self.selectionLb];
-}
-
--(void)refreshUI {
-    
-    [self.selectionLb sizeToFit];
-    CGRect btnFrame = self.selectionLb.frame;
-    btnFrame.origin.x = CGRectGetWidth([UIScreen mainScreen].bounds) - CGRectGetWidth(btnFrame) - 11;//11是以44为实际响应区域后selectionLb边距与44*44的距离
-    btnFrame.origin.y = 11;
-    if (@available(iOS 11.0,*)) {
-        btnFrame.origin.y += self.safeAreaInsets.top;
-        btnFrame.origin.x -= self.safeAreaInsets.right;
-    } else {
-        btnFrame.origin.y += CGRectGetMaxY([UIApplication sharedApplication].statusBarFrame);
-    }
-    self.selectionLb.frame = btnFrame;
-    
-    btnFrame = self.retBtn.frame;
-    btnFrame.origin.x = 0;
-    if (@available(iOS 11.0,*)) {
-        btnFrame.origin.y = self.safeAreaInsets.top;
-        btnFrame.origin.x = self.safeAreaInsets.left;
-        ///为了保证跟系统按钮位置搞好对上
-        if (btnFrame.origin.x > 0) {
-            btnFrame.origin.x -= 5;
-        }
-    } else {
-        btnFrame.origin.y = CGRectGetMaxY([UIApplication sharedApplication].statusBarFrame);
-    }
-    [self.retBtn setFrame:btnFrame];
-
-    if (self.show) {
-        btnFrame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, CGRectGetMaxY(btnFrame));
-    } else {
-        btnFrame = CGRectMake(0,-CGRectGetMaxY(btnFrame), [UIScreen mainScreen].bounds.size.width, CGRectGetMaxY(btnFrame));
-    }
-    
-    self.frame = btnFrame;
 }
 
 #pragma mark --- DWMediaPreviewTopToolBarProtocol method ---
@@ -180,20 +80,6 @@
     return self.frame.size.height;
 }
 
-#pragma mark --- UITraitEnvironment ---
-///处理深色模式
--(void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection API_AVAILABLE(ios(8.0)) {
-    [super traitCollectionDidChange:previousTraitCollection];
-    if (@available(iOS 13.0,*)) {
-        [self refreshUserInterfaceStyle];
-    }
-}
-
--(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0)) {
-    self.blurView.effect = self.internalBlurEffect;
-    self.retBtn.tintColor = self.internalBlackColor;
-}
-
 #pragma mark --- btn action ---
 -(void)retBtnAction:(UIButton *)sender {
     if (self.retAction) {
@@ -202,22 +88,38 @@
 }
 
 #pragma mark --- override ---
--(instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        [self setupDefaultValue];
-        [self setupUI];
-        [self refreshUI];
-    }
-    return self;
+-(void)setupDefaultValue {
+    [super setupDefaultValue];
+    _show = YES;
+    self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
+    _index = NSNotFound;
 }
 
--(void)safeAreaInsetsDidChange {
-    [super safeAreaInsetsDidChange];
-    [self refreshUI];
+-(void)setupUI {
+    [super setupUI];
+    [self addSubview:self.selectionLb];
 }
 
--(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+-(void)refreshUI {
+    [super refreshUI];
     
+    if (!self.show) {
+        CGRect btnFrame = self.frame;
+        btnFrame.origin.y = -CGRectGetHeight(btnFrame);
+        self.frame = btnFrame;
+    }
+    
+    [self.selectionLb sizeToFit];
+    CGRect btnFrame = self.selectionLb.frame;
+    btnFrame.origin.x = CGRectGetWidth([UIScreen mainScreen].bounds) - CGRectGetWidth(btnFrame) - 11;//11是以44为实际响应区域后selectionLb边距与44*44的距离
+    btnFrame.origin.y = 11;
+    if (@available(iOS 11.0,*)) {
+        btnFrame.origin.y += self.safeAreaInsets.top;
+        btnFrame.origin.x -= self.safeAreaInsets.right;
+    } else {
+        btnFrame.origin.y += CGRectGetMaxY([UIApplication sharedApplication].statusBarFrame);
+    }
+    self.selectionLb.frame = btnFrame;
 }
 
 -(void)setTintColor:(UIColor *)tintColor {
@@ -229,25 +131,6 @@
 }
 
 #pragma mark --- setter/getter ---
--(UIVisualEffectView *)blurView {
-    if (!_blurView) {
-        _blurView = [[UIVisualEffectView alloc] initWithEffect:self.internalBlurEffect];
-        _blurView.frame = self.bounds;
-        _blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    }
-    return _blurView;
-}
-
--(DWAlbumPreviewReturnBarButton *)retBtn {
-    if (!_retBtn) {
-        _retBtn = [DWAlbumPreviewReturnBarButton buttonWithType:(UIButtonTypeCustom)];
-        [_retBtn setFrame:CGRectMake(0, 0, 44, 44)];
-        [_retBtn addTarget:self action:@selector(retBtnAction:) forControlEvents:(UIControlEventTouchUpInside)];
-        _retBtn.tintColor = self.internalBlackColor;
-    }
-    return _retBtn;
-}
-
 -(DWLabel *)selectionLb {
     if (!_selectionLb) {
         _selectionLb = [[DWLabel alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
@@ -275,42 +158,6 @@
         _selectionLb.userInteractionEnabled = YES;
     }
     return _selectionLb;
-}
-
--(void)setDarkModeEnabled:(BOOL)darkModeEnabled {
-    if (_darkModeEnabled != darkModeEnabled) {
-        _darkModeEnabled = darkModeEnabled;
-        if (@available(iOS 13.0,*)) {
-            [self refreshUserInterfaceStyle];
-        }
-    }
-}
-
--(BOOL)darkMode {
-    if (self.darkModeEnabled) {
-        if (@available(iOS 13.0,*)) {
-            if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
-                return YES;
-            } else {
-                return NO;
-            }
-        }
-    }
-    return NO;
-}
-
--(UIColor *)internalBlackColor {
-    if (self.darkMode) {
-        return [UIColor whiteColor];
-    }
-    return [UIColor blackColor];
-}
-
--(UIBlurEffect *)internalBlurEffect {
-    if (self.darkMode) {
-        return [UIBlurEffect effectWithStyle:(UIBlurEffectStyleDark)];
-    }
-    return [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
 }
 
 @end

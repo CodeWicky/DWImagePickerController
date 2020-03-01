@@ -305,11 +305,11 @@ const NSInteger DWAlbumExportErrorCode = 10004;
 @implementation DWAlbumManager
 
 #pragma mark --- interface method ---
--(PHAuthorizationStatus)authorizationStatus {
++(PHAuthorizationStatus)authorizationStatus {
     return [PHPhotoLibrary authorizationStatus];
 }
 
--(void)requestAuthorization:(void (^)(PHAuthorizationStatus))completion {
++(void)requestAuthorization:(void (^)(PHAuthorizationStatus))completion {
     [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
         if (completion) {
             dispatch_async(dispatch_get_main_queue(), ^{

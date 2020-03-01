@@ -18,6 +18,8 @@
 
 @property (nonatomic ,strong) CALayer * maskLayer;
 
+@property (nonatomic ,assign) NSInteger selectedIndex;
+
 @end
 
 @implementation DWAlbumGridCell
@@ -33,13 +35,15 @@
 
 -(void)setSelectAtIndex:(NSInteger)index {
     if (index > 0 && index != NSNotFound) {
-        self.selectionLb.backgroundColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
+        _selectedIndex = index;
+        self.selectionLb.backgroundColor = self.tintColor;
         self.selectionLb.layer.borderColor = [UIColor whiteColor].CGColor;
         self.selectionLb.text = [NSString stringWithFormat:@"%ld",(long)index];
         self.selectionLb.userInteractionEnabled = YES;
         self.maskLayer.hidden = YES;
     } else {
         ///小于零为不可选中状态，等于零为非选中状态
+        _selectedIndex = NSNotFound;
         [CATransaction begin];
         [CATransaction setAnimationDuration:0];
         self.maskLayer.hidden = index == 0;
@@ -55,6 +59,8 @@
 #pragma mark --- override ---
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        _selectedIndex = NSNotFound;
+        self.tintColor = [UIColor colorWithRed:49.0 / 255 green:179.0 / 255 blue:244.0 / 255 alpha:1];
         [self.contentView addSubview:self.gridImage];
         [self.contentView.layer addSublayer:self.maskLayer];
         [self.contentView addSubview:self.selectionLb];
@@ -99,6 +105,13 @@
         [self setSelectAtIndex:0];
     }
     self.onSelect = nil;
+}
+
+-(void)setTintColor:(UIColor *)tintColor {
+    [super setTintColor:tintColor];
+    if (self.selectedIndex != NSNotFound) {
+        self.selectionLb.backgroundColor = tintColor;
+    }
 }
 
 #pragma mark --- setter/getter ---

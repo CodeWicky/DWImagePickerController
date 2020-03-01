@@ -144,8 +144,6 @@
 
 @property (nonatomic ,assign) BOOL networkAccessAllowed;
 
-//@property (nonatomic ,strong) UIVisualEffectView * blurView;
-
 @property (nonatomic ,strong) UIView * mask;
 
 @property (nonatomic ,assign) NSInteger originFocusIndex;
@@ -457,15 +455,6 @@
     }
     return _previewCol;
 }
-
-//-(UIVisualEffectView *)blurView {
-//    if (!_blurView) {
-//        UIBlurEffect * blurEffect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyleExtraLight)];
-//        _blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-//        _blurView.frame = self.bounds;
-//    }
-//    return _blurView;
-//}
 
 -(UIView *)mask {
     if (!_mask) {

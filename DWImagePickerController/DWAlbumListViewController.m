@@ -190,7 +190,13 @@
 #pragma mark --- life cycle ---
 -(void)viewDidLoad {
     [super viewDidLoad];
-    self.darkModeEnabled = YES;
+    if (@available(iOS 13.0, *)) {
+        if (self.darkModeEnabled) {
+            self.overrideUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
+        } else {
+            self.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
+        }
+    }
     self.cellHeight = 70;
     CGFloat scale = 2;
     self.photoSize = CGSizeMake(self.cellHeight * scale, self.cellHeight * scale);
@@ -198,6 +204,11 @@
     self.tableView.backgroundColor = self.internalWhiteColor;
     self.tableView.tableFooterView = [[UIView alloc] init];
     [self.tableView registerClass:[DWPosterCell class] forCellReuseIdentifier:@"PosterCell"];
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO animated:animated];
 }
 
 #pragma mark --- tool method ---
@@ -254,6 +265,14 @@
     self.tableView.backgroundColor = self.internalWhiteColor;
     self.view.backgroundColor = self.internalWhiteColor;
     [self.tableView reloadData];
+}
+
+#pragma mark --- override ---
+-(instancetype)init {
+    if (self = [super init]) {
+        _darkModeEnabled = YES;
+    }
+    return self;
 }
 
 #pragma mark --- setter/getter ---

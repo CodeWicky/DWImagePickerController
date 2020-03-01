@@ -47,7 +47,7 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 
  @return 返回状态
  */
--(PHAuthorizationStatus)authorizationStatus;
++(PHAuthorizationStatus)authorizationStatus;
 
 
 /**
@@ -55,7 +55,7 @@ typedef void(^DWAlbumExportVideoCompletion)(DWAlbumManager * _Nullable mgr ,BOOL
 
  @param completion 用户授权完成回调
  */
--(void)requestAuthorization:(nullable void(^)(PHAuthorizationStatus status))completion;
++(void)requestAuthorization:(nullable void(^)(PHAuthorizationStatus status))completion;
 
 
 /**

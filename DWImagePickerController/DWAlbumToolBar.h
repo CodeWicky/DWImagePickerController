@@ -30,7 +30,7 @@ typedef void(^ToolBarAction)(DWAlbumToolBar * toolBar);
 
 -(void)refreshUI;
 
--(void)refreshUserInterfaceStyle;
+-(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0));
 
 @end
 

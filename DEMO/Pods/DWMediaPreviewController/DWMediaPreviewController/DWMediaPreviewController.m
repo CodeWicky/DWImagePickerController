@@ -19,7 +19,7 @@
 
 @interface DWMediaPreviewLayout : UICollectionViewFlowLayout
 
-@property (nonatomic, assign) CGFloat distanceBetweenPages;
+@property (nonatomic ,assign) CGFloat distanceBetweenPages;
 
 @end
 
@@ -29,7 +29,7 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.distanceBetweenPages = 20;
+        _distanceBetweenPages = 20;
     }
     return self;
 }
@@ -47,7 +47,7 @@
     CGFloat halfWidth = self.collectionView.bounds.size.width / 2.0;
     CGFloat centerX = self.collectionView.contentOffset.x + halfWidth;
     [layoutAttsArray enumerateObjectsUsingBlock:^(UICollectionViewLayoutAttributes * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.center = CGPointMake(obj.center.x + (obj.center.x - centerX) / halfWidth * self.distanceBetweenPages / 2, obj.center.y);
+        obj.center = CGPointMake(obj.center.x + (obj.center.x - centerX) / halfWidth * _distanceBetweenPages / 2, obj.center.y);
     }];
     return layoutAttsArray;
 }
@@ -59,36 +59,29 @@
 @end
 
 @interface DWMediaPreviewController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>
+{
+    NSInteger _index;
+    CGRect _oriRect;
+    BOOL _previewSizeResized;
+    BOOL _indexChanged;
+    BOOL _sourceInteractivePopGestureEnabled;
+    BOOL _navigationBarShouldHidden;
+    BOOL _firstCellGotFocus;
+    NSUInteger _innerMediaCount;
+    UIColor * _backgroundColorBeforeFocusMode;
+}
 
 @property (nonatomic ,strong) DWFixAdjustCollectionView * collectionView;
 
 @property (nonatomic ,strong) DWMediaPreviewLayout * collectionViewLayout;
 
-@property (nonatomic ,assign) NSInteger index;
-
-@property (nonatomic ,assign) CGRect oriRect;
-
-@property (nonatomic ,assign) BOOL previewSizeResized;
-
-@property (nonatomic ,assign) BOOL indexChanged;
-
-@property (nonatomic ,assign) BOOL sourceInteractivePopGestureEnabled;
-
-@property (nonatomic ,assign) BOOL navigationBarShouldHidden;
-
 @property (nonatomic ,strong) NSCache * dataCache;
 
 @property (nonatomic ,strong) dispatch_queue_t asyncDecodeQueue;
 
-@property (nonatomic ,assign) BOOL firstCellGotFocus;
-
-@property (nonatomic ,assign) NSUInteger innerMediaCount;
-
 @property (nonatomic ,copy) DWMediaPreviewCellAction tapAction;
 
 @property (nonatomic ,copy) DWMediaPreviewCellAction doubleClickAction;
-
-@property (nonatomic ,strong) UIColor * backgroundColorBeforeFocusMode;
 
 @end
 
@@ -217,12 +210,12 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (self.isFocusOnMedia) {
         [self turnToDarkBackground:NO animated:NO];
     }
-    self.oriRect = self.collectionView.frame;
+    _oriRect = self.collectionView.frame;
     _isShowing = NO;
 }
 
 -(void)configToolBarIfNeeded {
-    self.navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
+    _navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
     if (self.topToolBar) {
 
         if (self.navigationController) {
@@ -246,7 +239,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (!CGSizeEqualToSize(((UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout).itemSize, self.view.bounds.size)) {
         [self.collectionView.collectionViewLayout prepareLayout];
     }
-    if (!CGRectEqualToRect(self.oriRect, self.collectionView.frame)) {
+    if (!CGRectEqualToRect(_oriRect, self.collectionView.frame)) {
         _previewSize = self.view.bounds.size;
         _previewSizeResized = YES;
     }
@@ -496,7 +489,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)turnToDarkBackground:(BOOL)dark animated:(BOOL)animated {
     if (dark) {
-        self.backgroundColorBeforeFocusMode = self.view.backgroundColor;
+        _backgroundColorBeforeFocusMode = self.view.backgroundColor;
     }
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
@@ -506,7 +499,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [self turnToDarkBackground:dark];
     }
     if (!dark) {
-        self.backgroundColorBeforeFocusMode = nil;
+        _backgroundColorBeforeFocusMode = nil;
     }
 }
 
@@ -514,7 +507,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if (dark) {
         self.view.backgroundColor = [UIColor blackColor];
     } else {
-        self.view.backgroundColor = self.backgroundColorBeforeFocusMode;
+        self.view.backgroundColor = _backgroundColorBeforeFocusMode;
     }
 }
 
@@ -602,8 +595,8 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 -(void)configMediaForCell:(DWMediaPreviewCell *)cell withMedia:(id)media {
     cell.media = media;
     ///这里在给cell设置完焦点后，要处理第一个cell获取焦点的事件
-    if (!self.firstCellGotFocus) {
-        self.firstCellGotFocus = YES;
+    if (!_firstCellGotFocus) {
+        _firstCellGotFocus = YES;
         [cell getFocus];
     }
 }
@@ -674,7 +667,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [super viewDidAppear:animated];
     ///按需关闭侧滑返回
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
-        self.sourceInteractivePopGestureEnabled = self.navigationController.interactivePopGestureRecognizer.enabled;
+        _sourceInteractivePopGestureEnabled = self.navigationController.interactivePopGestureRecognizer.enabled;
         self.navigationController.interactivePopGestureRecognizer.enabled = NO;
     }
     
@@ -684,10 +677,10 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     [super viewWillDisappear:animated];
     ///恢复侧滑返回
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
-        self.navigationController.interactivePopGestureRecognizer.enabled = self.sourceInteractivePopGestureEnabled;
+        self.navigationController.interactivePopGestureRecognizer.enabled = _sourceInteractivePopGestureEnabled;
     }
    
-    [self.navigationController setNavigationBarHidden:self.navigationBarShouldHidden animated:animated];
+    [self.navigationController setNavigationBarHidden:_navigationBarShouldHidden animated:animated];
     
 }
 
@@ -735,7 +728,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         [focusCell getFocus];
     } else {
         ///这里由于防止不在屏幕内滚动时导致无法获取visibleCells而无法获取焦点，所以在获取不到时置为NO，强制在cellForItem中获取焦点
-        self.firstCellGotFocus = NO;
+        _firstCellGotFocus = NO;
     }
     
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(previewController:didEndDisplayingCell:forItemAtIndex:previewType:)]) {
@@ -781,10 +774,14 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 }
 
 #pragma mark --- setter/getter ---
+-(UICollectionView *)previewView {
+    return _collectionView;
+}
+
 -(DWFixAdjustCollectionView *)collectionView {
     if (!_collectionView) {
         _collectionView = [[DWFixAdjustCollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:self.collectionViewLayout];
-        self.oriRect = _collectionView.frame;
+        _oriRect = _collectionView.frame;
         _collectionView.backgroundColor = [UIColor clearColor];
         _collectionView.delegate = self;
         _collectionView.dataSource = self;

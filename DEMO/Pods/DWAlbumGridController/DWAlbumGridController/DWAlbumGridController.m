@@ -33,26 +33,22 @@
 @interface DWAlbumGridController ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,UICollectionViewDataSourcePrefetching>
 {
     NSInteger _innerNotifyChangeIndex;
+    BOOL _navigationBarShouldHidden;
     BOOL _firstAppear;
     BOOL _needScrollToEdge;
     BOOL _isShowing;
     BOOL _screenRotateNeedsResetPreviewIndex;
+    CGFloat _scrollVelocity;
+    CGFloat _lastOffsetY;
     CGSize _oriSize;
+    CGSize _photoSize;
+    CGSize _thumnailSize;
+    NSArray <PHAsset *>* _assets;
 }
 
 @property (nonatomic ,strong) DWFixAdjustCollectionView * collectionView;
 
 @property (nonatomic ,strong) DWGridFlowLayout * collectionViewLayout;
-
-@property (nonatomic ,strong) NSArray <PHAsset *>* results;
-
-@property (nonatomic ,assign) CGSize photoSize;
-
-@property (nonatomic ,assign) CGSize thumnailSize;
-
-@property (nonatomic ,assign) CGFloat velocity;
-
-@property (nonatomic ,assign) CGFloat lastOffsetY;
 
 @property (nonatomic ,strong) NSMutableDictionary * clsCtn;
 
@@ -71,7 +67,7 @@
 -(void)configWithGridModel:(DWAlbumGridModel *)gridModel {
     if (![_gridModel isEqual:gridModel]) {
         _gridModel = gridModel;
-        _results = gridModel.results;
+        _assets = gridModel.results;
         self.title = gridModel.name;
         _needScrollToEdge = YES;
         [_collectionView reloadData];
@@ -94,7 +90,7 @@
 }
 
 -(void)notifyPreviewIndexChangeTo:(NSInteger)index {
-    if (index >= 0 && index < self.results.count) {
+    if (index >= 0 && index < _assets.count) {
         _innerNotifyChangeIndex = index;
     }
 }
@@ -128,6 +124,11 @@
     _firstAppear = NO;
 }
 
+-(void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self recoveryNavigationBarIfNeeded];
+}
+
 -(void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     [self leaveGrid];
@@ -137,6 +138,7 @@
 #pragma mark --- tool method ---
 -(void)showGrid {
     _isShowing = YES;
+    [self configNavigationBarIfNeeded];
     [self configItemSizeIfNeeded];
     [self handleScreenRotateBackgroundIfNeeded];
     [self handleAutoScrollIfNeeded];
@@ -147,13 +149,31 @@
     _isShowing = NO;
 }
 
+-(void)configNavigationBarIfNeeded {
+    if (_firstAppear) {
+        _navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
+    }
+    
+    if (self.topToolBar) {
+        if (self.navigationController) {
+            [self.navigationController setNavigationBarHidden:YES animated:YES];
+        }
+    }
+}
+
+-(void)recoveryNavigationBarIfNeeded {
+//    if (self.navigationController && self.navigationController.isNavigationBarHidden != _navigationBarShouldHidden) {
+//        [self.navigationController setNavigationBarHidden:_navigationBarShouldHidden animated:YES];
+//    }
+}
+
 -(void)configItemSizeIfNeeded {
     if (_firstAppear) {
         CGSize itemSize = ((UICollectionViewFlowLayout *)self.collectionViewLayout).itemSize;
         CGFloat scale = 2;
         CGFloat thumnailScale = 0.5;
-        self.photoSize = CGSizeMake(floor(itemSize.width * scale), floor(itemSize.height * scale));
-        self.thumnailSize = CGSizeMake(floor(itemSize.width * thumnailScale), floor(itemSize.height * thumnailScale));
+        _photoSize = CGSizeMake(floor(itemSize.width * scale), floor(itemSize.height * scale));
+        _thumnailSize = CGSizeMake(floor(itemSize.width * thumnailScale), floor(itemSize.height * thumnailScale));
     }
 }
 
@@ -174,7 +194,7 @@
 }
 
 -(void)handleAutoScrollIfNeeded {
-    if (self.results.count) {
+    if (_assets.count) {
         if (_needScrollToEdge) {
             [self handleAutoScrollToEdge];
         } else {
@@ -192,10 +212,10 @@
         if (_firstAppear) {
             ///防止第一次进入时，无法滚动至底部（差20px）
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+                [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self->_assets.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
             });
         } else {
-            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.results.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
+            [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_assets.count - 1 inSection:0] atScrollPosition:(UICollectionViewScrollPositionBottom) animated:NO];
         }
     } else {
         [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0] atScrollPosition:(UICollectionViewScrollPositionTop) animated:NO];
@@ -207,7 +227,7 @@
     ///这里如果没有旋屏，才考虑直接滚动，如果旋屏了，应该在safeArea改变之后再滚动
     if (!_screenRotateNeedsResetPreviewIndex) {
         if (_innerNotifyChangeIndex >= 0) {
-            if (_innerNotifyChangeIndex < self.results.count) {
+            if (_innerNotifyChangeIndex < _assets.count) {
                 ///此处应该不在可见范围内才滚动，在可见范围内不动
                 [self scrollIndexToCenterIfNeeded:_innerNotifyChangeIndex];
             }
@@ -220,7 +240,7 @@
     if (_screenRotateNeedsResetPreviewIndex) {
         _screenRotateNeedsResetPreviewIndex = NO;
         if (_innerNotifyChangeIndex >= 0) {
-            if (_innerNotifyChangeIndex < self.results.count) {
+            if (_innerNotifyChangeIndex < _assets.count) {
                 ///这里无论在不在可见范围内都滚动至中间。因为屏幕发生了转动，即使转动之前在屏幕中不需要滚动，可能旋屏后就不在屏幕中了。所以强制改到屏幕中。
                 [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_innerNotifyChangeIndex inSection:0] atScrollPosition:(UICollectionViewScrollPositionCenteredVertically) animated:NO];
             }
@@ -262,7 +282,7 @@
 
 -(void)refreshGrid:(DWAlbumGridModel *)model {
     _gridModel = model;
-    _results = model.results;
+    _assets = model.results;
 }
 
 -(void)configCellSelect:(DWAlbumGridCell *)cell asset:(PHAsset *)asset {
@@ -381,7 +401,7 @@
 
 -(void)resetSelectionCellAtIndex:(NSInteger)index toIndex:(NSInteger)toIndex {
     DWAlbumSelectionModel * model  = [self.selectionManager selectionModelAtIndex:index];
-    NSInteger mediaIndex = [self.results indexOfObject:model.asset];
+    NSInteger mediaIndex = [_assets indexOfObject:model.asset];
     DWAlbumGridCell * cellToRemove = (DWAlbumGridCell *)model.userInfo;
     if (cellToRemove && cellToRemove.index == mediaIndex && [self.collectionView.visibleCells containsObject:cellToRemove]) {
         [cellToRemove setSelectAtIndex:toIndex];
@@ -392,13 +412,13 @@
     
     NSArray <DWAlbumGridCell *>* visibleCells = self.collectionView.visibleCells;
     [visibleCells enumerateObjectsUsingBlock:^(DWAlbumGridCell * _Nonnull cell, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (CGSizeEqualToSize(self.photoSize, cell.model.targetSize)) {
+        if (CGSizeEqualToSize(_photoSize, cell.model.targetSize)) {
             return ;
         }
         PHAsset * asset = cell.model.asset;
-        NSInteger index = [self.results indexOfObject:asset];
+        NSInteger index = [_assets indexOfObject:asset];
         cell.index = index;
-        [self loadImageForAsset:asset targetSize:self.photoSize thumnail:NO completion:^(DWAlbumGridCellModel *model) {
+        [self loadImageForAsset:asset targetSize:_photoSize thumnail:NO completion:^(DWAlbumGridCellModel *model) {
             if (cell.index == index) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     cell.model = model;
@@ -428,7 +448,7 @@
 
 #pragma mark --- collectionView delegate ---
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return self.results.count;
+    return _assets.count;
 }
 
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -438,7 +458,7 @@
     ///为了解决这个问题，可以将状态的设置放置在willDisplayCell中，这样即可保证在cell出现前一定会被设置一次状态
     
     ///当然你也可以关于预加载功能，可以设置collectionView.prefetchingEnabled = NO;
-    PHAsset * asset = [self.results objectAtIndex:indexPath.row];
+    PHAsset * asset = [_assets objectAtIndex:indexPath.row];
     DWAlbumGridCell *cell = [self cellForAsset:asset atIndexPath:indexPath];;
     NSInteger originIndex = indexPath.item;
     cell.index = originIndex;
@@ -454,7 +474,7 @@
     ///所以会在高速情况下停止滚动，此时我们希望尽可能的看到的不是缩略图，所以对边缘做判断
     ///3.滚动边缘
     BOOL thumnail = NO;
-    if (self.velocity > 30 && (collectionView.isDecelerating || collectionView.isDragging) && ((collectionView.contentSize.height - collectionView.contentOffset.y > collectionView.bounds.size.height * 3) && (collectionView.contentOffset.y > collectionView.bounds.size.height * 2))) {
+    if (_scrollVelocity > 30 && (collectionView.isDecelerating || collectionView.isDragging) && ((collectionView.contentSize.height - collectionView.contentOffset.y > collectionView.bounds.size.height * 3) && (collectionView.contentOffset.y > collectionView.bounds.size.height * 2))) {
         thumnail = YES;
     }
     
@@ -462,7 +482,7 @@
     if (media) {
         cell.model = media;
     } else {
-        CGSize targetSize = thumnail ? self.thumnailSize : self.photoSize;
+        CGSize targetSize = thumnail ? _thumnailSize : _photoSize;
         [self loadImageForAsset:asset targetSize:targetSize thumnail:YES completion:^(DWAlbumGridCellModel *model) {
             if (!thumnail && model.media && model.asset) {
                 [DWAlbumMediaHelper cachePoster:model withAsset:model.asset];
@@ -482,21 +502,21 @@
 
 -(void)collectionView:(UICollectionView *)collectionView willDisplayCell:(DWAlbumGridCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
     ///这里设置一下可选状态，具体原因在cellForItem中有详细描述
-    PHAsset * asset = [self.results objectAtIndex:indexPath.row];
+    PHAsset * asset = [_assets objectAtIndex:indexPath.row];
     [self configCellSelect:cell asset:asset];
 }
 
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(gridViewController:didSelectAsset:mediaOption:atIndex:)]) {
-        PHAsset * asset = [self.results objectAtIndex:indexPath.item];
+        PHAsset * asset = [_assets objectAtIndex:indexPath.item];
         DWAlbumMediaOption mediaOption = [DWAlbumMediaHelper mediaOptionForAsset:asset];
         [self.dataSource gridViewController:self didSelectAsset:asset mediaOption:mediaOption atIndex:indexPath.item];
     }
 }
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    self.velocity = fabs(scrollView.contentOffset.y - self.lastOffsetY);
-    self.lastOffsetY = scrollView.contentOffset.y;
+    _scrollVelocity = fabs(scrollView.contentOffset.y - _lastOffsetY);
+    _lastOffsetY = scrollView.contentOffset.y;
 }
 
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
@@ -515,7 +535,7 @@
         [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [indexes addIndex:obj.row];
         }];
-        [self.dataSource gridController:self startCachingMediaForIndexes:indexes targetSize:self.photoSize];
+        [self.dataSource gridController:self startCachingMediaForIndexes:indexes targetSize:_photoSize];
     }
     
 }
@@ -526,7 +546,7 @@
         [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [indexes addIndex:obj.row];
         }];
-        [self.dataSource gridController:self stopCachingMediaForIndexes:indexes targetSize:self.photoSize];
+        [self.dataSource gridController:self stopCachingMediaForIndexes:indexes targetSize:_photoSize];
     }
 }
 

@@ -130,6 +130,10 @@ typedef void(^DWMediaPreviewCellAction)(DWMediaPreviewController * previewContro
 
 @interface DWMediaPreviewController : UIViewController
 
+//The previewView for current controller.
+///当前预览控制器的预览视图
+@property (nonatomic ,strong ,readonly) UICollectionView * previewView;
+
 //The datasource for previewController.
 ///预览数据源。
 @property (nonatomic ,weak) id<DWMediaPreviewDataSource> dataSource;
