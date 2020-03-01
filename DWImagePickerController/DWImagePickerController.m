@@ -27,7 +27,7 @@
 
 @end
 
-@interface DWImagePickerController ()<DWMediaPreviewDataSource,DWAlbumGridDataSource,PHPhotoLibraryChangeObserver,UITraitEnvironment>
+@interface DWImagePickerController ()<DWMediaPreviewDataSource,DWAlbumGridDataSource,PHPhotoLibraryChangeObserver,UITraitEnvironment,UIGestureRecognizerDelegate>
 {
     DWAlbumModel * _currentAlbum;
     DWAlbumGridModel * _currentGridModel;
@@ -74,6 +74,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.interactivePopGestureRecognizer.delegate = self;
     if (@available(iOS 13.0, *)) {
         if (self.darkModeEnabled) {
             self.overrideUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
@@ -894,6 +895,14 @@
     _gridVC.gridView.backgroundColor = self.internalWhiteColor;
     _previewVC.view.backgroundColor = self.internalWhiteColor;
     ///不设置_previewVC.previewView.backgroundColor，要始终保持为clearColor
+}
+
+#pragma mark --- gesture delegate ---
+-(BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    if (self.viewControllers.count > 1) {
+        return YES;
+    }
+    return NO;
 }
 
 #pragma mark --- observer for Photos ---

@@ -55,9 +55,13 @@
 
 @property (nonatomic ,strong) DWAlbumPreviewReturnBarButton * retBtn;
 
+@property (nonatomic ,strong) UIView * seperator;
+
 @property (nonatomic ,assign) BOOL darkMode;
 
 @property (nonatomic ,strong) UIColor * internalBlackColor;
+
+@property (nonatomic ,strong) UIColor * internalSeperatorColor;
 
 @property (nonatomic ,strong) UIBlurEffect * internalBlurEffect;
 
@@ -80,6 +84,7 @@
 -(void)setupUI {
     [self addSubview:self.blurView];
     [self addSubview:self.retBtn];
+    [self addSubview:self.seperator];
 }
 
 -(void)refreshUI {
@@ -99,6 +104,10 @@
 
     btnFrame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, CGRectGetMaxY(btnFrame));
     self.frame = btnFrame;
+    
+    btnFrame.origin.y = btnFrame.size.height;
+    btnFrame.size.height = 1 / [UIScreen mainScreen].scale;
+    self.seperator.frame = btnFrame;
 }
 
 #pragma mark --- UITraitEnvironment ---
@@ -113,6 +122,7 @@
 -(void)refreshUserInterfaceStyle API_AVAILABLE(ios(13.0)) {
     self.blurView.effect = self.internalBlurEffect;
     self.retBtn.tintColor = self.internalBlackColor;
+    self.seperator.backgroundColor = self.internalSeperatorColor;
 }
 
 #pragma mark --- btn action ---
@@ -170,6 +180,14 @@
     return _retBtn;
 }
 
+-(UIView *)seperator {
+    if (!_seperator) {
+        _seperator = [UIView new];
+        _seperator.backgroundColor = self.internalSeperatorColor;
+    }
+    return _seperator;
+}
+
 -(void)setDarkModeEnabled:(BOOL)darkModeEnabled {
     if (_darkModeEnabled != darkModeEnabled) {
         _darkModeEnabled = darkModeEnabled;
@@ -197,6 +215,13 @@
         return [UIColor whiteColor];
     }
     return [UIColor blackColor];
+}
+
+-(UIColor *)internalSeperatorColor {
+    if (self.darkMode) {
+        return [UIColor colorWithWhite:1 alpha:0.15];
+    }
+    return [UIColor colorWithWhite:0 alpha:0.3];
 }
 
 -(UIBlurEffect *)internalBlurEffect {
