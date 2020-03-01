@@ -182,6 +182,10 @@ typedef void(^DWMediaPreviewCellAction)(DWMediaPreviewController * previewContro
 ///下滑关闭的阈值，默认为100。
 @property (nonatomic ,assign) CGFloat closeThreshold;
 
+//Indicates whether to recovery navigation bar on -viewWillDisappear: .If you set topToolBar,previewController will hide navigationBar automatically when -viewWillAppear: .And previewController will recovery navigationBar hidden status if autoRecoveryNavigationBar is YES.Default by YES.
+///标志是否在 -viewWillDisappear: 时自动恢复导航栏的隐藏状态。如果你设置了topToolBar，预览控制器将在 -viewWillAppear: 是自动将导航栏隐藏。当autoRecoveryNavigationBar为真时，预览控制器将在 -viewWillDisappear: 时自动恢复导航栏的隐藏状态。默认为真。
+@property (nonatomic ,assign) BOOL autoRecoveryNavigationBar;
+
 /**
  Config previewController to preview media at specific index.
  配置当前应该展示的角标。

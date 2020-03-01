@@ -988,6 +988,7 @@
         CGFloat shortSide = MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
         CGFloat width = (shortSide - (_columnCount - 1) * _spacing) / _columnCount;
         _gridVC = [[DWAlbumGridController alloc] initWithItemWidth:width];
+        _gridVC.autoRecoveryNavigationBar = NO;
         _gridVC.dataSource = self;
         _gridPhotoSize = CGSizeMake(width * 2, width * 2);
         _gridVC.selectionManager = self.selectionManager;
@@ -1002,6 +1003,7 @@
 -(DWMediaPreviewController *)previewVC {
     if (!_previewVC) {
         _previewVC = [[DWMediaPreviewController alloc] init];
+        _previewVC.autoRecoveryNavigationBar = NO;
         _previewVC.dataSource = self;
         _previewVC.userInternalDataCache = NO;
         [_previewVC registerClass:[DWVideoControlPreviewCell class] forCustomizePreviewCellWithReuseIdentifier:@"videoControlCell"];

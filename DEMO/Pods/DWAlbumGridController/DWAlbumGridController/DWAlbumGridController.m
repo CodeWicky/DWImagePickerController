@@ -60,6 +60,7 @@
 -(instancetype)initWithItemWidth:(CGFloat)width {
     if (self = [super init]) {
         _itemWidth = width;
+        _autoRecoveryNavigationBar = YES;
     }
     return self;
 }
@@ -120,13 +121,14 @@
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self configNavigationBarIfNeededWithAnimated:animated];
     [self showGrid];
     _firstAppear = NO;
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self recoveryNavigationBarIfNeeded];
+    [self recoveryNavigationBarIfNeededWithAnimated:animated];
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
@@ -138,7 +140,6 @@
 #pragma mark --- tool method ---
 -(void)showGrid {
     _isShowing = YES;
-    [self configNavigationBarIfNeeded];
     [self configItemSizeIfNeeded];
     [self handleScreenRotateBackgroundIfNeeded];
     [self handleAutoScrollIfNeeded];
@@ -149,22 +150,24 @@
     _isShowing = NO;
 }
 
--(void)configNavigationBarIfNeeded {
+-(void)configNavigationBarIfNeededWithAnimated:(BOOL)animated {
     if (_firstAppear) {
         _navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
     }
     
     if (self.topToolBar) {
         if (self.navigationController) {
-            [self.navigationController setNavigationBarHidden:YES animated:YES];
+            [self.navigationController setNavigationBarHidden:YES animated:animated];
         }
     }
 }
 
--(void)recoveryNavigationBarIfNeeded {
-//    if (self.navigationController && self.navigationController.isNavigationBarHidden != _navigationBarShouldHidden) {
-//        [self.navigationController setNavigationBarHidden:_navigationBarShouldHidden animated:YES];
-//    }
+-(void)recoveryNavigationBarIfNeededWithAnimated:(BOOL)animated {
+    if (self.autoRecoveryNavigationBar) {
+        if (self.navigationController && self.navigationController.isNavigationBarHidden != _navigationBarShouldHidden) {
+            [self.navigationController setNavigationBarHidden:_navigationBarShouldHidden animated:YES];
+        }
+    }
 }
 
 -(void)configItemSizeIfNeeded {

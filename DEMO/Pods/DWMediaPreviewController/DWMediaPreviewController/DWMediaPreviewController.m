@@ -180,7 +180,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 #pragma mark --- tool method ---
 -(void)showPreview {
     _isShowing = YES;
-    [self configToolBarIfNeeded];
+    
     [self setFocusMode:NO animated:NO];
     [self resizePreviewSizeIfNeeded];
     
@@ -208,27 +208,33 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     DWMediaPreviewCell * cell = (DWMediaPreviewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_index inSection:0]];
     [cell clearCell];
     if (self.isFocusOnMedia) {
-        [self turnToDarkBackground:NO animated:NO];
+        [self setFocusMode:NO animated:NO];
     }
     _oriRect = self.collectionView.frame;
     _isShowing = NO;
 }
 
 -(void)configToolBarIfNeeded {
-    _navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
-    if (self.topToolBar) {
-
-        if (self.navigationController) {
-            [self.navigationController setNavigationBarHidden:YES animated:YES];
-        }
-        
-        if (!self.topToolBar.superview) {
-            [self.view addSubview:self.topToolBar];
-        }
+    if (self.topToolBar && !self.topToolBar.superview) {
+        [self.view addSubview:self.topToolBar];
     }
-    
     if (self.bottomToolBar && !self.bottomToolBar.superview) {
         [self.view addSubview:self.bottomToolBar];
+    }
+}
+
+-(void)configNavigationBarIfNeededWithAnimated:(BOOL)animated {
+    _navigationBarShouldHidden = self.navigationController.isNavigationBarHidden;
+    if (self.topToolBar) {
+        if (self.navigationController) {
+            [self.navigationController setNavigationBarHidden:YES animated:animated];
+        }
+    }
+}
+
+-(void)recoveryNavigationBarIfNeededWithAnimated:(BOOL)animated {
+    if (self.autoRecoveryNavigationBar) {
+        [self.navigationController setNavigationBarHidden:_navigationBarShouldHidden animated:animated];
     }
 }
 
@@ -637,7 +643,9 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 - (void)viewDidLoad {
     [super viewDidLoad];
     ///本次添加了toolBar后要将toolbar添加在self.view中，所以底部视图不能是collectionView，否则toolbar跟随滚动。故将collectionView缩放模式改为跟self.view等大，保证旋屏自动改变布局
+    self.view.clipsToBounds = YES;
     [self.view addSubview:self.collectionView];
+    [self configToolBarIfNeeded];
     if (@available(iOS 11.0,*)) {
         self.collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     } else {
@@ -660,6 +668,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self configNavigationBarIfNeededWithAnimated:animated];
     [self showPreview];
 }
 
@@ -679,9 +688,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
         self.navigationController.interactivePopGestureRecognizer.enabled = _sourceInteractivePopGestureEnabled;
     }
-   
-    [self.navigationController setNavigationBarHidden:_navigationBarShouldHidden animated:animated];
-    
+    [self recoveryNavigationBarIfNeededWithAnimated:animated];
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
@@ -769,6 +776,7 @@ static NSString * const videoImageID = @"DWVideoPreviewCell";
         _userInternalDataCache = YES;
         _closeOnSlidingDown = YES;
         _closeThreshold = 100;
+        _autoRecoveryNavigationBar = YES;
     }
     return self;
 }

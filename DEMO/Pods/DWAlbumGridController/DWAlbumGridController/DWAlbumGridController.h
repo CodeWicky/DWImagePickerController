@@ -64,6 +64,10 @@ typedef void(^DWGridViewControllerFetchCompletion)(DWAlbumGridCellModel * model)
 
 @property (nonatomic ,strong) DWAlbumSelectionManager * selectionManager;
 
+@property (nonatomic ,assign) BOOL autoRecoveryNavigationBar;
+
+-(instancetype)init API_UNAVAILABLE(ios);
+
 -(instancetype)initWithItemWidth:(CGFloat)width;
 
 -(void)registerClass:(Class)cellClass forCellWithReuseIdentifier:(NSString *)identifier;
