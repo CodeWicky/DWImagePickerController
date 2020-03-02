@@ -338,7 +338,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
     if (!opt) {
         albumType = DWAlbumFetchAlbumTypeAll;
     }
-    if (albumType == DWAlbumFetchAlbumTypeAllUnited) {
+    if (albumType & DWAlbumFetchAlbumTypeAllUnited) {
         PHFetchResult * allAlbum = [PHAsset fetchAssetsWithOptions:phOpt];
         [allAlbums addObject:allAlbum];
     } else {
@@ -347,7 +347,8 @@ const NSInteger DWAlbumExportErrorCode = 10004;
             [allAlbums addObject:myPhotoStreamAlbum];
         }
         
-        if (albumType & DWAlbumFetchAlbumTypeCameraRoll) {
+        ///这里由于隐藏相册在PHAssetCollectionTypeSmartAlbum中，所以如果有隐藏选项，也要获取，在后续处理相关行为即可
+        if (albumType & DWAlbumFetchAlbumTypeCameraRoll || albumType & DWAlbumFetchAlbumTypeHidden) {
             PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
             [allAlbums addObject:smartAlbums];
         }
@@ -373,7 +374,7 @@ const NSInteger DWAlbumExportErrorCode = 10004;
         albumArr = [NSMutableArray arrayWithCapacity:0];
     }
     
-    if (albumType == DWAlbumFetchAlbumTypeAllUnited) {
+    if (albumType & DWAlbumFetchAlbumTypeAllUnited) {
         PHFetchResult * album = allAlbums.firstObject;
         if (album.count && needTransform) {
             DWAlbumModel * albumModel = [[DWAlbumModel alloc] init];
@@ -391,8 +392,21 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                     continue;
                 }
                 
-                if (obj.assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumAllHidden) {
-                    continue;
+                ///这里判断隐藏相册
+                ///由于隐藏相册引入，即使未指定DWAlbumFetchAlbumTypeCameraRoll也会获取PHAssetCollectionTypeSmartAlbum，所以分三种状况，既两者都有或只有其中一个，两者都有就不用返回了，只有一个就按条件判断了
+                if ((albumType & DWAlbumFetchAlbumTypeHidden) && !(albumType & DWAlbumFetchAlbumTypeCameraRoll)) {
+                    ///选择了隐藏模式，但是没有选择cameraRoll。过滤非hidden的smartAlbum
+                    if (obj.assetCollectionType == PHAssetCollectionTypeSmartAlbum && obj.assetCollectionSubtype != PHAssetCollectionSubtypeSmartAlbumAllHidden) {
+                        ///上述五种类型中，只有DWAlbumFetchAlbumTypeCameraRoll和DWAlbumFetchAlbumTypeHidden的assetCollectionType是PHAssetCollectionTypeSmartAlbum。所以这种情况就排除掉这里不是hidden的即可
+                        continue;
+                    }
+                }
+                
+                if ((albumType & DWAlbumFetchAlbumTypeCameraRoll) && !(albumType & DWAlbumFetchAlbumTypeHidden)) {
+                    ///这种情况就是不要隐藏，直接过滤隐藏就行
+                    if (obj.assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumAllHidden) {//『隐藏』相册
+                        continue;
+                    }
                 }
                 
                 if (obj.assetCollectionSubtype == 1000000201) {
@@ -919,6 +933,10 @@ const NSInteger DWAlbumExportErrorCode = 10004;
                 break;
             default:
                 break;
+        }
+        
+        if (fetchOpt.albumType & DWAlbumFetchAlbumTypeHidden) {
+            opt.includeHiddenAssets = YES;
         }
     }
     return opt;

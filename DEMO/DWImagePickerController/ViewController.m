@@ -36,7 +36,7 @@
 //    DWImagePickerController * picker = [DWImagePickerController  showImagePickerWithAlbumManager:nil option:nil currentVC:self];
 //#pragma clang diagnostic pop
     DWImagePickerConfiguration * conf = [DWImagePickerConfiguration new];
-    conf.displayMediaOption = DWAlbumMediaOptionAll;
+    conf.displayMediaOption = DWAlbumMediaOptionImageMask;
     conf.selectableOption = DWAlbumMediaOptionAll;
     conf.multiTypeSelectionEnable = NO;
 //    conf.darkModeEnabled = NO;

@@ -264,13 +264,21 @@ typedef NS_ENUM(NSUInteger, DWAlbumSortType) {
 };
 
 typedef NS_OPTIONS(NSUInteger, DWAlbumFetchAlbumType) {
+    ///常规类型
     DWAlbumFetchAlbumTypeCameraRoll = 1 << 0,
     DWAlbumFetchAlbumTypeMyPhotoSteam = 1 << 1,
     DWAlbumFetchAlbumTypeSyncedAlbum = 1 << 2,
     DWAlbumFetchAlbumTypeAlbumCloudShared = 1 << 3,
-    DWAlbumFetchAlbumTypeTopLevelUser = 1 << 4,
+    DWAlbumFetchAlbumTypeTopLevelUser = 1 << 4,//用户相册
+    
+    ///聚合类型
     DWAlbumFetchAlbumTypeAll = DWAlbumFetchAlbumTypeCameraRoll | DWAlbumFetchAlbumTypeMyPhotoSteam | DWAlbumFetchAlbumTypeSyncedAlbum | DWAlbumFetchAlbumTypeAlbumCloudShared | DWAlbumFetchAlbumTypeTopLevelUser,
-    DWAlbumFetchAlbumTypeAllUnited = 1 << 5,
+    
+    ///合并类型（若枚举值包含合并类型，将忽略常规类型）
+    DWAlbumFetchAlbumTypeAllUnited = 1 << 5,//全部相册合并成一个相册
+    
+    ///附加类型
+    DWAlbumFetchAlbumTypeHidden = 1 << 6,//隐藏相册，若在其他模式上附加隐藏模式，将同时显示原相册中的普通照片及隐藏照片。若仅指定隐藏模式，则将仅展示隐藏相册。
 };
 
 /**
@@ -359,6 +367,9 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 
 ///结果数
 @property (nonatomic ,assign ,readonly) NSInteger count;
+
+///用户数据
+@property (nonatomic ,strong) id userInfo;
 
 @end
 

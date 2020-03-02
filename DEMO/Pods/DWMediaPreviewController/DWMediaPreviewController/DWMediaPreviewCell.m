@@ -955,6 +955,7 @@ API_AVAILABLE_END
 }
 
 -(void)clearCell {
+    [self stop];
     [super clearCell];
     [self.mediaView configVideoWithAsset:nil];
     self.posterView.image = nil;

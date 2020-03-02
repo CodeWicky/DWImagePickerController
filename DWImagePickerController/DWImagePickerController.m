@@ -14,6 +14,7 @@
 #import "DWAlbumPreviewNavigationBar.h"
 #import <DWMediaPreviewController/DWMediaPreviewCell.h>
 #import <DWAlbumGridController/DWAlbumMediaHelper.h>
+#import "DWAlbumModel+DWImagePickerControllerGridModel.h"
 
 @interface DWAlbumModel ()
 
@@ -120,11 +121,13 @@
         [self.albumManager fetchAlbumsWithOption:self.fetchOption completion:^(DWAlbumManager * _Nullable mgr, NSArray<DWAlbumModel *> * _Nullable obj) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self configAlbum:obj.firstObject];
+                obj.firstObject.userInfo = self->_currentGridModel;
                 [self.listVC configWithAlbums:obj albumManager:self.albumManager];
                 [self setViewControllers:@[self.listVC,self.gridVC]];
                 if (completion) {
                     completion();
                 }
+                [self autoFetchAlbumResults:obj];
             });
         }];
     });
@@ -201,6 +204,17 @@
 }
 
 #pragma mark ------ 资源获取 ------
+-(void)autoFetchAlbumResults:(NSArray <DWAlbumModel *>*)albums {
+    __weak typeof(self) weakSelf = self;
+    [albums enumerateObjectsUsingBlock:^(DWAlbumModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        obj.loader = ^DWAlbumGridModel *(DWAlbumModel *album) {
+            return [strongSelf gridModelFromAlbumModel:album];
+        };
+        [obj autoFetchGridModelBackground];
+    }];
+}
+
 -(void)fetchMediaWithAsset:(PHAsset *)asset previewType:(DWMediaPreviewType)previewType index:(NSUInteger)index targetSize:(CGSize)targetSize progressHandler:(DWMediaPreviewFetchMediaProgress)progressHandler fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
     ///这里由于预览数据源跟album数据源存在差异（不在展示范围内的可能不会丢给预览控制器，所以要将预览控制器中的index转换成album对应的index）
     NSInteger albumIndex = [_currentAlbum.fetchResult indexOfObject:asset];
@@ -617,6 +631,9 @@
 
 #pragma mark ------ 转换相关 ------
 -(DWAlbumGridModel *)gridModelFromAlbumModel:(DWAlbumModel *)album {
+    if (album.userInfo) {
+        return album.userInfo;
+    }
     DWAlbumGridModel * gridModel = [DWAlbumGridModel new];
     NSMutableArray * tmp = [NSMutableArray arrayWithCapacity:album.count];
     DWAlbumMediaOption displayOption = self.pickerConf ? self.pickerConf.displayMediaOption : DWAlbumMediaOptionAll;
@@ -635,6 +652,7 @@
     
     gridModel.results = [tmp copy];
     gridModel.name = album.name;
+    album.userInfo = gridModel;
     return gridModel;
 }
 

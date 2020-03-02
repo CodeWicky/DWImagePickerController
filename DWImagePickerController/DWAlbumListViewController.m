@@ -6,6 +6,7 @@
 //
 
 #import "DWAlbumListViewController.h"
+#import "DWAlbumModel+DWImagePickerControllerGridModel.h"
 
 @interface DWPosterCell : UITableViewCell<UITraitEnvironment>
 
@@ -231,13 +232,18 @@
     DWPosterCell * cell = [tableView dequeueReusableCellWithIdentifier:@"PosterCell" forIndexPath:indexPath];
     DWAlbumModel * albumModel = self.albums[indexPath.row];
     cell.titleLabel.text = albumModel.name;
-    cell.countLabel.text = [NSString stringWithFormat:@"(%ld)",(long)albumModel.count];
     cell.albumModel = albumModel;
-    [self.albumManager fetchPostForAlbum:albumModel targetSize:_photoSize completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+    [albumModel fetchGridModelWithCompletion:^(DWAlbumGridModel * _Nonnull gridModel) {
         if ([albumModel isEqual:cell.albumModel]) {
-            cell.posterImageView.image = obj.media;
+            cell.countLabel.text = [NSString stringWithFormat:@"(%ld)",(long)gridModel.results.count];
+            [self.albumManager fetchImageWithAsset:gridModel.results.lastObject targetSize:self->_photoSize networkAccessAllowed:albumModel.networkAccessAllowed progress:nil completion:^(DWAlbumManager * _Nullable mgr, DWImageAssetModel * _Nullable obj) {
+                if ([albumModel isEqual:cell.albumModel]) {
+                    cell.posterImageView.image = obj.media;
+                }
+            }];
         }
     }];
+    
     [cell setNeedsLayout];
     return cell;
 }
