@@ -1,6 +1,6 @@
 {
   "name": "DWImagePickerController",
-  "version": "0.0.0.11",
+  "version": "0.0.0.12",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,7 +12,7 @@
   },
   "source": {
     "git": "https://github.com/CodeWicky/DWImagePickerController.git",
-    "tag": "0.0.0.11"
+    "tag": "0.0.0.12"
   },
   "requires_arc": true,
   "platforms": {
@@ -32,7 +32,7 @@
       "~> 0.0.0.10"
     ],
     "DWKit/DWUtils/DWAlbumManager": [
-      "~> 0.0.0.15"
+      "~> 0.0.0.16"
     ]
   }
 }

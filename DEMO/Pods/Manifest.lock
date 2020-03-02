@@ -2,15 +2,15 @@ PODS:
   - DWAlbumGridController (0.0.0.9):
     - DWKit/DWComponent/DWFixAdjustCollectionView (~> 0.0.0.12)
     - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
-  - DWImagePickerController (0.0.0.11):
+  - DWImagePickerController (0.0.0.12):
     - DWAlbumGridController (~> 0.0.0.9)
     - DWKit/DWComponent/DWLabel (~> 0.0.0.10)
-    - DWKit/DWUtils/DWAlbumManager (~> 0.0.0.15)
+    - DWKit/DWUtils/DWAlbumManager (~> 0.0.0.16)
     - DWMediaPreviewController (~> 0.0.0.44)
-  - DWKit/DWComponent/DWFixAdjustCollectionView (0.0.0.15)
-  - DWKit/DWComponent/DWLabel (0.0.0.15)
-  - DWKit/DWUtils/DWAlbumManager (0.0.0.15)
-  - DWKit/DWUtils/DWOperationCancelFlag (0.0.0.15)
+  - DWKit/DWComponent/DWFixAdjustCollectionView (0.0.0.16)
+  - DWKit/DWComponent/DWLabel (0.0.0.16)
+  - DWKit/DWUtils/DWAlbumManager (0.0.0.16)
+  - DWKit/DWUtils/DWOperationCancelFlag (0.0.0.16)
   - DWMediaPreviewController (0.0.0.44):
     - DWKit/DWComponent/DWFixAdjustCollectionView (~> 0.0.0.12)
     - DWKit/DWUtils/DWOperationCancelFlag (~> 0.0.0.8)
@@ -39,8 +39,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   DWAlbumGridController: 313f6f7c70caeb87eb25b6221a69f8dbd50ab360
-  DWImagePickerController: ed8bfc6c7333c5bb4aa95e3fff0c62882e81c098
-  DWKit: 13aa2fcbd6ce9f09b483b694700a2c98dadf2ead
+  DWImagePickerController: df97f89e713680ef93b77b569d115947ff8e92a9
+  DWKit: ba94c823e6012ef80164e0a55f3c391848d4b282
   DWMediaPreviewController: df0b7606203bc655bdf483ccd87c98da55c9ccdf
   DWPlayer: 489f2116280123fdf4f53cf94893bb4a0f017cc1
   YYImage: 1e1b62a9997399593e4b9c4ecfbbabbf1d3f3b54
