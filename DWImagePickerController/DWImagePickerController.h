@@ -30,6 +30,8 @@ typedef void(^DWImagePickerAction)(DWImagePickerController * imagePicker);
 
 @property (nonatomic ,assign) BOOL darkModeEnabled;
 
+@property (nonatomic ,assign) BOOL photoLibraryDidChangeObserverEnabled;
+
 @property (nonatomic ,copy) DWImagePickerAction cancelAction;
 
 @property (nonatomic ,copy) DWImagePickerAction sendAction;

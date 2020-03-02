@@ -30,11 +30,13 @@
 
 @interface DWImagePickerController ()<DWMediaPreviewDataSource,DWAlbumGridDataSource,PHPhotoLibraryChangeObserver,UITraitEnvironment,UIGestureRecognizerDelegate>
 {
+    BOOL _photoLibraryDidChangeObserverEnabled;
     DWAlbumModel * _currentAlbum;
     DWAlbumGridModel * _currentGridModel;
     NSArray <PHAsset *>* _currentPreviewResults;
     CGSize _gridPhotoSize;
     BOOL _previewSelectionMode;
+    NSArray <DWAlbumModel *>* _albums;
 }
 
 @property (nonatomic ,strong) DWAlbumGridController * gridVC;
@@ -88,12 +90,15 @@
 #pragma mark --- interface method ---
 -(instancetype)initWithAlbumManager:(DWAlbumManager *)albumManager fetchOption:(DWAlbumFetchOption *)fetchOption pickerConfiguration:(DWImagePickerConfiguration *)pickerConf columnCount:(NSUInteger)columnCount spacing:(CGFloat)spacing {
     if (self = [super init]) {
-        [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
         _albumManager = albumManager;
         _fetchOption = fetchOption;
         _pickerConf = pickerConf;
         _columnCount = columnCount;
         _spacing = spacing;
+        _photoLibraryDidChangeObserverEnabled = pickerConf?pickerConf.photoLibraryDidChangeObserverEnabled:YES;
+        if (_photoLibraryDidChangeObserverEnabled) {
+            [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+        }
         self.modalPresentationStyle = UIModalPresentationFullScreen;
         
     }
@@ -120,6 +125,7 @@
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [self.albumManager fetchAlbumsWithOption:self.fetchOption completion:^(DWAlbumManager * _Nullable mgr, NSArray<DWAlbumModel *> * _Nullable obj) {
             dispatch_async(dispatch_get_main_queue(), ^{
+                self->_albums = obj;
                 [self configAlbum:obj.firstObject];
                 obj.firstObject.userInfo = self->_currentGridModel;
                 [self.listVC configWithAlbums:obj albumManager:self.albumManager];
@@ -629,6 +635,81 @@
     [self.previewBottomToolBar refreshSelection];
 }
 
+-(void)handleCurrentAlbumPhotoLibraryChange:(PHChange *)changeInstance {
+    PHFetchResultChangeDetails * changes = (PHFetchResultChangeDetails *)[changeInstance changeDetailsForFetchResult:_currentAlbum.fetchResult];
+    if (!changes) {
+        return;
+    }
+    [_currentAlbum configWithResult:changes.fetchResultAfterChanges];
+    [_currentAlbum clearGridModelCache];
+    [self onCurrentAlbumChange];
+    [self.gridVC refreshGrid:_currentGridModel];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        ///由于内部存在缓存机制，导致只要数据源变化了，就要重新刷新预览控制器内部数据
+        [self.previewVC reloadPreview];
+        ///因为只有在全展示的情况下，changes中的角标变化与实际展示的变化才是一一对应的，可以用update。否则只能reload解决
+        if (changes.hasIncrementalChanges && self.pickerConf.displayMediaOption == DWAlbumMediaOptionAll) {
+            UICollectionView * col = self.gridVC.gridView;
+            if (col) {
+                [col performBatchUpdates:^{
+                    NSIndexSet * remove = changes.removedIndexes;
+                    if (remove.count > 0) {
+                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:remove.count];
+                        [remove enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
+                        }];
+                        
+                        [col deleteItemsAtIndexPaths:indexPaths];
+                    }
+                    
+                    NSIndexSet * insert = changes.insertedIndexes;
+                    if (insert.count > 0) {
+                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:insert.count];
+                        [insert enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
+                        }];
+                        
+                        [col insertItemsAtIndexPaths:indexPaths];
+                    }
+                    
+                    NSIndexSet * change = changes.changedIndexes;
+                    if (change.count > 0) {
+                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:change.count];
+                        [change enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
+                        }];
+                        
+                        [col reloadItemsAtIndexPaths:indexPaths];
+                    }
+                    
+                    if (changes.hasMoves) {
+                        [changes enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                            [col moveItemAtIndexPath:[NSIndexPath indexPathForRow:fromIndex inSection:0] toIndexPath:[NSIndexPath indexPathForRow:toIndex inSection:0]];
+                        }];
+                    }
+                } completion:nil];
+            }
+        } else {
+            [self.gridVC.gridView reloadData];
+        }
+    });
+}
+
+-(void)handleOtherAlbumPhotoLibraryChange:(PHChange *)changeInstance {
+    [_albums enumerateObjectsUsingBlock:^(DWAlbumModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isEqual:_currentAlbum]) {
+            return ;
+        }
+        PHFetchResultChangeDetails * changes = (PHFetchResultChangeDetails *)[changeInstance changeDetailsForFetchResult:obj.fetchResult];
+        if (!changes) {
+            return;
+        }
+        [obj configWithResult:changes.fetchResultAfterChanges];
+        [obj clearGridModelCache];
+        [obj autoFetchGridModelBackground];
+    }];
+}
+
 #pragma mark ------ 转换相关 ------
 -(DWAlbumGridModel *)gridModelFromAlbumModel:(DWAlbumModel *)album {
     if (album.userInfo) {
@@ -925,67 +1006,15 @@
 
 #pragma mark --- observer for Photos ---
 -(void)photoLibraryDidChange:(PHChange *)changeInstance {
-    PHFetchResultChangeDetails * changes = (PHFetchResultChangeDetails *)[changeInstance changeDetailsForFetchResult:_currentAlbum.fetchResult];
-    if (!changes) {
-        return;
-    }
-    [_currentAlbum configWithResult:changes.fetchResultAfterChanges];
-    [self onCurrentAlbumChange];
-    [self.gridVC refreshGrid:_currentGridModel];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        ///由于内部存在缓存机制，导致只要数据源变化了，就要重新刷新预览控制器内部数据
-        [self.previewVC reloadPreview];
-        ///因为只有在全展示的情况下，changes中的角标变化与实际展示的变化才是一一对应的，可以用update。否则只能reload解决
-        if (changes.hasIncrementalChanges && self.pickerConf.displayMediaOption == DWAlbumMediaOptionAll) {
-            UICollectionView * col = self.gridVC.gridView;
-            if (col) {
-                [col performBatchUpdates:^{
-                    NSIndexSet * remove = changes.removedIndexes;
-                    if (remove.count > 0) {
-                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:remove.count];
-                        [remove enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
-                        }];
-                        
-                        [col deleteItemsAtIndexPaths:indexPaths];
-                    }
-                    
-                    NSIndexSet * insert = changes.insertedIndexes;
-                    if (insert.count > 0) {
-                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:insert.count];
-                        [insert enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
-                        }];
-                        
-                        [col insertItemsAtIndexPaths:indexPaths];
-                    }
-                    
-                    NSIndexSet * change = changes.changedIndexes;
-                    if (change.count > 0) {
-                        NSMutableArray * indexPaths = [NSMutableArray arrayWithCapacity:change.count];
-                        [change enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-                            [indexPaths addObject:[NSIndexPath indexPathForRow:idx inSection:0]];
-                        }];
-                        
-                        [col reloadItemsAtIndexPaths:indexPaths];
-                    }
-                    
-                    if (changes.hasMoves) {
-                        [changes enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                            [col moveItemAtIndexPath:[NSIndexPath indexPathForRow:fromIndex inSection:0] toIndexPath:[NSIndexPath indexPathForRow:toIndex inSection:0]];
-                        }];
-                    }
-                } completion:nil];
-            }
-        } else {
-            [self.gridVC.gridView reloadData];
-        }
-    });
+    [self handleCurrentAlbumPhotoLibraryChange:changeInstance];
+    [self handleOtherAlbumPhotoLibraryChange:changeInstance];
 }
 
-#pragma mark --- oveerride ---
+#pragma mark --- override ---
 -(void)dealloc {
-    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+    if (_photoLibraryDidChangeObserverEnabled) {
+        [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+    }
 }
 
 #pragma mark --- setter/getter ---
@@ -1224,6 +1253,7 @@
         _maxSelectCount = 0;
         _multiTypeSelectionEnable = YES;
         _darkModeEnabled = YES;
+        _photoLibraryDidChangeObserverEnabled = YES;
     }
     return self;
 }

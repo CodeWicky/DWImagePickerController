@@ -369,7 +369,7 @@ typedef NS_ENUM(NSUInteger, DWAlbumExportPresetType) {
 @property (nonatomic ,assign ,readonly) NSInteger count;
 
 ///用户数据
-@property (nonatomic ,strong) id userInfo;
+@property (nonatomic ,strong ,nullable) id userInfo;
 
 @end
 

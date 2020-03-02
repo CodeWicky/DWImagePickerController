@@ -31,6 +31,10 @@
     }
 }
 
+-(void)clearGridModelCache {
+    self.userInfo = nil;
+}
+
 #pragma mark --- setter/getter ---
 -(DWImagePickerControllerGridModelLoader)loader {
     return objc_getAssociatedObject(self, _cmd);

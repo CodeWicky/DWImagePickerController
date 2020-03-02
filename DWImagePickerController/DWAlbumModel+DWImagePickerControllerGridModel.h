@@ -15,11 +15,13 @@ typedef DWAlbumGridModel *_Nonnull(^DWImagePickerControllerGridModelLoader)(DWAl
 
 @property (nonatomic ,strong ,readonly) dispatch_queue_t fetchDataQueue;
 
-@property (nonatomic ,strong) DWAlbumGridModel * userInfo;
+@property (nonatomic ,strong ,nullable) DWAlbumGridModel * userInfo;
 
 -(void)autoFetchGridModelBackground;
 
 -(void)fetchGridModelWithCompletion:(nullable void(^)(DWAlbumGridModel * gridModel))completion;
+
+-(void)clearGridModelCache;
 
 @end
 
