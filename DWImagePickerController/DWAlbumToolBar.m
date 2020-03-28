@@ -60,7 +60,7 @@
 }
 
 -(void)refreshUI {
-    
+    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
     if (self.selectionManager.selections.count) {
         self.previewButton.userInteractionEnabled = YES;
         self.previewButton.textColor = self.internalBlackColor;
@@ -101,7 +101,7 @@
     
     btnFrame.size.width = CGRectGetMaxX(btnFrame);
     btnFrame.size.height = self.toolBarHeight;
-    btnFrame.origin.x = (self.superview.bounds.size.width - btnFrame.size.width) * 0.5;
+    btnFrame.origin.x = (screenWidth - btnFrame.size.width) * 0.5;
     btnFrame.origin.y = 0;
     self.originCtn.frame = btnFrame;
     
@@ -118,7 +118,7 @@
     btnFrame = self.sendButton.frame;
     btnSize = btnFrame.size;
     btnFrame.origin.y = (self.toolBarHeight - btnSize.height) * 0.5;
-    btnFrame.origin.x = self.superview.bounds.size.width - 15 - btnSize.width;
+    btnFrame.origin.x = screenWidth - 15 - btnSize.width;
     
     if (@available(iOS 11.0,*)) {
         btnFrame.origin.x -= self.safeAreaInsets.right;
@@ -126,7 +126,7 @@
     
     self.sendButton.frame = btnFrame;
     
-    btnFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - self.toolBarHeight, [UIScreen mainScreen].bounds.size.width, self.toolBarHeight);
+    btnFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - self.toolBarHeight, screenWidth, self.toolBarHeight);
     
     if (@available(iOS 11.0,*)) {
         btnFrame.size.height += self.safeAreaInsets.bottom;
