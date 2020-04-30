@@ -449,7 +449,7 @@
 
 -(void)handlePreviewAlbumSelectAtIndex:(NSInteger)index {
     if (index < _currentPreviewResults.count) {
-        PHAsset * asset = _currentPreviewResults[index];
+        PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
         NSInteger idx = [self.selectionManager indexOfSelection:asset];
         if (idx == NSNotFound) {
             ///这里由于gridViewController中添加的selection对应的mediaIndex是gridIndex，这里要转化成gridIndex
@@ -547,7 +547,7 @@
     if (index >= _currentPreviewResults.count) {
         [self.previewBottomToolBar focusOnIndex:NSNotFound];
     } else {
-        PHAsset * asset = _currentPreviewResults[index];
+        PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
         index = [self.selectionManager indexOfSelection:asset];
         [self.previewBottomToolBar focusOnIndex:index];
     }
@@ -580,6 +580,10 @@
         if ([filterResults isEqualToArray:_currentPreviewResults]) {
             return;
         }
+        
+        if (self.previewVC.currentIndex >= _currentPreviewResults.count) {
+            return;
+        }
         ///这里要尽可能的保证资源刷新的过程中，previewVC当前展示的cell不变。所以记录当前展示的asset，在刷新后再切换回他的位置
         PHAsset * currentPreviewAsset = [_currentPreviewResults objectAtIndex:self.previewVC.currentIndex];
         [self configCurrentPreviewResults:filterResults];
@@ -590,6 +594,10 @@
 }
 
 -(void)setPreviewTopToolBarSelectedAtIndex:(NSUInteger)index {
+    if (index >= _currentPreviewResults.count) {
+        [self.previewTopToolBar setSelectAtIndex:0];
+        return;
+    }
     PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     NSUInteger idx = [self.selectionManager indexOfSelection:asset];
     ///调整idx。如果找不到改为0，因为navigationBar中规定0为未选中，如果找到则自加，因为规定角标从1开始
@@ -797,9 +805,14 @@
     }
     NSMutableIndexSet * tmp = [NSMutableIndexSet indexSet];
     [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-        PHAsset * asset = _currentGridModel.results[idx];
-        NSInteger albumIndex = [_currentAlbum.fetchResult indexOfObject:asset];
-        [tmp addIndex:albumIndex];
+        if (idx < _currentGridModel.results.count) {
+            PHAsset * asset = [_currentGridModel.results objectAtIndex:idx];
+            NSInteger albumIndex = [_currentAlbum.fetchResult indexOfObject:asset];
+            if (albumIndex != NSNotFound) {
+                [tmp addIndex:albumIndex];
+            }
+        }
+        
     }];
     return [tmp copy];
 }
@@ -808,7 +821,10 @@
     if ([_currentPreviewResults isEqualToArray:_currentGridModel.results]) {
         return index;
     }
-    PHAsset * asset = _currentGridModel.results[index];
+    if (index >= _currentGridModel.results.count) {
+        return NSNotFound;
+    }
+    PHAsset * asset = [_currentGridModel.results objectAtIndex:index];
     return [_currentPreviewResults indexOfObject:asset];
 }
 
@@ -816,7 +832,10 @@
     if ([_currentPreviewResults isEqualToArray:_currentGridModel.results]) {
         return index;
     }
-    PHAsset * asset = _currentPreviewResults[index];
+    if (index >= _currentPreviewResults.count) {
+        return NSNotFound;
+    }
+    PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     return [_currentGridModel.results indexOfObject:asset];
 }
 
@@ -872,11 +891,17 @@
 }
 
 -(DWMediaPreviewType)previewController:(DWMediaPreviewController *)previewController previewTypeAtIndex:(NSUInteger)index {
+    if (index >= _currentPreviewResults.count) {
+        return DWMediaPreviewTypeNone;
+    }
     PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     return [self previewTypeForAsset:asset];
 }
 
 -(DWMediaPreviewData *)previewController:(DWMediaPreviewController *)previewController previewDataAtIndex:(NSUInteger)index {
+    if (index >= _currentPreviewResults.count) {
+        return nil;
+    }
     PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     DWMediaPreviewData * previewData = [self.previewDataCache objectForKey:asset];
     return previewData;
@@ -885,7 +910,7 @@
 -(void)previewController:(DWMediaPreviewController *)previewController finishBuildingPreviewData:(DWMediaPreviewData *)previewData atIndex:(NSUInteger)index {
     if (previewData) {
         if (index < _currentPreviewResults.count) {
-            PHAsset * asset = _currentPreviewResults[index];
+            PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
             previewData.userInfo = asset;
             [self.previewDataCache setObject:previewData forKey:asset];
         }
@@ -900,6 +925,9 @@
 }
 
 -(BOOL)previewController:(DWMediaPreviewController *)previewController isHDRAtIndex:(NSUInteger)index previewType:(DWMediaPreviewType)previewType {
+    if (index >= _currentPreviewResults.count) {
+        return NO;
+    }
     PHAsset * asset = [_currentPreviewResults objectAtIndex:index];
     return asset.mediaSubtypes & PHAssetMediaSubtypePhotoHDR;
 }
@@ -965,11 +993,13 @@
 -(void)previewController:(DWMediaPreviewController *)previewController prefetchMediaAtIndexes:(NSArray *)indexes fetchCompletion:(DWMediaPreviewFetchMediaCompletion)fetchCompletion {
     [indexes enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSInteger index = [obj integerValue];
-        dispatch_async(self.preloadQueue, ^{
-            PHAsset * asset = [self->_currentPreviewResults objectAtIndex:index];
-            DWMediaPreviewType previewType = [self previewTypeForAsset:asset];
-            [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
-        });
+        if (index < _currentPreviewResults.count) {
+            dispatch_async(self.preloadQueue, ^{
+                PHAsset * asset = [self->_currentPreviewResults objectAtIndex:index];
+                DWMediaPreviewType previewType = [self previewTypeForAsset:asset];
+                [self fetchMediaWithAsset:asset previewType:previewType index:index targetSize:previewController.previewSize progressHandler:nil fetchCompletion:fetchCompletion];
+            });
+        }
     }];
 }
 
