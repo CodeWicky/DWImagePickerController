@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name = 'DWImagePickerController'
-s.version = '0.0.0.14'
+s.version = '0.0.0.15'
 s.license = { :type => 'MIT', :file => 'LICENSE' }
 s.summary = '一个相册选择库。ImagePicker frameworks.'
 s.homepage = 'https://github.com/CodeWicky/DWImagePickerController'
@@ -14,5 +14,5 @@ s.frameworks = 'UIKit'
 s.dependency 'DWMediaPreviewController', '~> 0.0.0.44'
 s.dependency 'DWAlbumGridController', '~> 0.0.0.9'
 s.dependency 'DWKit/DWComponent/DWLabel', '~> 0.0.0.10'
-s.dependency 'DWKit/DWUtils/DWAlbumManager', '~> 0.0.0.16'
+s.dependency 'DWKit/DWUtils/DWAlbumManager', '~> 0.0.0.19'
 end
